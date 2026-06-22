@@ -1,7 +1,8 @@
 # Development
 
-1. `npm i` in root
-2. `npm run dev` in root
+1. install node v20.20 - 24.16 (`node -v` to check)
+2. `npm i` in root
+3. `npm run dev` in root
 
 # Production
 
