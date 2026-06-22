@@ -37,6 +37,8 @@
 	},
 	"dependencies": {
 		"@lichess-org/chessground": "^10.1.1",
+		"@mliebelt/pgn-parser": "^1.4.19",
+		"@sveltejs/adapter-static": "^3.0.10",
 		"chess.js": "^1.4.0",
 		"svelte5-chessground": "^1.1.1"
 	}
