@@ -1,2 +1,9 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+    import { Chess } from 'chess.js';
+    import 'svelte5-chessground/style.css';
+	import ChessBoard from '../components/ChessBoard.svelte';
+
+    const chess = new Chess();
+</script>
+
+<ChessBoard {chess} />

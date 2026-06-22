@@ -34,5 +34,10 @@
 		"typescript": "^6.0.3",
 		"typescript-eslint": "^8.60.1",
 		"vite": "^8.0.16"
+	},
+	"dependencies": {
+		"@lichess-org/chessground": "^10.1.1",
+		"chess.js": "^1.4.0",
+		"svelte5-chessground": "^1.1.1"
 	}
 }
