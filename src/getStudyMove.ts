@@ -4,95 +4,165 @@ import { Chess } from 'chess.js';
 
 const LICHESS_STUDY_URL = 'https://lichess.org/api/study/';
 
-type StudyMove = {
-	moveNumber?: number | null;
-	turn?: string;
-	// the san of the move
-	// 1-item object because we direct cast from ParseTree, but this is the only field we care about
-	notation?: {
-		notation?: string;
+type StudyGame = ParseTree;
+type StudyMove = ParseTree['moves'][number];
+type StudyGameTree = Omit<StudyGame, 'moves'> & { moveTree: MoveNode };
+
+interface TreeNode<T> {
+	branches: T[];
+}
+type MoveNode = Omit<StudyMove, 'variations'> & TreeNode<MoveNode>;
+// A MoveNode, except with a fen. Is not `MoveNode & fen` because TreeNode's subtype also needs to have a fen
+type MoveNodeWithFEN = TreeNode<MoveNodeWithFEN> & Omit<StudyMove, 'variations'> & { fen: string };
+
+/**
+ * Saves all immediately proceeding moves (across variations and mainline) in the `branches` property for each node in the given mainline.
+ * Discards the `variations` property.
+ * Makes no guarantees on branch order.
+ *
+ * Example:
+ * ```
+ * convertStudyGameToTree({
+ * 	...otherGameProps,
+ * 	moves: [
+ * 		{ notation: 'e4', variations: 'c5', 'd5' },
+ * 		{ notation: 'e5' },
+ * 		{ notation: 'Nf3' }
+ * ]
+ * })
+ * const result = {
+ * 	...otherGameProps,
+ *  moveTree: {
+ * 		notation: 'e4',
+ * 		branches: [
+ * 			{ notation: 'e5' },
+ * 			{ notation: 'c5' },
+ * 			{ notation: 'd5' },
+ * 		]
+ * 	}
+ * }
+ * ```
+ */
+function convertStudyGameToTree(studyGame: StudyGame): StudyGameTree {
+	const convertStudyMoveToTree = (studyMoves: StudyMove[], previousNode?: MoveNode): MoveNode => {
+		const node: MoveNode = { ...studyMoves[0], branches: [] };
+
+		if (studyMoves.length === 1) return node;
+
+		studyMoves[0].variations.forEach((variation) =>
+			previousNode?.branches.push(convertStudyMoveToTree(variation, node))
+		);
+		node.branches.push(convertStudyMoveToTree(studyMoves.toSpliced(0, 1), node));
+
+		return node;
 	};
-	// all alternative paths from THIS move
-	variations?: StudyMove[][];
-};
 
-type StudyGame = ParseTree & {
-	moves: StudyMove[];
-};
-
-/**
- * Represents a StudyMove as a string
- * @param move the Studymove to be converted
- * @param isFirstMove pass true to avoid writing turn number if it is black's turn. some studies have moves like 4. b4 ... 4... exd4, so pass true to collapse to 4. b4 exd4
- * @returns a string representation of our single move (just the san, if black)
- */
-function renderMove(move: StudyMove, isFirstMove: boolean): string {
-	const tokens: string[] = [];
-
-	// move number part
-	if (
-		!(move.turn === 'b' && !isFirstMove) && // skip writing move number if it's black's move and it's not the first move
-		move.moveNumber !== undefined &&
-		move.moveNumber !== null
-	) {
-		tokens.push(`${move.moveNumber}${move.turn === 'b' ? '...' : '.'}`);
-	}
-
-	// san part
-	if (move.notation?.notation) {
-		tokens.push(move.notation.notation);
-	}
-
-	return tokens.join(' ');
+	return {
+		...studyGame,
+		moveTree: convertStudyMoveToTree(studyGame.moves)
+	};
 }
 
 /**
- * Recursively traverses all variations of a game and converts their moves to PGN strings
- * @param game the StudyGame to collect PGNs from
- * @returns an array of strings of all PGNs from the game
+ * Traverses the given tree, putting each node and every parent of the node through the given function.
+ * This function is a mutator.
  */
-function collectPgns(game: StudyGame): string[] {
-	const pgns: string[] = [];
-
-	function visitMoves(moves: StudyMove[], path: string[]) {
-		//  base case: we have no more moves to traverse
-		if (moves.length === 0) {
-			// only record if we have something to write
-			if (path.length) {
-				pgns.push(path.join(' '));
-			}
-			return;
-		}
-
-		const [move, ...remainingMoves] = moves;
-		const renderedMove = renderMove(move, path.length === 0);
-		// create a new collection so we don't mess up the other branches on this path
-		const nextPath = [...path, renderedMove];
-
-		// if we have variations, recurse their paths as well
-		// start from before our move, since variations are alternatives to current move
-		move.variations?.forEach((variation) => visitMoves(variation, path));
-
-		visitMoves(remainingMoves, nextPath);
-	}
-
-	visitMoves(game.moves, []);
-
-	return pgns;
+function traverseTreePassParents<T extends TreeNode<T>>(
+	node: T,
+	func: (node: T, parents: T[]) => void,
+	parents: T[] = []
+): void {
+	node.branches.forEach((branch) => traverseTreePassParents(branch, func, [...parents, node]));
+	func(node, parents);
 }
 
+/**
+ * Maps the given tree, putting each node and every parent of the node through the given function.
+ *
+ * This function is not (meant to be) a mutator! The given function needs to return a node.
+ * Here is what a 1:1 map would look like:
+ * ```
+ * mapTree(node, (node, parents, mappedBranches) => { ...node, branches: mappedBranches })
+ * ```
+ *
+ * May or may not mutate the given tree.
+ */
+function mapTreePassParents<R extends TreeNode<R>, T extends TreeNode<T>>(
+	node: T,
+	func: (node: T, parents: T[], mappedBranches: R[]) => R,
+	parents: T[] = []
+): R {
+	const mappedBranches = node.branches.map((branch) =>
+		mapTreePassParents(branch, func, [...parents, node])
+	);
+	return func(node, parents, mappedBranches);
+}
+
+/**
+ * Creates a Map of every study move and all of it's FENs possible next moves across all given trees.
+ */
+function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
+	const createBoard = (startingFEN: string | undefined, moves: MoveNode[]) => {
+		// if (!startingFEN)
+		// 	throw new Error(
+		// 		`Error creating board, startingFEN undefined or falsy: ${startingFEN}. studyGameTrees: ${studyGameTrees}`
+		// 	);
+		const applyMoveToBoard = (board: Chess, move: MoveNode) => {
+			const notation = move.notation?.notation;
+			if (!notation)
+				throw new Error(
+					`Error applying move to board, study move undefined or falsy: ${move}. studyGameTrees: ${studyGameTrees}`
+				);
+			board.move(notation);
+		};
+		const board = new Chess(startingFEN);
+		moves.forEach((move) => applyMoveToBoard(board, move));
+		return board;
+	};
+
+	const moveTreesWithFEN = studyGameTrees.map((game) =>
+		mapTreePassParents(
+			game.moveTree,
+			(node, parentMoves, mappedBranches): MoveNodeWithFEN => ({
+				...node,
+				fen: createBoard(game.tags?.FEN, [...parentMoves, node]).fen(),
+				branches: mappedBranches
+			})
+		)
+	);
+
+	const FENAssociations = new Map<string, MoveNode[]>();
+	moveTreesWithFEN.forEach((root) =>
+		traverseTreePassParents(root, (node, parentMoves) => {
+			if (parentMoves.length === 0) return;
+			const moveBeforeCurrent = parentMoves[parentMoves.length - 1];
+
+			const existingNextMoveSet = FENAssociations.get(moveBeforeCurrent.fen);
+			if (!existingNextMoveSet) FENAssociations.set(moveBeforeCurrent.fen, []);
+
+			FENAssociations.get(moveBeforeCurrent.fen)!.push(node);
+		})
+	);
+	return FENAssociations;
+}
+
+let studyGames = new Map<string, StudyGame[]>();
 /**
  * Retrieves a list of PNG strings given a lichess study. Removes overlaps
- * @param studyId the id of the study to retrieve PGNs from
+ * @param lichessStudyId the id of the study to retrieve PGNs from
  * @param isPublic true if the study is public
  * @param apiToken required if the study is not public (private/unlisted)
- * @returns all (non-overlapping & non-duplicate) branches from the study in PGN format
+ * @returns StudyGame for every chapter of the Lichess Study referred to by the given studyId
  */
-async function getStudyPGNs(
-	studyId: string,
+async function getStudyGames(
+	lichessStudyId: string,
 	isPublic: boolean = true,
 	apiToken?: string
-): Promise<string[]> {
+): Promise<StudyGame[]> {
+	// check cache
+	let studyGame = studyGames.get(lichessStudyId);
+	if (studyGame) return studyGame;
+
 	let searchParams = new URLSearchParams();
 
 	let headers = new Headers();
@@ -111,62 +181,93 @@ async function getStudyPGNs(
 	searchParams.append('variations', 'true');
 	searchParams.append('orientation', 'false');
 
-	const response = await fetch(`${LICHESS_STUDY_URL}${studyId}.pgn?${searchParams.toString()}`, {
-		headers: headers
+	const response = await fetch(
+		`${LICHESS_STUDY_URL}${lichessStudyId}.pgn?${searchParams.toString()}`,
+		{
+			headers: headers
+		}
+	);
+	const games = response.text().then(parseGames);
+
+	// cache
+	games.then((games) => studyGames.set(lichessStudyId, games));
+
+	return games;
+}
+
+/**
+ * Hashes a Lichess Study by its "StudyName" field and its "UTCDate" and "UTCTime".
+ * Some of these are a Lichess-specific tags.
+ * @throws If there are no chapters or if any tags do not exist.
+ * @param games An array of StudyGames representing a collection of Lichess Study Chapters.
+ */
+let getStudyHash = (games: StudyGame[]): string => {
+	if (games.length === 0)
+		throw new Error(
+			`Error getting study key, study game had length 0. Does the associated Lichess study have any chapters? games: ${games}`
+		);
+
+	const tags = games[0].tags as Record<string, string | undefined> | undefined;
+	if (!tags)
+		throw new Error(`Tags was undefined or falsy. Games: ${games}. Tags: ${games[0].tags}`);
+
+	const attributes = [tags['StudyName'], tags['UTCDate'], tags['UTCTime']];
+	if (attributes.some((v) => !v))
+		throw new Error(`Tag attribute was undefined or falsy: values: ${attributes}`);
+
+	return attributes.join();
+};
+let preparedStudies = new Map<string, ReturnType<typeof prepareStudy>>();
+
+/**
+ * Mutates the given array of study games and returns a FEN association map. See {@link createFENAssociationMap}
+ * @param games An array of StudyGames representing a collection of Lichess Study Chapters.
+ */
+function prepareStudy(games: StudyGame[]): {
+	studyGameTrees: StudyGameTree[],
+	fenAssociationMap: Map<string, MoveNode[]>
+} {
+	// check cache
+	let preparedStudy = preparedStudies.get(getStudyHash(games));
+	if (preparedStudy) return preparedStudy;
+
+	const studyGameTrees = games.map((game) => convertStudyGameToTree(game));
+	const fenAssociationMap = createFENAssociationMap(studyGameTrees);
+
+	// cache
+	preparedStudies.set(getStudyHash(games), {
+		studyGameTrees,
+		fenAssociationMap
 	});
 
-	let studyPGNs = (parseGames(await response.text()) as StudyGame[]).flatMap(collectPgns);
-	// remove duplicates
-	studyPGNs = [...new Set(studyPGNs)]
-	// remove PGN lines that are included in other lines
-	return studyPGNs
-		.filter((pgn) => !studyPGNs.some((other) => other !== pgn && other.startsWith(pgn)))
-		.map((PGN) => PGN.trim());
-}
-
-function getFENFromPGN(PGN: string): string {
-	let chessjs = new Chess();
-	chessjs.loadPgn(PGN);
-	return chessjs.fen();
-}
-
-function getFENandMovesFromPGNs(PGNs: string[]): { [FEN: string] : string[] } {
-	return {}
-} 
-
-/**
- * Get a random next move from a given map of FEN -> moves
- * @param FENs the FENs to search through for viable moves
- * @param currentFEN the current state of the board, in FEN, to search for next moves from
- * @returns a random move (san) from the FENs, or null if the current state does not exist in the given FENs
- */
-function getMoveFromFENs(FENs: { [FEN: string] : string[] }, currentFEN: string): string | null {
-
-
-	return null;
+	return { studyGameTrees, fenAssociationMap };
 }
 
 /**
- * Retrieves a random next move included in a lichess study based on a current position FEN
- * Probably avoid using this when we have state, just store the PGNs in state instead of fetching every time
- * @param studyId the ID of the Lichess study to analyze
- * @param currentFEN the current board state, represented in FEN
- * @param turn 'b' if black to move, 'w' if white to move
- * @param isPublic true if the study is public, false requires an apiToken
- * @param apiToken the apiToken to use if the study is private/unlisted
- * @returns a random next move, or null if no viable branch was found
+ * Returns a random move from the given Study's chapters that follow the given FEN.
+ * @param lichessStudyId id of Lichess Study to search
+ * @param currentFEN fen to search
+ * @returns Next move in SAN
  */
-async function getStudyMove(
-	studyId: string,
-	currentFEN: string,
-	isPublic: boolean = true,
-	apiToken?: string
-): Promise<string | null> {
-	const studyPGNs = await getStudyPGNs(studyId, isPublic, apiToken);
-	// console.debug(`Found PGNs from studyId ${studyId} (${studyPGNs.length} PGNs):`)
-	// console.debug(studyPGNs)
-	// return getMoveFromFENs(studyPGNs, currentFEN, turn);
-	return new Promise<string>((resolve) => resolve(""))
+async function getStudyMove(lichessStudyId: string, currentFEN: string) {
+	const games = await getStudyGames(lichessStudyId, true);
+	const preparedStudy = prepareStudy(games);
+	const nextMoves = preparedStudy.fenAssociationMap.get(currentFEN);
+	return nextMoves?.[Math.floor(Math.random() * nextMoves.length)];
 }
 
-// console.log(`Selected move: ${await getStudyMove('Utd758xx', '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6')}`);
+// const chess = new Chess();
+// chess.loadPgn('1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6');
+
+// getStudyMove('Utd758xx', chess.fen()).then((move) => {
+// 	console.log(move?.notation.notation);
+// });
+// getStudyMove('Utd758xx', chess.fen()).then((move) => {
+// 	console.log(move?.notation.notation);
+// });
+// getStudyMove('Utd758xx', chess.fen()).then((move) => {
+// 	console.log(move?.notation.notation);
+// });
+// getStudyMove('Utd758xx', chess.fen()).then((move) => {
+// 	console.log(move?.notation.notation);
+// });
