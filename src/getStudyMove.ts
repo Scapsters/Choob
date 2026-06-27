@@ -35,7 +35,10 @@ type MoveNodeWithFEN = TreeNode<MoveNodeWithFEN> & Omit<StudyMove, 'variations'>
  *  moveTree: {
  * 		notation: 'e4',
  * 		branches: [
- * 			{ notation: 'e5' },
+ * 			{ 
+ * 				notation: 'e5',
+ * 				branches: [{ notation: 'Nf3' }]
+ * 			},
  * 			{ notation: 'c5' },
  * 			{ notation: 'd5' },
  * 		]
@@ -80,7 +83,7 @@ function traverseTreePassParents<T extends TreeNode<T>>(
  * Maps the given tree, putting each node and every parent of the node through the given function.
  *
  * This function is not (meant to be) a mutator! The given function needs to return a node.
- * Here is what a 1:1 map would look like:
+ * Here is what a 1:1 map would look like. Note that parents is ignored:
  * ```
  * mapTree(node, (node, parents, mappedBranches) => { ...node, branches: mappedBranches })
  * ```
@@ -99,14 +102,10 @@ function mapTreePassParents<R extends TreeNode<R>, T extends TreeNode<T>>(
 }
 
 /**
- * Creates a Map of every study move and all of it's FENs possible next moves across all given trees.
+ * Creates a Map of every study move and all of its FEN's possible next moves across all given trees.
  */
 function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 	const createBoard = (startingFEN: string | undefined, moves: MoveNode[]) => {
-		// if (!startingFEN)
-		// 	throw new Error(
-		// 		`Error creating board, startingFEN undefined or falsy: ${startingFEN}. studyGameTrees: ${studyGameTrees}`
-		// 	);
 		const applyMoveToBoard = (board: Chess, move: MoveNode) => {
 			const notation = move.notation?.notation;
 			if (!notation)
@@ -125,8 +124,8 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 			game.moveTree,
 			(node, parentMoves, mappedBranches): MoveNodeWithFEN => ({
 				...node,
-				fen: createBoard(game.tags?.FEN, [...parentMoves, node]).fen(),
-				branches: mappedBranches
+				branches: mappedBranches,
+				fen: createBoard(game.tags?.FEN, [...parentMoves, node]).fen()
 			})
 		)
 	);
