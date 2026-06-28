@@ -102,6 +102,13 @@ function mapTreePassParents<R extends TreeNode<R>, T extends TreeNode<T>>(
 }
 
 /**
+ * Returns a fen with the half-move and whole-move counter set to 0
+ */
+function makeFENMoveAgnostic(fen: string) {
+	return [...fen.split(' ').splice(4), 0, 0].join(' ') 
+}
+
+/**
  * Creates a Map of every study move and all of its FEN's possible next moves across all given trees.
  */
 function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
@@ -118,14 +125,14 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 		moves.forEach((move) => applyMoveToBoard(board, move));
 		return board;
 	};
-
+	
 	const moveTreesWithFEN = studyGameTrees.map((game) =>
 		mapTreePassParents(
 			game.moveTree,
 			(node, parentMoves, mappedBranches): MoveNodeWithFEN => ({
 				...node,
 				branches: mappedBranches,
-				fen: createBoard(game.tags?.FEN, [...parentMoves, node]).fen()
+				fen: makeFENMoveAgnostic(createBoard(game.tags?.FEN, [...parentMoves, node]).fen())
 			})
 		)
 	);
@@ -251,7 +258,7 @@ function prepareStudy(games: StudyGame[]): {
 async function getStudyMove(lichessStudyId: string, currentFEN: string) {
 	const games = await getStudyGames(lichessStudyId, true);
 	const preparedStudy = prepareStudy(games);
-	const nextMoves = preparedStudy.fenAssociationMap.get(currentFEN);
+	const nextMoves = preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN))
 	return nextMoves?.[Math.floor(Math.random() * nextMoves.length)];
 }
 
