@@ -35,7 +35,7 @@ type MoveNodeWithFEN = TreeNode<MoveNodeWithFEN> & Omit<StudyMove, 'variations'>
  *  moveTree: {
  * 		notation: 'e4',
  * 		branches: [
- * 			{ 
+ * 			{
  * 				notation: 'e5',
  * 				branches: [{ notation: 'Nf3' }]
  * 			},
@@ -105,7 +105,7 @@ function mapTreePassParents<R extends TreeNode<R>, T extends TreeNode<T>>(
  * Returns a fen with the half-move and whole-move counter set to 0
  */
 function makeFENMoveAgnostic(fen: string) {
-	return [...fen.split(' ').splice(4), 0, 0].join(' ') 
+	return [...fen.split(' ').splice(4), 0, 0].join(' ');
 }
 
 /**
@@ -125,7 +125,7 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 		moves.forEach((move) => applyMoveToBoard(board, move));
 		return board;
 	};
-	
+
 	const moveTreesWithFEN = studyGameTrees.map((game) =>
 		mapTreePassParents(
 			game.moveTree,
@@ -230,8 +230,8 @@ let preparedStudies = new Map<string, ReturnType<typeof prepareStudy>>();
  * @param games An array of StudyGames representing a collection of Lichess Study Chapters.
  */
 function prepareStudy(games: StudyGame[]): {
-	studyGameTrees: StudyGameTree[],
-	fenAssociationMap: Map<string, MoveNode[]>
+	studyGameTrees: StudyGameTree[];
+	fenAssociationMap: Map<string, MoveNode[]>;
 } {
 	// check cache
 	let preparedStudy = preparedStudies.get(getStudyHash(games));
@@ -258,7 +258,7 @@ function prepareStudy(games: StudyGame[]): {
 async function getStudyMove(lichessStudyId: string, currentFEN: string) {
 	const games = await getStudyGames(lichessStudyId, true);
 	const preparedStudy = prepareStudy(games);
-	return preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN))
+	return preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN));
 }
 
 // const chess = new Chess();

@@ -20,27 +20,30 @@ class Chooser {}
  * @returns The chosen index as a number, or `-1` if the array was empty or all weights were `0`.
  */
 Chooser.chooseWeightedIndex = (weights, seed = Math.random(), defaultWeight = 1) => {
-    // If the array is falsy, not an array, or empty, return -1.
-    if (!weights || !Array.isArray(weights) || weights.length <= 0) {
-        return -1;
-    }
-    // Keep it positive.
-    defaultWeight = Math.abs(defaultWeight);
-    let cumulative = 0;
-    // Add all weights to cumulative, and build an array of each cumulative value.
-    // For example, if the weights are [5, 30, 10], this would build an array
-    // containing [5, 35, 45], and cumulative=45.
-    const ranges = weights.map((weight) => (cumulative += typeof weight === 'number' && weight >= 0 ? Math.abs(weight) : defaultWeight));
-    // Select our value.
-    const selectedValue = Math.random() * cumulative;
-    // If the selected value is within one of the ranges, that's our choice!
-    for (let index = 0; index < ranges.length; index++) {
-        if (selectedValue < ranges[index]) {
-            return index;
-        }
-    }
-    // If nothing was chosen, all weights were 0 or something went wrong.
-    return -1;
+	// If the array is falsy, not an array, or empty, return -1.
+	if (!weights || !Array.isArray(weights) || weights.length <= 0) {
+		return -1;
+	}
+	// Keep it positive.
+	defaultWeight = Math.abs(defaultWeight);
+	let cumulative = 0;
+	// Add all weights to cumulative, and build an array of each cumulative value.
+	// For example, if the weights are [5, 30, 10], this would build an array
+	// containing [5, 35, 45], and cumulative=45.
+	const ranges = weights.map(
+		(weight) =>
+			(cumulative += typeof weight === 'number' && weight >= 0 ? Math.abs(weight) : defaultWeight)
+	);
+	// Select our value.
+	const selectedValue = Math.random() * cumulative;
+	// If the selected value is within one of the ranges, that's our choice!
+	for (let index = 0; index < ranges.length; index++) {
+		if (selectedValue < ranges[index]) {
+			return index;
+		}
+	}
+	// If nothing was chosen, all weights were 0 or something went wrong.
+	return -1;
 };
 /**
  * Choose an object based on the `"weight"` properties in the object within the provided array.
@@ -60,36 +63,40 @@ Chooser.chooseWeightedIndex = (weights, seed = Math.random(), defaultWeight = 1)
  *
  * @returns The chosen object, or `null` if the array was empty or all weights were `0`.
  */
-Chooser.chooseWeightedObject = (arrayOfObjects, weightPropertyKey = 'weight', defaultWeight = 1, seed = Math.random()) => {
-    // If the array is falsy, not an array, or empty, return null.
-    if (!arrayOfObjects || !Array.isArray(arrayOfObjects) || arrayOfObjects.length <= 0) {
-        return null;
-    }
-    // Drop the sign. https://www.youtube.com/watch?v=I7Hea6tdg0c
-    defaultWeight = Math.abs(defaultWeight);
-    // Collect the weights from the objects into an array.
-    const weights = arrayOfObjects.map((currItem) => {
-        // When in doubt, we'll use the default.
-        let currWeight = defaultWeight;
-        // We expect each item to have the weight property
-        if (!!currItem) {
-            const propValue = currItem[weightPropertyKey];
-            // Use the abs of the prop value, but only if it's a number.
-            if (typeof propValue === 'number') {
-                currWeight = Math.abs(propValue);
-            }
-        }
-        return currWeight;
-    });
-    // Choose an index based on the weights...
-    const chosenIndex = Chooser.chooseWeightedIndex(weights, seed, defaultWeight);
-    // If an index was chosen, return the object for that index.
-    if (chosenIndex >= 0) {
-        return arrayOfObjects[chosenIndex];
-    }
-    else {
-        // Otherwise all weights were 0 or something went wrong. Return null.
-        return null;
-    }
+Chooser.chooseWeightedObject = (
+	arrayOfObjects,
+	weightPropertyKey = 'weight',
+	defaultWeight = 1,
+	seed = Math.random()
+) => {
+	// If the array is falsy, not an array, or empty, return null.
+	if (!arrayOfObjects || !Array.isArray(arrayOfObjects) || arrayOfObjects.length <= 0) {
+		return null;
+	}
+	// Drop the sign. https://www.youtube.com/watch?v=I7Hea6tdg0c
+	defaultWeight = Math.abs(defaultWeight);
+	// Collect the weights from the objects into an array.
+	const weights = arrayOfObjects.map((currItem) => {
+		// When in doubt, we'll use the default.
+		let currWeight = defaultWeight;
+		// We expect each item to have the weight property
+		if (!!currItem) {
+			const propValue = currItem[weightPropertyKey];
+			// Use the abs of the prop value, but only if it's a number.
+			if (typeof propValue === 'number') {
+				currWeight = Math.abs(propValue);
+			}
+		}
+		return currWeight;
+	});
+	// Choose an index based on the weights...
+	const chosenIndex = Chooser.chooseWeightedIndex(weights, seed, defaultWeight);
+	// If an index was chosen, return the object for that index.
+	if (chosenIndex >= 0) {
+		return arrayOfObjects[chosenIndex];
+	} else {
+		// Otherwise all weights were 0 or something went wrong. Return null.
+		return null;
+	}
 };
 export default Chooser;

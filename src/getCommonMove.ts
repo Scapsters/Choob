@@ -1,4 +1,4 @@
-import Chooser from './lib/external-packages/Chooser.js'
+import Chooser from './lib/external-packages/Chooser.js';
 
 type LichessRating = '0' | '1000' | '1200' | '1400' | '1600' | '1800' | '2000' | '2200' | '2500';
 type LichessSpeed = 'ultraBullet' | 'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence';
@@ -54,5 +54,7 @@ async function getCommonMove(
 		weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number)
 	}));
 
-	return new Promise<string>((resolve) => resolve((Chooser.chooseWeightedObject(weightedMoves) as move).san));
+	return new Promise<string>((resolve) =>
+		resolve((Chooser.chooseWeightedObject(weightedMoves) as move).san)
+	);
 }
