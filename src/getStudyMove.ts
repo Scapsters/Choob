@@ -253,13 +253,12 @@ function prepareStudy(games: StudyGame[]): {
  * Returns a random move from the given Study's chapters that follow the given FEN.
  * @param lichessStudyId id of Lichess Study to search
  * @param currentFEN fen to search
- * @returns Next move in SAN
+ * @returns Array of next moves in SAN. Not guaranteed to be ordered or stable
  */
 async function getStudyMove(lichessStudyId: string, currentFEN: string) {
 	const games = await getStudyGames(lichessStudyId, true);
 	const preparedStudy = prepareStudy(games);
-	const nextMoves = preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN))
-	return nextMoves?.[Math.floor(Math.random() * nextMoves.length)];
+	return preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN))
 }
 
 // const chess = new Chess();
