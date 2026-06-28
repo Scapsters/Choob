@@ -11,7 +11,7 @@ const gitignorePath = path.resolve(import.meta.dirname, '.gitignore');
 export default defineConfig(
 	includeIgnoreFile(gitignorePath),
 	globalIgnores([
-		'src/Chooser.js'
+		'src/lib/external-packages'
 	]),
 	js.configs.recommended,
 	ts.configs.recommended,
