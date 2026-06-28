@@ -9,7 +9,9 @@
 
 	let login: Login;
 	onMount(() => {
-		login = new Login(page.url.href);
+		const url = new URL(page.url.href);
+		url.search = '';
+		login = new Login(url.href);
 		login.init();
 	});
 
@@ -20,5 +22,5 @@
 <button onclick={() => login.login()}>
 bello
 </button>
-<p><b>Access token:</b> {authToken?.token ?? 'Not logged in'}</p>
+<p><b>Access token:</b> {authToken?.token || 'Not logged in'}</p>
 <ChessBoard {chess} />

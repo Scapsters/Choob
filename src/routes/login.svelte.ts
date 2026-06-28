@@ -6,7 +6,7 @@ export const lichessHost = 'https://lichess.org';
 export const scopes = ['study:read'];
 export const clientId = 'choob.com';
 export const authToken = $state({
-	token: undefined
+	token: ''
 });
 
 export class Login {
@@ -40,7 +40,7 @@ export class Login {
         // Might want to persist accessContext.token until the user logs out.
         this.accessContext = await this.oauth.getAccessToken();
 
-        console.log('Received token: ' + this.accessContext);
+        authToken.token = this.accessContext.token?.value || ''
 
         // Can also use this convenience wrapper for fetch() instead of
         // using manually using getAccessToken() and setting the
