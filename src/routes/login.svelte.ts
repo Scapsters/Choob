@@ -24,7 +24,9 @@ export class Login {
       scopes,
       redirectUrl: this.redirectUrl,
       onAccessTokenExpiry: refreshAccessToken => refreshAccessToken(),
-      onInvalidGrant: _retry => {},
+      onInvalidGrant: _retry => {
+        this.error = new Error('Invalid Grant!')
+      },
     });
   }
 
