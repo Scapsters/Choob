@@ -65,8 +65,4 @@ export class Login {
       },
     });
   }
-
-  getAccessTokenValue(): string | undefined {
-    return this.accessContext?.token?.value;
-  }
 }

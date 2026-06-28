@@ -9,7 +9,7 @@
 
 	let login: Login;
 	onMount(() => {
-		login = new Login("https://redirectmeto.com/"+page.url.href);
+		login = new Login(page.url.href);
 		login.init();
 	});
 
