@@ -5,11 +5,12 @@
 	import { Login, authToken } from './login.svelte.ts'
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { SvelteURL } from 'svelte/reactivity';
 
 
 	let login: Login;
 	onMount(() => {
-		const url = new URL(page.url.href);
+		const url = new SvelteURL(page.url.href);
 		url.search = '';
 		login = new Login(url.href);
 		login.init();
