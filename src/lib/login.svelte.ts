@@ -12,7 +12,7 @@ export const authToken = $state({
 export class Login {
   redirectUrl: string;
   oauth: OAuth2AuthCodePKCE;
-  error?: any;
+  error?: unknown;
   accessContext?: AccessContext;
 
   constructor(redirectUrl: string) {
