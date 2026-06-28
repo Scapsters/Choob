@@ -39,6 +39,7 @@ export default defineConfig(
 		// 'svelte/button-has-type': 'error'
 		rules: {
 			'@typescript-eslint/no-unused-vars': 'off',
+			'prefer-const': 'off'
 		}
 	}
 );
