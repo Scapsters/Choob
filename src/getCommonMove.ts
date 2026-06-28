@@ -49,9 +49,9 @@ async function getCommonMove(
 		san: string;
 		weight: number;
 	};
-	const weightedMoves: move[] = movesResponse.map((item: { [x: string]: any }) => ({
+	const weightedMoves: move[] = movesResponse.map((item: { [x: string]: string | number }) => ({
 		san: item['san'],
-		weight: item['white'] + item['draws'] + item['black']
+		weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number)
 	}));
 
 	return new Promise<string>((resolve) => resolve((Chooser.chooseWeightedObject(weightedMoves) as move).san));
