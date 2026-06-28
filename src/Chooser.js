@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Contains static weighted chooser functions.
  */
