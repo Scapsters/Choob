@@ -36,6 +36,7 @@
 		"vite": "^8.0.16"
 	},
 	"dependencies": {
+		"@bity/oauth2-auth-code-pkce": "^2.13.0",
 		"@lichess-org/chessground": "^10.1.1",
 		"@mliebelt/pgn-parser": "^1.4.19",
 		"@sveltejs/adapter-static": "^3.0.10",
