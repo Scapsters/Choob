@@ -1,12 +1,12 @@
 import { OAuth2AuthCodePKCE } from '@bity/oauth2-auth-code-pkce';
-import type { AccessContext } from '@bity/oauth2-auth-code-pkce';
+import type { AccessContext, AccessToken } from '@bity/oauth2-auth-code-pkce';
+import { SvelteDate } from 'svelte/reactivity';
 
 export const lichessHost = 'https://lichess.org';
 export const scopes = ['study:read'];
 export const clientId = 'choob.com';
-export const authToken = $state({
-	token: ''
-});
+export let authToken = $state<{ token: AccessToken | null }>({ token: null });
+
 
 export class Login {
 	redirectUrl: string;
@@ -30,6 +30,17 @@ export class Login {
 	}
 
 	async login() {
+		// check cache
+		const JSONifiedAuthContainer = window.localStorage.getItem('lichess-auth-token');
+		if (JSONifiedAuthContainer) {
+			const cachedAuthToken = (JSON.parse(JSONifiedAuthContainer) as typeof authToken)?.token;
+			// Assumes that putting the expiry into the date constructor works! https://jsdate.wtf/ reference
+			if (cachedAuthToken && new SvelteDate() < new SvelteDate(cachedAuthToken.expiry)) {
+				authToken.token = cachedAuthToken;
+				return
+			}
+		}
+
 		// Redirect to authentication prompt.
 		await this.oauth.fetchAuthorizationCode();
 	}
@@ -41,12 +52,12 @@ export class Login {
 				// Might want to persist accessContext.token until the user logs out.
 				this.accessContext = await this.oauth.getAccessToken();
 
-				authToken.token = this.accessContext.token?.value || '';
+				const token = this.accessContext.token
+				if (!token) throw new Error('Token received but is undefined!');
+				authToken.token = token;
 
-				// Can also use this convenience wrapper for fetch() instead of
-				// using manually using getAccessToken() and setting the
-				// "Authorization: Bearer ..." header.
-				const fetch = this.oauth.decorateFetchHTTPClient(window.fetch);
+				// cache
+				window.localStorage.setItem('lichess-auth-token', JSON.stringify(authToken));
 			}
 		} catch (err) {
 			this.error = err;
