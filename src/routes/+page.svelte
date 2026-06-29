@@ -5,6 +5,8 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { SvelteURL } from 'svelte/reactivity';
+	import type { Color } from 'chess.js';
+	import { getStudyMove } from '../lib/chess/getStudyMove.ts';
 
 	let login: Login;
 	onMount(() => {
@@ -15,6 +17,17 @@
 	});
 
 	const chess = new SvelteChess();
+	
+	let playerColor: Color = 'w'
+
+	$effect(() => {
+		if (chess.turn !== playerColor) {
+			getStudyMove('mzJ7q0W7', chess.fen).then(moves => {
+				chess.move(moves[Math.floor(Math.random() * moves.length)].notation.notation)
+			})
+		}
+	})
+
 </script>
 
 <button onclick={() => login.login()}> bello </button>

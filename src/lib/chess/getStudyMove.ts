@@ -258,7 +258,7 @@ function prepareStudy(games: StudyGame[]): {
  * @param currentFEN fen to search
  * @returns Array of next moves in SAN. Not guaranteed to be ordered or stable
  */
-async function getStudyMove(lichessStudyId: string, currentFEN: string) {
+export async function getStudyMove(lichessStudyId: string, currentFEN: string, authToken: string) {
 	const games = await getStudyGames(lichessStudyId, true);
 	const preparedStudy = prepareStudy(games);
 	return preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN));

@@ -14,7 +14,7 @@ const LICHESS_EXPLORER_URL = 'https://explorer.lichess.org/lichess';
  * @param play in UCI format, the moves that have occurred so far
  * @returns A single common move in san format
  */
-async function getCommonMove(
+export async function getCommonMove(
 	apiToken: string,
 	ratings: LichessRating[] = ['0', '1000', '1200', '1400', '1600', '1800', '2000', '2200', '2500'],
 	movesToConsider: number = 12,
