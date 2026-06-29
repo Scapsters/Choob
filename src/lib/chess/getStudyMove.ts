@@ -115,10 +115,13 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 	const createBoard = (startingFEN: string | undefined, moves: MoveNode[]) => {
 		const applyMoveToBoard = (board: Chess, move: MoveNode) => {
 			const notation = move.notation?.notation;
-			if (!notation)
-				throw new Error(
-					`Error applying move to board, study move undefined or falsy: ${move}. studyGameTrees: ${studyGameTrees}`
-				);
+			if (!notation) {
+				return;
+				// TODO: investigate if this should error or not
+				// throw new Error(
+				// 	`Error applying move to board, study move undefined or falsy: ${move}. studyGameTrees: ${studyGameTrees}`
+				// );
+			}
 			board.move(notation);
 		};
 		const board = new Chess(startingFEN);
