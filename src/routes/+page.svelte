@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { Chess } from 'chess.js';
 	import 'svelte5-chessground/style.css';
-	import ChessBoard from '../components/ChessBoard.svelte';
+	import ChessBoard, { SvelteChess } from '../components/ChessBoard.svelte';
 	import { Login, authToken } from '../lib/login.svelte.ts';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -15,9 +14,10 @@
 		login.init();
 	});
 
-	const chess = new Chess();
+	const chess = new SvelteChess();
 </script>
 
 <button onclick={() => login.login()}> bello </button>
 <p><b>Access token:</b> {authToken?.token || 'Not logged in'}</p>
 <ChessBoard {chess} />
+<p>I am the mini board: {chess.fen}</p>
