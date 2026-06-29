@@ -1,4 +1,4 @@
-import Chooser from './lib/external-packages/Chooser.js';
+import Chooser from '../external-packages/Chooser.js';
 
 type LichessRating = '0' | '1000' | '1200' | '1400' | '1600' | '1800' | '2000' | '2200' | '2500';
 type LichessSpeed = 'ultraBullet' | 'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence';
