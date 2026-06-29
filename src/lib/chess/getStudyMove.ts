@@ -50,7 +50,7 @@ function convertStudyGameToTree(studyGame: StudyGame): StudyGameTree {
 	const convertStudyMoveToTree = (studyMoves: StudyMove[], previousNode?: MoveNode): MoveNode => {
 		const node: MoveNode = { ...studyMoves[0], branches: [] };
 
-		if (studyMoves.length === 1) return node;
+		if (studyMoves.length <= 1) return node;
 
 		studyMoves[0].variations.forEach((variation) =>
 			previousNode?.branches.push(convertStudyMoveToTree(variation, node))
