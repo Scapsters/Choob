@@ -167,7 +167,7 @@ async function getStudyGames(
 	lichessStudyId: string,
 	isPublic: boolean = true,
 	apiToken?: string
-): Promise<StudyGame[]> {
+): Promise<StudyGame[] | null> {
 	// check cache
 	let studyGame = studyGames.get(lichessStudyId);
 	if (studyGame) return studyGame;
@@ -196,6 +196,11 @@ async function getStudyGames(
 			headers: headers
 		}
 	);
+	
+	if(response.status !== 200) {
+		return null;
+	}
+
 	const games = response.text().then(parseGames);
 
 	// cache
@@ -258,8 +263,7 @@ function prepareStudy(games: StudyGame[]): {
  * @param currentFEN fen to search
  * @returns Array of next moves in SAN. Not guaranteed to be ordered or stable
  */
-export async function getStudyMove(lichessStudyId: string, currentFEN: string, authToken: string) {
-	const games = await getStudyGames(lichessStudyId, true);
+	if(!games?.length) return;
 	const preparedStudy = prepareStudy(games);
 	return preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN));
 }
