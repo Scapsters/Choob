@@ -2,10 +2,11 @@
 	import { Chessground } from 'chessground';
 	import { type Key } from 'svelte5-chessground';
 	import { Chess } from 'chess.js';
+	import type { Move } from 'chess.js'
 	import 'svelte5-chessground/style.css';
 	import { SvelteMap } from 'svelte/reactivity';
 
-	let { chess }: { chess: SvelteChess } = $props();
+	let { chess, onMove }: { chess: SvelteChess, onMove: () => void } = $props();
 
 	let boardEl: HTMLElement;
 	let api: ReturnType<typeof Chessground>;
@@ -46,6 +47,7 @@
 							check: chess.chess.isCheck()
 						});
 						chess.updateSnapshot()
+						onMove();
 					}
 				}
 			}
