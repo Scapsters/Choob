@@ -31,6 +31,6 @@
 </script>
 
 <button onclick={() => login.login()}> bello </button>
-<p><b>Access token:</b> {authToken?.token || 'Not logged in'}</p>
+<p><b>Access token:</b> {authToken?.token?.value || 'Not logged in'}</p>
 <ChessBoard {chess} />
 <p>I am the mini board: {chess.fen}</p>
