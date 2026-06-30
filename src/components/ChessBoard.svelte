@@ -65,6 +65,7 @@
 		// These should be read-only but then i'd need to write getters and setters :( just dont break the rules ok
 		fen = $state(this.chess.fen())
 		turn = $state(this.chess.turn())
+		history = $state(this.chess.history())
 
 		/**
 		 * This is what tells Svelte we've done something. Not calling it after making a change won't
@@ -73,6 +74,7 @@
 		updateSnapshot() {
 			this.fen = this.chess.fen()
 			this.turn = this.chess.turn()
+			this.history = this.chess.history()
 		}
 
 		move(move: Parameters<Chess['move']>[0]) {
