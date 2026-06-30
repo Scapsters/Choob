@@ -1,12 +1,53 @@
+<script module>
+	/**
+	 * Svelte cannot track the mutations made by functions like `Chess.move`. So, wrap everything we intend to call/access :(
+	 */
+	export class SvelteChess {
+		chess = new Chess();
+		// These should be read-only but then i'd need to write getters and setters :( just dont break the rules ok
+		fen = $state(this.chess.fen());
+		turn = $state(this.chess.turn());
+		history = $state(this.chess.history());
+
+		/**
+		 * This is what tells Svelte we've done something. Not calling it after making a change won't
+		 * lose the change, it just won't tell Svelte until it is called.
+		 */
+		updateSnapshot() {
+			this.fen = this.chess.fen();
+			this.turn = this.chess.turn();
+			this.history = this.chess.history();
+		}
+
+		move(move: Parameters<Chess['move']>[0]) {
+			this.chess.move(move);
+			this.updateSnapshot();
+		}
+
+		historyVerbose(): Move[] {
+			return this.chess.history({ verbose: true });
+		}
+	}
+</script>
+
 <script lang="ts">
 	import { Chessground } from 'chessground';
 	import { type Key } from 'svelte5-chessground';
 	import { Chess } from 'chess.js';
-	import type { Move } from 'chess.js'
+	import type { Color, Move } from 'chess.js';
 	import 'svelte5-chessground/style.css';
 	import { SvelteMap } from 'svelte/reactivity';
+	import type { ChoobHistoryEntry } from '../routes/+page.svelte';
 
-	let { chess, onMove }: { chess: SvelteChess, onMove: () => void } = $props();
+	let {
+		chess,
+		onMove,
+		addEntryToHistory
+	}: {
+		chess: SvelteChess;
+		onMove: () => void;
+		addEntryToHistory: (turn: Color, entry: ChoobHistoryEntry) => void;
+	} = $props();
 
 	let boardEl: HTMLElement;
 	let api: ReturnType<typeof Chessground>;
@@ -39,6 +80,14 @@
 				events: {
 					after: (from, to) => {
 						chess.chess.move({ from, to });
+						
+						const history = chess.chess.history()
+						// Turn is flipped because this is after the .move call, but we still want history for the SAN
+						addEntryToHistory(turnColor() === "white" ? "b" : "w", {
+							centipawns: null,
+							san: history[history.length - 1],
+							source: "player"
+						})
 						api.set({
 							fen: chess.chess.fen(),
 							turnColor: turnColor(),
@@ -46,7 +95,7 @@
 							movable: { color: turnColor(), dests: getDestinations() },
 							check: chess.chess.isCheck()
 						});
-						chess.updateSnapshot()
+						chess.updateSnapshot();
 						onMove();
 					}
 				}
@@ -54,38 +103,6 @@
 		});
 		return () => api.destroy();
 	});
-</script>
-
-<script module>
-	/**
-	 * Svelte cannot track the mutations made by functions like `Chess.move`. So, wrap everything we intend to call/access :(
-	 */
-	export class SvelteChess {
-		chess = new Chess()
-		// These should be read-only but then i'd need to write getters and setters :( just dont break the rules ok
-		fen = $state(this.chess.fen())
-		turn = $state(this.chess.turn())
-		history = $state(this.chess.history())
-
-		/**
-		 * This is what tells Svelte we've done something. Not calling it after making a change won't
-		 * lose the change, it just won't tell Svelte until it is called.
-		 */
-		updateSnapshot() {
-			this.fen = this.chess.fen()
-			this.turn = this.chess.turn()
-			this.history = this.chess.history()
-		}
-
-		move(move: Parameters<Chess['move']>[0]) {
-			this.chess.move(move)
-			this.updateSnapshot()
-		}
-
-		historyVerbose(): Move[] {
-			return this.chess.history({ verbose: true })
-		}
-	}
 </script>
 
 <div class="container" bind:this={boardEl}></div>
