@@ -80,14 +80,14 @@
 				events: {
 					after: (from, to) => {
 						chess.chess.move({ from, to });
-						
-						const history = chess.chess.history()
+
+						const history = chess.chess.history();
 						// Turn is flipped because this is after the .move call, but we still want history for the SAN
-						addEntryToHistory(turnColor() === "white" ? "b" : "w", {
+						addEntryToHistory(turnColor() === 'white' ? 'b' : 'w', {
 							centipawns: null,
 							san: history[history.length - 1],
-							source: "player"
-						})
+							source: 'player'
+						});
 						api.set({
 							fen: chess.chess.fen(),
 							turnColor: turnColor(),
