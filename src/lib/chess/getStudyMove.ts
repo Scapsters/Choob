@@ -261,8 +261,12 @@ function prepareStudy(games: StudyGame[]): {
  * Returns a random move from the given Study's chapters that follow the given FEN.
  * @param lichessStudyId id of Lichess Study to search
  * @param currentFEN fen to search
+ * @param authToken the API token to use to lichess
+ * @param isPublic true if the study is public/unlisted, false otherwise (private)
  * @returns Array of next moves in SAN. Not guaranteed to be ordered or stable
  */
+export async function getStudyMove(lichessStudyId: string, currentFEN: string, authToken: string | undefined, isPublic: boolean) {
+	const games = await getStudyGames(lichessStudyId, isPublic, authToken);
 	if(!games?.length) return;
 	const preparedStudy = prepareStudy(games);
 	return preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN));
