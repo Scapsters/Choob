@@ -41,7 +41,9 @@ export default defineConfig(
 		rules: {
 			'@typescript-eslint/no-unused-vars': 'off',
 			'prefer-const': 'off',
-			'@typescript-eslint/ban-ts-comment': 'off'
+			'@typescript-eslint/ban-ts-comment': 'off',
+			'no-case-declarations': 'off',
+			'no-fallthrough': 'off',
 		}
 	}
 );
