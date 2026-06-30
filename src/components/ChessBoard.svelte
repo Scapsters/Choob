@@ -56,11 +56,11 @@
 
 <script module>
 	/**
-	 * Svelte cannot track the mutations made by functions like `Chess.move`. So, wrap everything we intend to call/access ):
+	 * Svelte cannot track the mutations made by functions like `Chess.move`. So, wrap everything we intend to call/access :(
 	 */
 	export class SvelteChess {
 		chess = new Chess()
-		// These should be read-only but then i'd need to write getters and setters ): just dont break the rules ok
+		// These should be read-only but then i'd need to write getters and setters :( just dont break the rules ok
 		fen = $state(this.chess.fen())
 		turn = $state(this.chess.turn())
 
