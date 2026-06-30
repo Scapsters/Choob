@@ -77,6 +77,10 @@
 			this.chess.move(move)
 			this.updateSnapshot()
 		}
+
+		historyVerbose(): Move[] {
+			return this.chess.history({ verbose: true })
+		}
 	}
 </script>
 
