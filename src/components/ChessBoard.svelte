@@ -38,15 +38,18 @@
 	import 'svelte5-chessground/style.css';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { ChoobHistoryEntry } from '../routes/+page.svelte';
+	import type { ChoobEvaluation } from '../lib/chess/getEngineEvaluation.ts';
 
 	let {
 		chess,
 		onMove,
-		addEntryToHistory
+		addEntryToHistory,
+		getEvaluation
 	}: {
 		chess: SvelteChess;
-		onMove: () => void;
+		onMove: (evaluation?: ChoobEvaluation) => void;
 		addEntryToHistory: (turn: Color, entry: ChoobHistoryEntry) => void;
+		getEvaluation: (fen: string) => Promise<ChoobEvaluation>;
 	} = $props();
 
 	let boardEl: HTMLElement;
@@ -78,16 +81,9 @@
 				dests: getDestinations(),
 				showDests: true,
 				events: {
-					after: (from, to) => {
+					after: async (from, to) => {
 						chess.chess.move({ from, to });
 
-						const history = chess.chess.history();
-						// Turn is flipped because this is after the .move call, but we still want history for the SAN
-						addEntryToHistory(turnColor() === 'white' ? 'b' : 'w', {
-							centipawns: null,
-							san: history[history.length - 1],
-							source: 'player'
-						});
 						api.set({
 							fen: chess.chess.fen(),
 							turnColor: turnColor(),
@@ -96,7 +92,15 @@
 							check: chess.chess.isCheck()
 						});
 						chess.updateSnapshot();
-						onMove();
+
+						const evaluation = await getEvaluation(chess.chess.fen());
+						const history = chess.chess.history();
+						addEntryToHistory(turnColor() === 'white' ? 'b' : 'w', {
+							...evaluation,
+							san: history[history.length - 1],
+							moveSource: 'player'
+						});
+						onMove(evaluation);
 					}
 				}
 			}

@@ -7,12 +7,15 @@ type LichessCloudEvaluation = {
 	}[];
 };
 
-type ChoobEvaluation = {
-	centipawns: number;
+export type EvalType = 'cloud' | 'local';
+
+export type ChoobEvaluation = {
+	centipawns: number | string;
 	move: {
 		from: string;
 		to: string;
 	};
+	evalSource: EvalType;
 };
 
 const LICHESS_CLOUD_EVAL_URL = 'https://lichess.org/api/cloud-eval';
@@ -43,6 +46,7 @@ export async function getEngineEvaluation(
 		move: {
 			from: body.pvs[0].moves.split(' ')[0].substring(0, 2),
 			to: body.pvs[0].moves.split(' ')[0].substring(2, 4)
-		}
+		},
+		evalSource: 'cloud'
 	};
 }

@@ -1,13 +1,14 @@
 <script module>
-	export type MoveType = 'study' | 'common' | 'engine' | 'player';
+	import type { ChoobEvaluation } from '../lib/chess/getEngineEvaluation.ts';
+
+	export type MoveType = 'study' | 'common' | 'engine (C)' | 'engine (L)' | 'player';
 	export type MoveWeight = {
 		type: MoveType;
 		weight: number;
 	};
-	export type ChoobHistoryEntry = {
+	export type ChoobHistoryEntry = ChoobEvaluation & {
 		san: string;
-		source: MoveType;
-		centipawns: number | null;
+		moveSource: MoveType;
 	};
 	export type ChoobHistory = [ChoobHistoryEntry, ChoobHistoryEntry | null][];
 </script>
@@ -25,7 +26,11 @@
 	import Chooser from '../lib/external-packages/Chooser.js';
 	import { getCommonMove } from '../lib/chess/getCommonMove.ts';
 	import { getUCIHistory } from '../lib/chessjs-uci.ts';
-	import { getEngineEvaluation } from '../lib/chess/getEngineEvaluation.ts';
+	import { getEngineEvaluation as getCloudEvaluation } from '../lib/chess/getEngineEvaluation.ts';
+	import {
+		evaluateFEN as getLocalEvaluation,
+		initializeStockfish
+	} from '../lib/chess/stockfish/stockfish.ts';
 
 	let login: Login;
 	onMount(() => {
@@ -33,6 +38,8 @@
 		url.search = '';
 		login = new Login(url.href);
 		login.init();
+
+		initializeStockfish();
 	});
 
 	const chess = new SvelteChess();
@@ -55,10 +62,11 @@
 			weight: weightCommonMove
 		},
 		{
-			type: 'engine',
+			type: 'engine (C)',
 			weight: weightEngineMove
 		}
 	]);
+	let localEvalDepth = $state(14);
 
 	/**
 	 * Add entry to history based on color. "white" creates a new move and
@@ -75,32 +83,29 @@
 		}
 	};
 
-	let onMove = $derived(async () => {
+	const getEvaluation = async (fen: string): Promise<ChoobEvaluation> => {
+		if (authToken?.token?.value) {
+			const cloudEval = await getCloudEvaluation(fen, authToken.token.value);
+			if (cloudEval) return cloudEval;
+		}
+		return getLocalEvaluation(fen, localEvalDepth);
+	};
+
+	let onMove = $derived(async (evaluation?: ChoobEvaluation) => {
 		// board should only move on its own when it's not our turn
 		if (chess.turn === playerColor) return;
 
-		// study moves are the only viable option if authtoken is not set
-		if (authToken?.token?.value === undefined) {
-			console.warn('authToken has not been set, defaulting to always using study moves');
-			let moves = await getStudyMove(studyId, chess.fen, authToken?.token?.value, studyIsPublic);
-			if (moves?.length) {
-				const move = moves[Math.floor(Math.random() * moves.length)].notation.notation;
-				chess.move(move);
-				addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
-					centipawns: null,
-					san: move,
-					source: 'study'
-				});
-			} else {
-				throw new Error(
-					'no API key provided but not study move found. cannot move! should end the game in this state later'
-				);
-			}
-			return;
-		}
-
 		// otherwise, use the weights. fall through to the next case if any step returns none
-		let engineMove = await getEngineEvaluation(chess.fen, authToken?.token?.value);
+		evaluation ??= await getEvaluation(chess.fen);
+		const makeAndRecordMove = (move: string | { from: string; to: string }, source: MoveType) => {
+			chess.move(move);
+			const history = chess.chess.history();
+			addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
+				...evaluation,
+				san: history[history.length - 1],
+				moveSource: source
+			});
+		};
 		switch (Chooser.chooseWeightedObject(weights).type as MoveType) {
 			case 'study':
 				console.log('Trying study move');
@@ -114,58 +119,40 @@
 					let studyMove =
 						studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
 					console.log(`Using study move: ${JSON.stringify(studyMove)}`);
-					chess.move(studyMove);
-
-					addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
-						centipawns: engineMove?.centipawns ?? null,
-						san: studyMove,
-						source: 'study'
-					});
-
+					makeAndRecordMove(studyMove, 'study');
 					break;
 				}
 			case 'common':
-				console.log('Trying common move');
-				let commonMove = await getCommonMove(authToken?.token?.value, {
-					play: getUCIHistory(chess)
-				});
-				if (commonMove?.length) {
-					console.log(`Using common move: ${JSON.stringify(commonMove)}`);
-					chess.move(commonMove);
-
-					addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
-						centipawns: engineMove?.centipawns ?? null,
-						san: commonMove,
-						source: 'common'
+				if (authToken?.token?.value !== undefined) {
+					console.log('Trying common move');
+					let commonMove = await getCommonMove(authToken?.token?.value, {
+						play: getUCIHistory(chess)
 					});
-
-					break;
+					if (commonMove?.length) {
+						console.log(`Using common move: ${JSON.stringify(commonMove)}`);
+						makeAndRecordMove(commonMove, 'common');
+						break;
+					}
 				}
-			case 'engine':
-				console.log('Trying engine move');
-				if (engineMove) {
-					console.log(`Using engine move: ${JSON.stringify(engineMove.move)}`);
-					chess.move(engineMove.move);
-
-					const history = chess.chess.history();
-					addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
-						centipawns: engineMove?.centipawns ?? null,
-						san: history[history.length - 1],
-						source: 'engine'
-					});
-				} else {
-					throw new Error(
-						'Unable to resolve move as study, common, nor engine, should end game in this state later'
-					);
+			case 'engine (C)':
+				if (authToken?.token?.value !== undefined) {
+					console.log('Trying cloud engine move');
+					if (evaluation.evalSource === 'cloud') {
+						console.log(`Using cloud engine move: ${JSON.stringify(evaluation.move)}`);
+						makeAndRecordMove(evaluation.move, 'engine (C)');
+						break;
+					}
 				}
-				break;
+			case 'engine (L)':
+				console.log(`Using local engine move: ${JSON.stringify(evaluation.move)}`);
+				makeAndRecordMove(evaluation.move, 'engine (L)');
 		}
 	});
 </script>
 
 <button onclick={() => login.login()}> bello </button>
 <p><b>Access token:</b> {authToken?.token?.value || 'Not logged in'}</p>
-<ChessBoard {chess} {onMove} {addEntryToHistory} />
+<ChessBoard {chess} {onMove} {addEntryToHistory} {getEvaluation} />
 <p>
 	Study ID: <input bind:value={studyId} placeholder="Input study Id..." />
 	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
@@ -187,9 +174,25 @@
 	<input type="number" bind:value={weightEngineMove} min="0" max="100" />
 	<input type="range" bind:value={weightEngineMove} min="0" max="100" />
 </p>
+<p>
+	Local engine depth:
+	<input type="number" bind:value={localEvalDepth} min="0" max="25" />
+	<input type="range" bind:value={localEvalDepth} min="0" max="25" />
+</p>
+
+<button
+	onclick={() =>
+		window.open(
+			`https://lichess.org/analysis/pgn/${encodeURIComponent(chess.chess.pgn())}`,
+			'_blank'
+		)}
+>
+	Lichess Button
+</button>
+
 <table>
 	<thead>
-		<tr>
+		<tr class="*:px-2">
 			<td>Move</td>
 			<td>Eval</td>
 			<td>Source</td>
@@ -202,11 +205,11 @@
 		{#each choobHistory as entry (entry)}
 			<tr>
 				<td>{entry[0].san}</td>
-				<td>{entry[0].centipawns || '-'}</td>
-				<td>{entry[0]?.source || '-'}</td>
-				<td>{entry[1]?.san || '-'}</td>
-				<td>{entry[1]?.centipawns || '-'}</td>
-				<td>{entry[1]?.source || '-'}</td>
+				<td>{entry[0].centipawns}</td>
+				<td>{entry[0].moveSource}</td>
+				<td>{entry[1]?.san ?? '-'}</td>
+				<td>{entry[1]?.centipawns ?? '-'}</td>
+				<td>{entry[1]?.moveSource ?? '-'}</td>
 			</tr>
 		{/each}
 	</tbody>
