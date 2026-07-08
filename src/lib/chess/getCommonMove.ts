@@ -52,6 +52,9 @@ export async function getCommonMove(
 		}
 	});
 	const movesResponse = (await response.json())['moves'];
+
+	if (movesResponse.length === 0) return ''
+
 	type move = {
 		san: string;
 		weight: number;
@@ -61,7 +64,5 @@ export async function getCommonMove(
 		weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number)
 	}));
 
-	return new Promise<string>((resolve) =>
-		resolve((Chooser.chooseWeightedObject(weightedMoves) as move).san)
-	);
+	return (Chooser.chooseWeightedObject(weightedMoves) as move).san
 }
