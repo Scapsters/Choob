@@ -21,7 +21,7 @@
 	import { onMount } from 'svelte';
 	import { SvelteURL } from 'svelte/reactivity';
 	import type { Color } from 'chess.js';
-	import { getStudyMove } from '../lib/chess/getStudyMove.ts';
+	import { getStudyMove, getStudyGames } from '../lib/chess/getStudyMove.ts';
 	import type { _ } from '$env/static/private';
 	import Chooser from '../lib/external-packages/Chooser.js';
 	import { getCommonMove } from '../lib/chess/getCommonMove.ts';
@@ -47,8 +47,21 @@
 
 	let choobHistory = $state<ChoobHistory>([]);
 
-	let studyId = $state('mzJ7q0W7');
+	type StudyState = 'valid' | 'invalid' | 'loading'
+	let studyId = $state('');
 	let studyIsPublic = $state(true);
+	let studyValidity: StudyState = $state('invalid');
+	function validateStudyId() {
+		studyValidity = 'loading';
+		getStudyGames(studyId, studyIsPublic, authToken?.token?.value).then((games) => {
+			if(games?.length) {
+				studyValidity = 'valid';
+			} else {
+				studyValidity = 'invalid';
+			}
+		});
+	}
+
 	let weightCommonMove = $state(50);
 	let weightStudyMove = $state(50);
 	let weightEngineMove = $state(0);
@@ -154,10 +167,11 @@
 <p><b>Access token:</b> {authToken?.token?.value || 'Not logged in'}</p>
 <ChessBoard {chess} {onMove} {addEntryToHistory} {getEvaluation} />
 <p>
-	Study ID: <input bind:value={studyId} placeholder="Input study Id..." />
+	Study ID: <input bind:value={studyId} placeholder="Input study Id..." oninput={validateStudyId} />
 	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
+	<br>
+	{studyValidity}
 </p>
-
 <p>
 	Study move weight:
 	<input type="number" bind:value={weightStudyMove} min="0" max="100" />

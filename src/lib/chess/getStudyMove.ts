@@ -163,7 +163,7 @@ let studyGames = new Map<string, StudyGame[]>();
  * @param apiToken required if the study is not public (private/unlisted)
  * @returns StudyGame for every chapter of the Lichess Study referred to by the given studyId
  */
-async function getStudyGames(
+export async function getStudyGames(
 	lichessStudyId: string,
 	isPublic: boolean = true,
 	apiToken?: string
