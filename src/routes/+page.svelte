@@ -23,15 +23,11 @@
 	import { SvelteURL } from 'svelte/reactivity';
 	import type { Color } from 'chess.js';
 	import { getStudyMove } from '../lib/chess/getStudyMove.ts';
-	import type { _ } from '$env/static/private';
 	import Chooser from '../lib/external-packages/Chooser.js';
 	import { getCommonMove, type ChoobCommonMove } from '../lib/chess/getCommonMove.ts';
-	import { getUCIHistory } from '../lib/chessjs-uci.ts';
-	import { getCloudEvaluation as getCloudEvaluation } from '../lib/chess/getCloudEvaluation.ts';
-	import {
-		getLocalEvaluation as getLocalEvaluation,
-		initializeStockfish
-	} from '../lib/chess/getLocalEvaluation.ts';
+	import { getUCIHistory } from '../lib/chess/chessjs-uci.ts';
+	import { getCloudEvaluation } from '../lib/chess/getCloudEvaluation.ts';
+	import { getLocalEvaluation, initializeStockfish } from '../lib/chess/getLocalEvaluation.ts';
 
 	let login: Login;
 	onMount(() => {

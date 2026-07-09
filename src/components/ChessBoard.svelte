@@ -41,7 +41,7 @@
 	import type { ChoobEvaluation } from '../lib/chess/getCloudEvaluation.ts';
 	import { getCommonMove } from '../lib/chess/getCommonMove.ts';
 	import { authToken } from '../lib/login.svelte.ts';
-	import { getUCIHistory } from '../lib/chessjs-uci.ts';
+	import { getUCIHistory } from '../lib/chess/chessjs-uci.ts';
 
 	let {
 		chess,

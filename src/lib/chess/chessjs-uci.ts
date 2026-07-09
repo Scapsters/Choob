@@ -1,4 +1,4 @@
-import { SvelteChess } from '../components/ChessBoard.svelte';
+import { SvelteChess } from '../../components/ChessBoard.svelte';
 import type { Move } from 'chess.js';
 
 /**
