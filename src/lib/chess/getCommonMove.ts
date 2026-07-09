@@ -5,8 +5,8 @@ type LichessSpeed = 'ultraBullet' | 'bullet' | 'blitz' | 'rapid' | 'classical' |
 
 export type ChoobCommonMove = {
 	move: string
-	// Should add up to ~1
-	winPercents: {
+	// Should add up to ~1. Should not exist when certainty is low
+	winPercents?: {
 		white: number,
 		draws: number,
 		black: number,
@@ -80,11 +80,11 @@ export async function getCommonMove(
 
 	const { white, draws, black } = body 
 	const sum = white + draws + black
-	const winPercents = {
+	const winPercents = sum > 25 ? {
 		white: white / sum,
 		draws: draws / sum,
 		black: black / sum
-	}
+	} : undefined
 
 	return { move, winPercents } 
 }
