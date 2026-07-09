@@ -15,8 +15,8 @@ const LICHESS_EXPLORER_URL = 'https://explorer.lichess.org/lichess';
  * @returns A single common move in san format
  */
 export async function getCommonMove(
-	apiToken: string,
 	{
+		apiToken,
 		ratings = ['0', '1000', '1200', '1400', '1600', '1800', '2000', '2200', '2500'],
 		movesToConsider = 12,
 		speeds = [
@@ -27,14 +27,17 @@ export async function getCommonMove(
 			'classical',
 			'correspondence'
 		],
-		play = undefined
+		play
 	}: {
+		apiToken?: string
 		ratings?: LichessRating[],
 		movesToConsider?: number,
 		speeds?: LichessSpeed[],
 		play?: string
 	}
-): Promise<string> {
+): Promise<ChoobCommonMove | null> {
+	if (!apiToken) return null
+
 	let searchParams = new URLSearchParams();
 	searchParams.append('speeds', speeds.toString());
 	searchParams.append('ratings', ratings.toString());

@@ -38,18 +38,21 @@
 	import 'svelte5-chessground/style.css';
 	import { SvelteMap } from 'svelte/reactivity';
 	import type { ChoobHistoryEntry } from '../routes/+page.svelte';
-	import type { ChoobEvaluation } from '../lib/chess/getEngineEvaluation.ts';
+	import type { ChoobEvaluation } from '../lib/chess/getCloudEvaluation.ts';
+	import { getCommonMove } from '../lib/chess/getCommonMove.ts';
+	import { authToken } from '../lib/login.svelte.ts';
+	import { getUCIHistory } from '../lib/chessjs-uci.ts';
 
 	let {
 		chess,
-		onMove,
+		playOpponentMove,
 		addEntryToHistory,
-		getEvaluation
+		getEngineEvaluation
 	}: {
 		chess: SvelteChess;
-		onMove: (evaluation?: ChoobEvaluation) => void;
+		playOpponentMove: (evaluation?: Promise<ChoobEvaluation>) => void;
 		addEntryToHistory: (turn: Color, entry: ChoobHistoryEntry) => void;
-		getEvaluation: (fen: string) => Promise<ChoobEvaluation>;
+		getEngineEvaluation: (fen: string) => Promise<ChoobEvaluation>;
 	} = $props();
 
 	let boardEl: HTMLElement;
@@ -93,14 +96,18 @@
 						});
 						chess.updateSnapshot();
 
-						const evaluation = await getEvaluation(chess.chess.fen());
+						const evaluation = getEngineEvaluation(chess.chess.fen());
+						const common = getCommonMove({
+							apiToken: authToken?.token?.value,
+							play: getUCIHistory(chess)
+						});
 						const history = chess.chess.history();
 						addEntryToHistory(turnColor() === 'white' ? 'b' : 'w', {
-							...evaluation,
+							...(await evaluation),
 							san: history[history.length - 1],
-							moveSource: 'player'
+							moveSource: 'player',
 						});
-						onMove(evaluation);
+						playOpponentMove(evaluation);
 					}
 				}
 			}

@@ -25,10 +25,12 @@ const LICHESS_CLOUD_EVAL_URL = 'https://lichess.org/api/cloud-eval';
  * @param apiToken Lichess API token
  * @returns null if no eval was found, rating and best move otherwise
  */
-export async function getEngineEvaluation(
+export async function getCloudEvaluation(
 	fen: string,
-	apiToken: string
+	apiToken?: string
 ): Promise<ChoobEvaluation | null> {
+	if (!apiToken) return null;
+	
 	const url = new URL(LICHESS_CLOUD_EVAL_URL);
 	url.searchParams.append('fen', fen);
 

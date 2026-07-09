@@ -1,4 +1,4 @@
-import type { ChoobEvaluation } from '../getEngineEvaluation';
+import type { ChoobEvaluation } from './getCloudEvaluation';
 
 // https://stackoverflow.com/a/68945416
 const wasmSupported =
@@ -88,7 +88,7 @@ export async function initializeStockfish() {
 	return waitForResponse(['uci'], 'uciok').then(() => waitForResponse(['isready'], 'readyok'));
 }
 
-export async function evaluateFEN(fen: string, depth: number): Promise<ChoobEvaluation> {
+export async function getLocalEvaluation(fen: string, depth: number): Promise<ChoobEvaluation> {
 	const blackToMove = fen.split(' ')[1] === 'b';
 
 	const data = await waitForResponse([`position fen ${fen}`, `go depth ${depth}`], ['score', 'bestmove']);

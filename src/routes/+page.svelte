@@ -1,5 +1,5 @@
 <script module>
-	import type { ChoobEvaluation } from '../lib/chess/getEngineEvaluation.ts';
+	import type { ChoobEvaluation } from '../lib/chess/getCloudEvaluation.ts';
 
 	export type MoveType = 'study' | 'common' | 'engine (C)' | 'engine (L)' | 'player';
 	export type MoveWeight = {
@@ -24,13 +24,13 @@
 	import { getStudyMove } from '../lib/chess/getStudyMove.ts';
 	import type { _ } from '$env/static/private';
 	import Chooser from '../lib/external-packages/Chooser.js';
-	import { getCommonMove } from '../lib/chess/getCommonMove.ts';
+	import { getCommonMove, type ChoobCommonMove } from '../lib/chess/getCommonMove.ts';
 	import { getUCIHistory } from '../lib/chessjs-uci.ts';
-	import { getEngineEvaluation as getCloudEvaluation } from '../lib/chess/getEngineEvaluation.ts';
+	import { getCloudEvaluation as getCloudEvaluation } from '../lib/chess/getCloudEvaluation.ts';
 	import {
-		evaluateFEN as getLocalEvaluation,
+		getLocalEvaluation as getLocalEvaluation,
 		initializeStockfish
-	} from '../lib/chess/stockfish/stockfish.ts';
+	} from '../lib/chess/getLocalEvaluation.ts';
 
 	let login: Login;
 	onMount(() => {
@@ -83,29 +83,34 @@
 		}
 	};
 
-	const getEvaluation = async (fen: string): Promise<ChoobEvaluation> => {
-		if (authToken?.token?.value) {
-			const cloudEval = await getCloudEvaluation(fen, authToken.token.value);
-			if (cloudEval) return cloudEval;
-		}
-		return getLocalEvaluation(fen, localEvalDepth);
+	const getEngineEvaluation = async (fen: string): Promise<ChoobEvaluation> => {
+		const localEval = getLocalEvaluation(fen, localEvalDepth);
+		const cloudEval = await getCloudEvaluation(fen, authToken?.token?.value);
+		return cloudEval ?? localEval;
 	};
 
-	let onMove = $derived(async (evaluation?: ChoobEvaluation) => {
-		// board should only move on its own when it's not our turn
-		if (chess.turn === playerColor) return;
+	const makeAndRecordMove = async (
+		move: string | { from: string; to: string },
+		source: MoveType
+	) => {
+		chess.move(move);
+		const history = chess.chess.history();
+		addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
+			...(await getEngineEvaluation(chess.fen)),
+			san: history[history.length - 1],
+			moveSource: source,
+		});
+	};
 
-		// otherwise, use the weights. fall through to the next case if any step returns none
-		evaluation ??= await getEvaluation(chess.fen);
-		const makeAndRecordMove = (move: string | { from: string; to: string }, source: MoveType) => {
-			chess.move(move);
-			const history = chess.chess.history();
-			addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
-				...evaluation,
-				san: history[history.length - 1],
-				moveSource: source
-			});
-		};
+	let playOpponentMove = $derived(async (engine?: Promise<ChoobEvaluation>) => {
+		// precompute certain move types for use in recording
+		// (even if we use a study move, we want to track the win percent/centipawns)
+		let common = getCommonMove({
+			apiToken: authToken?.token?.value,
+			play: getUCIHistory(chess)
+		});
+		engine ??= getEngineEvaluation(chess.fen);
+
 		switch (Chooser.chooseWeightedObject(weights).type as MoveType) {
 			case 'study':
 				console.log('Trying study move');
@@ -123,36 +128,34 @@
 					break;
 				}
 			case 'common':
-				if (authToken?.token?.value !== undefined) {
-					console.log('Trying common move');
-					let commonMove = await getCommonMove(authToken?.token?.value, {
-						play: getUCIHistory(chess)
-					});
-					if (commonMove?.length) {
-						console.log(`Using common move: ${JSON.stringify(commonMove)}`);
-						makeAndRecordMove(commonMove, 'common');
-						break;
-					}
+				console.log('Trying common move');
+				const awaitedCommon = await common;
+				if (awaitedCommon) {
+					console.log(`Using common move: ${JSON.stringify(awaitedCommon)}`);
+					makeAndRecordMove(awaitedCommon.move, 'common');
+					break;
 				}
 			case 'engine (C)':
 				if (authToken?.token?.value !== undefined) {
 					console.log('Trying cloud engine move');
-					if (evaluation.evalSource === 'cloud') {
-						console.log(`Using cloud engine move: ${JSON.stringify(evaluation.move)}`);
-						makeAndRecordMove(evaluation.move, 'engine (C)');
+					const awaitedEngine = await engine;
+					if (awaitedEngine.evalSource === 'cloud') {
+						console.log(`Using cloud engine move: ${JSON.stringify(awaitedEngine.move)}`);
+						makeAndRecordMove(awaitedEngine.move, 'engine (C)');
 						break;
 					}
 				}
 			case 'engine (L)':
-				console.log(`Using local engine move: ${JSON.stringify(evaluation.move)}`);
-				makeAndRecordMove(evaluation.move, 'engine (L)');
+				const awaitedEngine = await engine;
+				console.log(`Using local engine move: ${JSON.stringify(awaitedEngine.move)}`);
+				makeAndRecordMove(awaitedEngine.move, 'engine (L)');
 		}
 	});
 </script>
 
 <button onclick={() => login.login()}> bello </button>
 <p><b>Access token:</b> {authToken?.token?.value || 'Not logged in'}</p>
-<ChessBoard {chess} {onMove} {addEntryToHistory} {getEvaluation} />
+<ChessBoard {chess} {playOpponentMove} {addEntryToHistory} {getEngineEvaluation} />
 <p>
 	Study ID: <input bind:value={studyId} placeholder="Input study Id..." />
 	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
@@ -189,27 +192,32 @@
 >
 	Lichess Button
 </button>
+<button onclick={() => playOpponentMove()}> Lichess Button (Evil) </button>
 
 <table>
 	<thead>
-		<tr class="*:px-2">
+		<tr class="*:px-3">
 			<td>Move</td>
 			<td>Eval</td>
 			<td>Source</td>
+			<td>Win% (W)</td>
 			<td>Move</td>
 			<td>Eval</td>
 			<td>Source</td>
+			<td>Win% (W)</td>
 		</tr>
 	</thead>
 	<tbody>
 		{#each choobHistory as entry (entry)}
-			<tr>
+			<tr class="*:text-center">
 				<td>{entry[0].san}</td>
 				<td>{entry[0].centipawns}</td>
 				<td>{entry[0].moveSource}</td>
+				<td>{Math.round((entry[0].winPercents?.white ?? 0) * 100) || '-'}</td>
 				<td>{entry[1]?.san ?? '-'}</td>
 				<td>{entry[1]?.centipawns ?? '-'}</td>
 				<td>{entry[1]?.moveSource ?? '-'}</td>
+				<td>{Math.round((entry[1]?.winPercents?.white ?? 0) * 100) || '-'}</td>
 			</tr>
 		{/each}
 	</tbody>
