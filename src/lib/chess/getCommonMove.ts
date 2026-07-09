@@ -3,6 +3,16 @@ import Chooser from '../external-packages/Chooser.js';
 type LichessRating = '0' | '1000' | '1200' | '1400' | '1600' | '1800' | '2000' | '2200' | '2500';
 type LichessSpeed = 'ultraBullet' | 'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence';
 
+export type ChoobCommonMove = {
+	move: string
+	// Should add up to ~1
+	winPercents: {
+		white: number,
+		draws: number,
+		black: number,
+	}
+}
+
 const LICHESS_EXPLORER_URL = 'https://explorer.lichess.org/lichess';
 
 /**
@@ -54,18 +64,27 @@ export async function getCommonMove(
 			Authorization: `Bearer ${apiToken}`
 		}
 	});
-	const movesResponse = (await response.json())['moves'];
+	const body = await response.json()
+	const movesResponse = body['moves'];
+	if (movesResponse.length === 0) return null
 
-	if (movesResponse.length === 0) return ''
-
-	type move = {
+	type WeightedMove = {
 		san: string;
 		weight: number;
 	};
-	const weightedMoves: move[] = movesResponse.map((item: { [x: string]: string | number }) => ({
+	const weightedMoves: WeightedMove[] = movesResponse.map((item: { [x: string]: string | number }) => ({
 		san: item['san'],
 		weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number)
 	}));
+	const move = (Chooser.chooseWeightedObject(weightedMoves) as WeightedMove).san
 
-	return (Chooser.chooseWeightedObject(weightedMoves) as move).san
+	const { white, draws, black } = body 
+	const sum = white + draws + black
+	const winPercents = {
+		white: white / sum,
+		draws: draws / sum,
+		black: black / sum
+	}
+
+	return { move, winPercents } 
 }

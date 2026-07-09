@@ -9,6 +9,7 @@
 	export type ChoobHistoryEntry = ChoobEvaluation & {
 		san: string;
 		moveSource: MoveType;
+		winPercents?: ChoobCommonMove['winPercents'];
 	};
 	export type ChoobHistory = [ChoobHistoryEntry, ChoobHistoryEntry | null][];
 </script>
@@ -99,6 +100,12 @@
 			...(await getEngineEvaluation(chess.fen)),
 			san: history[history.length - 1],
 			moveSource: source,
+			winPercents: (
+				await getCommonMove({
+					apiToken: authToken?.token?.value,
+					play: getUCIHistory(chess)
+				})
+			)?.winPercents
 		});
 	};
 

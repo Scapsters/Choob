@@ -106,6 +106,7 @@
 							...(await evaluation),
 							san: history[history.length - 1],
 							moveSource: 'player',
+							winPercents: (await common)?.winPercents
 						});
 						playOpponentMove(evaluation);
 					}
