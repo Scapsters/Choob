@@ -4,14 +4,14 @@ type LichessRating = '0' | '1000' | '1200' | '1400' | '1600' | '1800' | '2000' |
 type LichessSpeed = 'ultraBullet' | 'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence';
 
 export type ChoobCommonMove = {
-	move: string
+	move: string;
 	// Should add up to ~1. Should not exist when certainty is low
 	winPercents?: {
-		white: number,
-		draws: number,
-		black: number,
-	}
-}
+		white: number;
+		draws: number;
+		black: number;
+	};
+};
 
 const LICHESS_EXPLORER_URL = 'https://explorer.lichess.org/lichess';
 
@@ -24,29 +24,20 @@ const LICHESS_EXPLORER_URL = 'https://explorer.lichess.org/lichess';
  * @param play in UCI format, the moves that have occurred so far
  * @returns A single common move in san format
  */
-export async function getCommonMove(
-	{
-		apiToken,
-		ratings = ['0', '1000', '1200', '1400', '1600', '1800', '2000', '2200', '2500'],
-		movesToConsider = 12,
-		speeds = [
-			'ultraBullet',
-			'bullet',
-			'blitz',
-			'rapid',
-			'classical',
-			'correspondence'
-		],
-		play
-	}: {
-		apiToken?: string
-		ratings?: LichessRating[],
-		movesToConsider?: number,
-		speeds?: LichessSpeed[],
-		play?: string
-	}
-): Promise<ChoobCommonMove | null> {
-	if (!apiToken) return null
+export async function getCommonMove({
+	apiToken,
+	ratings = ['0', '1000', '1200', '1400', '1600', '1800', '2000', '2200', '2500'],
+	movesToConsider = 12,
+	speeds = ['ultraBullet', 'bullet', 'blitz', 'rapid', 'classical', 'correspondence'],
+	play
+}: {
+	apiToken?: string;
+	ratings?: LichessRating[];
+	movesToConsider?: number;
+	speeds?: LichessSpeed[];
+	play?: string;
+}): Promise<ChoobCommonMove | null> {
+	if (!apiToken) return null;
 
 	let searchParams = new URLSearchParams();
 	searchParams.append('speeds', speeds.toString());
@@ -64,27 +55,32 @@ export async function getCommonMove(
 			Authorization: `Bearer ${apiToken}`
 		}
 	});
-	const body = await response.json()
+	const body = await response.json();
 	const movesResponse = body['moves'];
-	if (movesResponse.length === 0) return null
+	if (movesResponse.length === 0) return null;
 
 	type WeightedMove = {
 		san: string;
 		weight: number;
 	};
-	const weightedMoves: WeightedMove[] = movesResponse.map((item: { [x: string]: string | number }) => ({
-		san: item['san'],
-		weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number)
-	}));
-	const move = (Chooser.chooseWeightedObject(weightedMoves) as WeightedMove).san
+	const weightedMoves: WeightedMove[] = movesResponse.map(
+		(item: { [x: string]: string | number }) => ({
+			san: item['san'],
+			weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number)
+		})
+	);
+	const move = (Chooser.chooseWeightedObject(weightedMoves) as WeightedMove).san;
 
-	const { white, draws, black } = body 
-	const sum = white + draws + black
-	const winPercents = sum > 25 ? {
-		white: white / sum,
-		draws: draws / sum,
-		black: black / sum
-	} : undefined
+	const { white, draws, black } = body;
+	const sum = white + draws + black;
+	const winPercents =
+		sum > 25
+			? {
+					white: white / sum,
+					draws: draws / sum,
+					black: black / sum
+				}
+			: undefined;
 
-	return { move, winPercents } 
+	return { move, winPercents };
 }

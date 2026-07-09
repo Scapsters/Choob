@@ -30,7 +30,7 @@ export async function getCloudEvaluation(
 	apiToken?: string
 ): Promise<ChoobEvaluation | null> {
 	if (!apiToken) return null;
-	
+
 	const url = new URL(LICHESS_CLOUD_EVAL_URL);
 	url.searchParams.append('fen', fen);
 

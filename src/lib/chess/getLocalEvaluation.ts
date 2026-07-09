@@ -45,13 +45,13 @@ async function waitForResponse(commands: string[], desiredResponses?: string[] |
 
 	/**
 	 * For every message, see if it matches one of our desired responses.
-	 * 
+	 *
 	 * If there is none, return the first message
 	 * If theres only one, return the data on the first matching message
 	 * If there are multiple, collect each matching message with its corresponding desired reponse,
 	 * then when there is something for all desired messages, return them
-	 * 
-	 * A single entry array would act near-identically to a string, but its kind of unergonomic 
+	 *
+	 * A single entry array would act near-identically to a string, but its kind of unergonomic
 	 */
 	const responses = new Map<string, string>();
 	const promise = new Promise((resolve) => {
@@ -91,7 +91,10 @@ export async function initializeStockfish() {
 export async function getLocalEvaluation(fen: string, depth: number): Promise<ChoobEvaluation> {
 	const blackToMove = fen.split(' ')[1] === 'b';
 
-	const data = await waitForResponse([`position fen ${fen}`, `go depth ${depth}`], ['score', 'bestmove']);
+	const data = await waitForResponse(
+		[`position fen ${fen}`, `go depth ${depth}`],
+		['score', 'bestmove']
+	);
 
 	const scoreParts = data.get('score')!.split(' ');
 	const scoreIndex = scoreParts.findIndex((part) => part === 'score');

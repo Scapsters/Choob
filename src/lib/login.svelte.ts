@@ -7,7 +7,6 @@ export const scopes = ['study:read'];
 export const clientId = 'choob.com';
 export let authToken = $state<{ token: AccessToken | null }>({ token: null });
 
-
 export class Login {
 	redirectUrl: string;
 	oauth: OAuth2AuthCodePKCE;
@@ -37,7 +36,7 @@ export class Login {
 			// Assumes that putting the expiry into the date constructor works! https://jsdate.wtf/ reference
 			if (cachedAuthToken && new SvelteDate() < new SvelteDate(cachedAuthToken.expiry)) {
 				authToken.token = cachedAuthToken;
-				return
+				return;
 			}
 		}
 
@@ -52,7 +51,7 @@ export class Login {
 				// Might want to persist accessContext.token until the user logs out.
 				this.accessContext = await this.oauth.getAccessToken();
 
-				const token = this.accessContext.token
+				const token = this.accessContext.token;
 				if (!token) throw new Error('Token received but is undefined!');
 				authToken.token = token;
 
