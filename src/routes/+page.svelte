@@ -92,16 +92,16 @@
 	) => {
 		chess.move(move);
 		const history = chess.chess.history();
+		const engine = getEngineEvaluation(chess.fen);
+		const common = getCommonMove({
+			apiToken: authToken?.token?.value,
+			play: getUCIHistory(chess)
+		});
 		addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
-			...(await getEngineEvaluation(chess.fen)),
+			...(await engine),
 			san: history[history.length - 1],
 			moveSource: source,
-			winPercents: (
-				await getCommonMove({
-					apiToken: authToken?.token?.value,
-					play: getUCIHistory(chess)
-				})
-			)?.winPercents
+			winPercents: (await common)?.winPercents
 		});
 	};
 
