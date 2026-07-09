@@ -153,7 +153,10 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 			const existingNextMoveSet = FENAssociations.get(fen);
 			if (!existingNextMoveSet) FENAssociations.set(fen, []);
 
-			FENAssociations.get(fen)!.push(node);
+			// very specific, don't add nodes that correspond to empty chapters to the initial fen's association map
+			if (node.notation) {
+				FENAssociations.get(fen)!.push(node);
+			}
 		})
 	);
 	return FENAssociations;
