@@ -8,6 +8,13 @@
 		fen = $state(this.chess.fen());
 		turn = $state(this.chess.turn());
 		history = $state(this.chess.history());
+		
+		constructor(fen?: string) {
+			this.chess = new Chess(fen || undefined) // don't take empty string
+			this.fen = this.chess.fen()
+			this.turn = this.chess.turn()
+			this.history = this.chess.history()
+		}
 
 		/**
 		 * This is what tells Svelte we've done something. Not calling it after making a change won't
@@ -26,6 +33,11 @@
 
 		historyVerbose(): Move[] {
 			return this.chess.history({ verbose: true });
+		}
+
+		reset() {
+			this.chess.reset();
+			this.updateSnapshot();
 		}
 	}
 </script>
@@ -47,12 +59,14 @@
 		chess,
 		playOpponentMove,
 		addEntryToHistory,
-		getEngineEvaluation
+		getEngineEvaluation,
+		playerColor
 	}: {
 		chess: SvelteChess;
 		playOpponentMove: (evaluation?: Promise<ChoobEvaluation>) => void;
 		addEntryToHistory: (turn: Color, entry: ChoobHistoryEntry) => void;
 		getEngineEvaluation: (fen: string) => Promise<ChoobEvaluation>;
+		playerColor: Color;
 	} = $props();
 
 	let boardEl: HTMLElement;
@@ -73,14 +87,16 @@
 		return destinationLists;
 	}
 
+	const isPlayersTurn = () => playerColor === 'w' ? 'white' : 'black' === turnColor();
 	$effect(() => {
 		// https://github.com/lichess-org/chessground/blob/master/src/config.ts
 		api = Chessground(boardEl, {
 			fen: chess.fen,
 			turnColor: turnColor(),
+			orientation: playerColor === 'w' ? 'white' : 'black',
 			movable: {
 				free: false,
-				color: turnColor(),
+				color: isPlayersTurn() ? turnColor() : undefined,
 				dests: getDestinations(),
 				showDests: true,
 				events: {
@@ -91,7 +107,7 @@
 							fen: chess.chess.fen(),
 							turnColor: turnColor(),
 							lastMove: [from, to],
-							movable: { color: turnColor(), dests: getDestinations() },
+							movable: { color: isPlayersTurn() ? turnColor() : undefined, dests: getDestinations() },
 							check: chess.chess.isCheck()
 						});
 						chess.updateSnapshot();

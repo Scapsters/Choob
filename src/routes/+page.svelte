@@ -39,8 +39,12 @@
 		initializeStockfish();
 	});
 
-	const chess = new SvelteChess();
+	let chess = $state(new SvelteChess());
+	type ColorChoice = Color | 'random';
 	let playerColor = $state<Color>('w');
+	let playerColorChoice = $state<ColorChoice>('w');
+
+	let startingFen = $state<string>('')
 
 	let choobHistory = $state<ChoobHistory>([]);
 
@@ -158,7 +162,7 @@
 
 <button onclick={() => login.login()}> bello </button>
 <p><b>Access token:</b> {authToken?.token?.value || 'Not logged in'}</p>
-<ChessBoard {chess} {playOpponentMove} {addEntryToHistory} {getEngineEvaluation} />
+<ChessBoard {chess} {playOpponentMove} {addEntryToHistory} {getEngineEvaluation} {playerColor} />
 <p>
 	Study ID: <input bind:value={studyId} placeholder="Input study Id..." />
 	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
@@ -196,6 +200,28 @@
 	Lichess Button
 </button>
 <button onclick={() => playOpponentMove()}> Lichess Button (Evil) </button>
+
+<p>Starting FEN</p>
+<p>
+	<input type="text" bind:value={startingFen}/>
+</p>
+
+<button onclick={() => startingFen = chess.fen}>Make current FEN starting FEN</button>
+
+<p>Color: {playerColor}</p>
+<label><input type="radio" bind:group={playerColorChoice} value="w" />White</label>
+<label><input type="radio" bind:group={playerColorChoice} value="random" />Random</label>
+<label><input type="radio" bind:group={playerColorChoice} value="b" />Black</label>
+
+<button
+	onclick={() => {
+		chess = new SvelteChess(startingFen)
+		choobHistory = [];
+		playerColor =
+			playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
+		if (playerColor === 'b') playOpponentMove();
+	}}>New Game</button
+>
 
 <table>
 	<thead>
