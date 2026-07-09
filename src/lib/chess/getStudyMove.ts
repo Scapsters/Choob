@@ -3,6 +3,7 @@ import type { ParseTree } from '@mliebelt/pgn-parser';
 import { Chess } from 'chess.js';
 
 const LICHESS_STUDY_URL = 'https://lichess.org/api/study/';
+const DEFAULT_FEN = makeFENMoveAgnostic('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 
 type StudyGame = ParseTree;
 type StudyMove = ParseTree['moves'][number];
@@ -141,15 +142,18 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 	);
 
 	const FENAssociations = new Map<string, MoveNode[]>();
-	moveTreesWithFEN.forEach((root) =>
+	moveTreesWithFEN.forEach((root, i) =>
 		traverseTreePassParents(root, (node, parentMoves) => {
-			if (parentMoves.length === 0) return;
-			const moveBeforeCurrent = parentMoves[parentMoves.length - 1];
+			const fen = makeFENMoveAgnostic(
+				(parentMoves.length === 0
+					? studyGameTrees[i].tags?.FEN
+					: parentMoves[parentMoves.length - 1].fen) ?? DEFAULT_FEN
+			);
 
-			const existingNextMoveSet = FENAssociations.get(moveBeforeCurrent.fen);
-			if (!existingNextMoveSet) FENAssociations.set(moveBeforeCurrent.fen, []);
+			const existingNextMoveSet = FENAssociations.get(fen);
+			if (!existingNextMoveSet) FENAssociations.set(fen, []);
 
-			FENAssociations.get(moveBeforeCurrent.fen)!.push(node);
+			FENAssociations.get(fen)!.push(node);
 		})
 	);
 	return FENAssociations;
