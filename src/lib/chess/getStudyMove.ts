@@ -200,8 +200,8 @@ async function getStudyGames(
 			headers: headers
 		}
 	);
-	
-	if(response.status !== 200) {
+
+	if (response.status !== 200) {
 		return null;
 	}
 
@@ -269,9 +269,14 @@ function prepareStudy(games: StudyGame[]): {
  * @param isPublic true if the study is public/unlisted, false otherwise (private)
  * @returns Array of next moves in SAN. Not guaranteed to be ordered or stable
  */
-export async function getStudyMove(lichessStudyId: string, currentFEN: string, authToken: string | undefined, isPublic: boolean) {
+export async function getStudyMove(
+	lichessStudyId: string,
+	currentFEN: string,
+	authToken: string | undefined,
+	isPublic: boolean
+) {
 	const games = await getStudyGames(lichessStudyId, isPublic, authToken);
-	if(!games?.length) return;
+	if (!games?.length) return;
 	const preparedStudy = prepareStudy(games);
 	return preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN));
 }
