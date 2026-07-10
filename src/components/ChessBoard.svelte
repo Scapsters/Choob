@@ -115,7 +115,7 @@
 						const evaluation = getEngineEvaluation(chess.chess.fen());
 						const common = getCommonMove({
 							apiToken: authToken?.token?.value,
-							play: getUCIHistory(chess)
+							fen: chess.fen
 						});
 						const history = chess.chess.history();
 						addEntryToHistory(turnColor() === 'white' ? 'b' : 'w', {

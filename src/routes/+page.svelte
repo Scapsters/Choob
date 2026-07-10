@@ -100,7 +100,7 @@
 		const engine = getEngineEvaluation(chess.fen);
 		const common = getCommonMove({
 			apiToken: authToken?.token?.value,
-			play: getUCIHistory(chess)
+			fen: chess.fen
 		});
 		addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
 			...(await engine),
@@ -113,9 +113,9 @@
 	let playOpponentMove = $derived(async (engine?: Promise<ChoobEvaluation>) => {
 		// precompute certain move types for use in recording
 		// (even if we use a study move, we want to track the win percent/centipawns)
-		let common = getCommonMove({
+		const common = getCommonMove({
 			apiToken: authToken?.token?.value,
-			play: getUCIHistory(chess)
+			fen: chess.fen
 		});
 		engine ??= getEngineEvaluation(chess.fen);
 

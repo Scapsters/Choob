@@ -29,13 +29,13 @@ export async function getCommonMove({
 	ratings = ['0', '1000', '1200', '1400', '1600', '1800', '2000', '2200', '2500'],
 	movesToConsider = 12,
 	speeds = ['ultraBullet', 'bullet', 'blitz', 'rapid', 'classical', 'correspondence'],
-	play
+	fen
 }: {
 	apiToken?: string;
 	ratings?: LichessRating[];
 	movesToConsider?: number;
 	speeds?: LichessSpeed[];
-	play?: string;
+	fen?: string;
 }): Promise<ChoobCommonMove | null> {
 	if (!apiToken) return null;
 
@@ -43,7 +43,7 @@ export async function getCommonMove({
 	searchParams.append('speeds', speeds.toString());
 	searchParams.append('ratings', ratings.toString());
 	searchParams.append('moves', movesToConsider.toString());
-	if (play) searchParams.append('play', play);
+	if (fen) searchParams.append('fen', fen);
 
 	// these are non-default parameters that i think should always be these values
 	// refer to https://lichess.org/api#tag/opening-explorer/GET/lichess for more info
