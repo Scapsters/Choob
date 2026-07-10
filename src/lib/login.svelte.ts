@@ -67,6 +67,7 @@ export class Login {
 		const token = this.accessContext?.token?.value;
 		this.accessContext = undefined;
 		this.error = undefined;
+		authToken.token = null;
 
 		// Example request using vanilla fetch: Revoke access token.
 		await fetch(`${lichessHost}/api/token`, {

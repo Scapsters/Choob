@@ -50,8 +50,9 @@
 
 	let studyId = $state('mzJ7q0W7');
 	let studyIsPublic = $state(true);
-	let weightCommonMove = $state(50);
-	let weightStudyMove = $state(50);
+	let weightCommonMove = $state(0);
+	$effect(() => void (weightCommonMove = authToken.token ? weightCommonMove : 0))
+	let weightStudyMove = $state(100);
 	let weightEngineMove = $state(0);
 	let weights: MoveWeight[] = $derived([
 		{
@@ -161,6 +162,7 @@
 </script>
 
 <button onclick={() => login.login()}> bello </button>
+<button onclick={() => login.logout()}> buhbye </button>
 <p><b>Access token:</b> {authToken?.token?.value || 'Not logged in'}</p>
 <ChessBoard {chess} {playOpponentMove} {addEntryToHistory} {getEngineEvaluation} {playerColor} />
 <p>
@@ -176,8 +178,8 @@
 <!-- TODO: force common/engine weight to 0 if authtoken is null, remove check in onMove -->
 <p>
 	Common move weight:
-	<input type="number" bind:value={weightCommonMove} min="0" max="100" />
-	<input type="range" bind:value={weightCommonMove} min="0" max="100" />
+	<input type="number" bind:value={weightCommonMove} min="0" max="100" disabled={!authToken.token} />
+	<input type="range" bind:value={weightCommonMove} min="0" max="100" disabled={!authToken.token} />
 </p>
 <p>
 	Engine move weight:
