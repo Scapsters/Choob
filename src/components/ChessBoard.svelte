@@ -53,7 +53,6 @@
 	import type { ChoobEvaluation } from '../lib/chess/getCloudEvaluation.ts';
 	import { getCommonMove } from '../lib/chess/getCommonMove.ts';
 	import { authToken } from '../lib/login.svelte.ts';
-	import { getUCIHistory } from '../lib/chess/chessjs-uci.ts';
 
 	let {
 		chess,
@@ -89,11 +88,19 @@
 
 	const isPlayersTurn = () => playerColor === 'w' ? 'white' : 'black' === turnColor();
 	$effect(() => {
+		const history = chess.historyVerbose()
+		const lastMove = history && history[chess.history.length - 1]
 		// https://github.com/lichess-org/chessground/blob/master/src/config.ts
 		api = Chessground(boardEl, {
 			fen: chess.fen,
 			turnColor: turnColor(),
 			orientation: playerColor === 'w' ? 'white' : 'black',
+			check: chess.chess.isCheck(),
+			lastMove: lastMove && [lastMove.from, lastMove.to],
+			highlight: {
+				lastMove: true,
+				check: true
+			},
 			movable: {
 				free: false,
 				color: isPlayersTurn() ? turnColor() : undefined,
@@ -139,5 +146,11 @@
 	.container {
 		width: 512px;
 		height: 512px;
+	}
+	:global square.last-move {
+		background-color: rgba(155, 199, 0, 0.41);
+	}
+	:global square.check {
+		background-color: rgba(20, 85, 30, 0.5);
 	}
 </style>
