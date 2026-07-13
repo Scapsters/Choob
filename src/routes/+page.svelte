@@ -25,9 +25,9 @@
 	import { getStudyMove } from '../lib/chess/getStudyMove.ts';
 	import Chooser from '../lib/external-packages/Chooser.js';
 	import { getCommonMove, type ChoobCommonMove } from '../lib/chess/getCommonMove.ts';
-	import { getUCIHistory } from '../lib/chess/chessjs-uci.ts';
 	import { getCloudEvaluation } from '../lib/chess/getCloudEvaluation.ts';
 	import { getLocalEvaluation, initializeStockfish } from '../lib/chess/getLocalEvaluation.ts';
+	import ChapterPicker, { type StudyChapter } from '../components/ChapterPicker.svelte';
 
 	let login: Login;
 	onMount(() => {
@@ -45,6 +45,7 @@
 	let playerColorChoice = $state<ColorChoice>('w');
 
 	let startingFen = $state<string>('')
+	let selectedChapter = $state<StudyChapter>()
 
 	let choobHistory = $state<ChoobHistory>([]);
 
@@ -165,10 +166,31 @@
 <button onclick={() => login.logout()}> buhbye </button>
 <p><b>Access token:</b> {authToken?.token?.value || 'Not logged in'}</p>
 <ChessBoard {chess} {playOpponentMove} {addEntryToHistory} {getEngineEvaluation} {playerColor} />
-<p>
+
+<div>
+	<label><input type="radio" bind:group={playerColorChoice} value="w" />White</label>
+	<label><input type="radio" bind:group={playerColorChoice} value="random" />Random</label>
+	<label><input type="radio" bind:group={playerColorChoice} value="b" />Black</label>
+</div>
+
+<div class="mb-4">
+	<button
+		onclick={() => {
+			chess = new SvelteChess(selectedChapter?.fen ?? startingFen)
+			choobHistory = [];
+			playerColor =
+			playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
+			if (playerColor === 'b') playOpponentMove();
+		}}>New Game</button
+	>
+</div>
+
+<div>
 	Study ID: <input bind:value={studyId} placeholder="Input study Id..." />
 	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
-</p>
+</div>
+<ChapterPicker bind:selectedChapter={selectedChapter} studyId={studyId} />
+
 
 <p>
 	Study move weight:
@@ -210,20 +232,7 @@
 
 <button onclick={() => startingFen = chess.fen}>Make current FEN starting FEN</button>
 
-<p>Color: {playerColor}</p>
-<label><input type="radio" bind:group={playerColorChoice} value="w" />White</label>
-<label><input type="radio" bind:group={playerColorChoice} value="random" />Random</label>
-<label><input type="radio" bind:group={playerColorChoice} value="b" />Black</label>
 
-<button
-	onclick={() => {
-		chess = new SvelteChess(startingFen)
-		choobHistory = [];
-		playerColor =
-			playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
-		if (playerColor === 'b') playOpponentMove();
-	}}>New Game</button
->
 
 <table>
 	<thead>

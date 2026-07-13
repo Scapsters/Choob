@@ -3,11 +3,13 @@ import type { ParseTree } from '@mliebelt/pgn-parser';
 import { Chess } from 'chess.js';
 
 const LICHESS_STUDY_URL = 'https://lichess.org/api/study/';
-const DEFAULT_FEN = makeFENMoveAgnostic('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+export const DEFAULT_FEN = makeFENMoveAgnostic('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
 
 type StudyGame = ParseTree;
 type StudyMove = ParseTree['moves'][number];
 type StudyGameTree = Omit<StudyGame, 'moves'> & { moveTree: MoveNode };
+
+export type StudyGameTags = Record<string, string | undefined> | undefined
 
 interface TreeNode<T> {
 	branches: T[];
@@ -170,7 +172,7 @@ let studyGames = new Map<string, StudyGame[]>();
  * @param apiToken required if the study is not public (private/unlisted)
  * @returns StudyGame for every chapter of the Lichess Study referred to by the given studyId
  */
-async function getStudyGames(
+export async function getStudyGames(
 	lichessStudyId: string,
 	isPublic: boolean = true,
 	apiToken?: string
@@ -228,7 +230,7 @@ let getStudyHash = (games: StudyGame[]): string => {
 			`Error getting study key, study game had length 0. Does the associated Lichess study have any chapters? games: ${games}`
 		);
 
-	const tags = games[0].tags as Record<string, string | undefined> | undefined;
+	const tags = games[0].tags as StudyGameTags;
 	if (!tags)
 		throw new Error(`Tags was undefined or falsy. Games: ${games}. Tags: ${games[0].tags}`);
 
