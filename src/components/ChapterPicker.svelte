@@ -20,7 +20,8 @@
 	let chapters: IncompleteStudyChapter[] = $state([]);
 
 	let selectedIncompleteChapter: IncompleteStudyChapter | null = $state(null);
-	let whereToPlayChapterFrom: 'start' | 'end' = $state('start');
+	let whereToPlayChapterFrom: 'start' | 'end' | 'custom' = $state('start');
+	let moveNumberToPlayChapterFrom = $state(0);
 
 	$effect(() => {
 		const updateChapters = async () => {
@@ -44,12 +45,28 @@
 
 		const startingFen = selectedIncompleteChapter.startingFen;
 
-		const endOfChapter = new Chess(startingFen);
-		selectedIncompleteChapter.pgn.forEach((move) => {
-			endOfChapter.move(move.notation.notation);
-		});
+		let fenToPlayFrom: string = startingFen;
+		switch (whereToPlayChapterFrom) {
+			case 'start':
+				fenToPlayFrom = startingFen;
+				break;
+			case 'end':
+				const endOfChapter = new Chess(startingFen);
+				selectedIncompleteChapter.pgn.forEach((move) => {
+					endOfChapter.move(move.notation.notation);
+				});
+				fenToPlayFrom = endOfChapter.fen();
+				break;
+			case 'custom':
+			default:
+				const customMove = new Chess(startingFen);
+				selectedIncompleteChapter.pgn.forEach((move, i) => {
+					if (i >= moveNumberToPlayChapterFrom) return;
+					customMove.move(move.notation.notation);
+				});
+				fenToPlayFrom = customMove.fen();
+		}
 
-		const fenToPlayFrom = whereToPlayChapterFrom === 'start' ? startingFen : endOfChapter.fen();
 		selectedChapter = { ...selectedIncompleteChapter, fenToPlayFrom };
 	});
 </script>
@@ -57,20 +74,36 @@
 <div>
 	<div>
 		<p>Select Study Chapter for Starting FEN</p>
-		<label for="start">Use Start</label><input
-			bind:group={whereToPlayChapterFrom}
-			id="start"
-			value="start"
-			type="radio"
-			name="fenSide"
-		/>
-		<label for="end">Use End</label><input
-			bind:group={whereToPlayChapterFrom}
-			id="end"
-			value="end"
-			type="radio"
-			name="fenSide"
-		/>
+		<div>
+			<label for="start">Use Start</label><input
+				bind:group={whereToPlayChapterFrom}
+				id="start"
+				value="start"
+				type="radio"
+				name="fenSide"
+			/>
+			<label class="pl-3 pr-1" for="end">Use End</label><input
+				bind:group={whereToPlayChapterFrom}
+				id="end"
+				value="end"
+				type="radio"
+				name="fenSide"
+			/>
+			<label class="pl-3 pr-1" for="custom">Use Move Number</label><input
+				bind:group={whereToPlayChapterFrom}
+				id="custom"
+				value="custom"
+				type="radio"
+				name="fenSide"
+			/>
+			<input
+				bind:value={moveNumberToPlayChapterFrom}
+				id="customValue"
+				type="number"
+				class="border-1 border-slate-200 w-11 disabled:text-slate-400"
+				disabled={whereToPlayChapterFrom !== 'custom'}
+			/>
+		</div>
 	</div>
 	<div class="p-1 h-28 w-70 overflow-y-scroll">
 		{#each chapters as chapter (chapter)}
