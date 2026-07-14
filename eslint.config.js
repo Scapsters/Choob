@@ -44,6 +44,7 @@ export default defineConfig(
 			'@typescript-eslint/ban-ts-comment': 'off',
 			'no-case-declarations': 'off',
 			'no-fallthrough': 'off',
+			'no-useless-assignment': 'off',
 		}
 	}
 );

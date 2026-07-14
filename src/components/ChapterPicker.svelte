@@ -16,7 +16,6 @@
 	import { Chess } from 'chess.js';
 
 	let { studyId, selectedChapter = $bindable() }: { studyId: string; selectedChapter?: StudyChapter } = $props();
-	void selectedChapter; // shut up eslint
 
 	let chapters: IncompleteStudyChapter[] = $state([]);
 
