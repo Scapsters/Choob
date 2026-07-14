@@ -2,7 +2,7 @@
 	type IncompleteStudyChapter = {
 		name: string;
 		startingFen: string;
-        pgn: ParseTree["moves"];
+		pgn: ParseTree['moves'];
 	};
 	export type StudyChapter = IncompleteStudyChapter & {
 		fenToPlayFrom: string;
@@ -15,11 +15,8 @@
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 	import { Chess } from 'chess.js';
 
-	let {
-		studyId,
-		selectedChapter = $bindable()
-	}: { studyId: string; selectedChapter?: StudyChapter } = $props();
-    void selectedChapter // shut up eslint
+	let { studyId, selectedChapter = $bindable() }: { studyId: string; selectedChapter?: StudyChapter } = $props();
+	void selectedChapter; // shut up eslint
 
 	let chapters: IncompleteStudyChapter[] = $state([]);
 
@@ -35,7 +32,7 @@
 				study?.map((chapter) => {
 					const name = (chapter.tags as StudyGameTags)?.['ChapterName'];
 					const startingFen = chapter.tags?.FEN ?? DEFAULT_FEN;
-                    if (!name || !startingFen)
+					if (!name || !startingFen)
 						throw new Error(`studyId ${studyId} was missing name or fen: ${name}, ${startingFen}`);
 					return { name, startingFen, pgn: chapter.moves };
 				}) || [];
@@ -46,13 +43,13 @@
 	$effect(() => {
 		if (!selectedIncompleteChapter) return;
 
-        const startingFen = selectedIncompleteChapter.startingFen
-        
-        const endOfChapter = new Chess(startingFen)
-        selectedIncompleteChapter.pgn.forEach(move => {
-            endOfChapter.move(move.notation.notation)
-        })
-        
+		const startingFen = selectedIncompleteChapter.startingFen;
+
+		const endOfChapter = new Chess(startingFen);
+		selectedIncompleteChapter.pgn.forEach((move) => {
+			endOfChapter.move(move.notation.notation);
+		});
+
 		const fenToPlayFrom = whereToPlayChapterFrom === 'start' ? startingFen : endOfChapter.fen();
 		selectedChapter = { ...selectedIncompleteChapter, fenToPlayFrom };
 	});
@@ -62,14 +59,14 @@
 	<div>
 		<p>Select Study Chapter for Starting FEN</p>
 		<label for="start">Use Start</label><input
-        bind:group={whereToPlayChapterFrom}
+			bind:group={whereToPlayChapterFrom}
 			id="start"
 			value="start"
 			type="radio"
 			name="fenSide"
 		/>
 		<label for="end">Use End</label><input
-        bind:group={whereToPlayChapterFrom}
+			bind:group={whereToPlayChapterFrom}
 			id="end"
 			value="end"
 			type="radio"
@@ -80,13 +77,7 @@
 		{#each chapters as chapter (chapter)}
 			{const name = chapter.name}
 			<div>
-				<input
-					id={name}
-					name="chapterSelect"
-					type="radio"
-					bind:group={selectedIncompleteChapter}
-					value={chapter}
-				/>
+				<input id={name} name="chapterSelect" type="radio" bind:group={selectedIncompleteChapter} value={chapter} />
 				<label for={name}>{name}</label>
 			</div>
 		{/each}

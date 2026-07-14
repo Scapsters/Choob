@@ -2,11 +2,9 @@ import type { ChoobEvaluation } from './getCloudEvaluation';
 
 // https://stackoverflow.com/a/68945416
 const wasmSupported =
-	typeof WebAssembly === 'object' &&
-	WebAssembly.validate(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
+	typeof WebAssembly === 'object' && WebAssembly.validate(Uint8Array.of(0x0, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00));
 const stockfish =
-	typeof window !== 'undefined' &&
-	new Worker(wasmSupported ? 'stockfish/stockfish.wasm.js' : 'stockfish/stockfish.js');
+	typeof window !== 'undefined' && new Worker(wasmSupported ? 'stockfish/stockfish.wasm.js' : 'stockfish/stockfish.js');
 
 export const evalCache = new Map<string, object>();
 
@@ -91,10 +89,7 @@ export async function initializeStockfish() {
 export async function getLocalEvaluation(fen: string, depth: number): Promise<ChoobEvaluation> {
 	const blackToMove = fen.split(' ')[1] === 'b';
 
-	const data = await waitForResponse(
-		[`position fen ${fen}`, `go depth ${depth}`],
-		['score', 'bestmove']
-	);
+	const data = await waitForResponse([`position fen ${fen}`, `go depth ${depth}`], ['score', 'bestmove']);
 
 	const scoreParts = data.get('score')!.split(' ');
 	const scoreIndex = scoreParts.findIndex((part) => part === 'score');

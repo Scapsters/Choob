@@ -58,16 +58,16 @@
 	let weights: MoveWeight[] = $derived([
 		{
 			type: 'study',
-			weight: weightStudyMove
+			weight: weightStudyMove,
 		},
 		{
 			type: 'common',
-			weight: weightCommonMove
+			weight: weightCommonMove,
 		},
 		{
 			type: 'engine (C)',
-			weight: weightEngineMove
-		}
+			weight: weightEngineMove,
+		},
 	]);
 	let localEvalDepth = $state(14);
 
@@ -97,22 +97,19 @@
 		return cloudEval ?? localEval;
 	};
 
-	const makeAndRecordMove = async (
-		move: string | { from: string; to: string },
-		source: MoveType
-	) => {
+	const makeAndRecordMove = async (move: string | { from: string; to: string }, source: MoveType) => {
 		chess.move(move);
 		const history = chess.chess.history();
 		const engine = getEngineEvaluation(chess.fen);
 		const common = getCommonMove({
 			apiToken: authToken?.token?.value,
-			fen: chess.fen
+			fen: chess.fen,
 		});
 		addEntryToHistory(chess.turn === 'w' ? 'b' : 'w', {
 			...(await engine),
 			san: history[history.length - 1],
 			moveSource: source,
-			winPercents: (await common)?.winPercents
+			winPercents: (await common)?.winPercents,
 		});
 	};
 
@@ -121,7 +118,7 @@
 		// (even if we use a study move, we want to track the win percent/centipawns)
 		const common = getCommonMove({
 			apiToken: authToken?.token?.value,
-			fen: chess.fen
+			fen: chess.fen,
 		});
 		engine ??= getEngineEvaluation(chess.fen);
 
@@ -129,15 +126,9 @@
 			case 'study':
 				if (enabledStudyMove) {
 					console.log('Trying study move');
-					let studyMoves = await getStudyMove(
-						studyId,
-						chess.fen,
-						authToken?.token?.value,
-						studyIsPublic
-					);
+					let studyMoves = await getStudyMove(studyId, chess.fen, authToken?.token?.value, studyIsPublic);
 					if (studyMoves?.length) {
-						let studyMove =
-							studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
+						let studyMove = studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
 						console.log(`Using study move: ${JSON.stringify(studyMove)}`);
 						makeAndRecordMove(studyMove, 'study');
 						break;
@@ -192,8 +183,7 @@
 		onclick={() => {
 			chess = new SvelteChess(selectedChapter?.fenToPlayFrom ?? startingFen);
 			choobHistory = [];
-			playerColor =
-				playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
+			playerColor = playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
 			if (playerColor === 'b') playOpponentMove();
 		}}>New Game</button
 	>
@@ -218,20 +208,8 @@
 		<div>
 			<input type="checkbox" bind:checked={enabledCommonMove} />
 			Common move weight:
-			<input
-				type="number"
-				bind:value={weightCommonMove}
-				min="0"
-				max="100"
-				disabled={!authToken.token}
-			/>
-			<input
-				type="range"
-				bind:value={weightCommonMove}
-				min="0"
-				max="100"
-				disabled={!authToken.token}
-			/>
+			<input type="number" bind:value={weightCommonMove} min="0" max="100" disabled={!authToken.token} />
+			<input type="range" bind:value={weightCommonMove} min="0" max="100" disabled={!authToken.token} />
 		</div>
 		<div>
 			<input type="checkbox" bind:checked={enabledEngineMove} />
@@ -249,11 +227,7 @@
 </div>
 
 <button
-	onclick={() =>
-		window.open(
-			`https://lichess.org/analysis/pgn/${encodeURIComponent(chess.chess.pgn())}`,
-			'_blank'
-		)}
+	onclick={() => window.open(`https://lichess.org/analysis/pgn/${encodeURIComponent(chess.chess.pgn())}`, '_blank')}
 >
 	Lichess Button
 </button>

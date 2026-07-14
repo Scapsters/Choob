@@ -31,8 +31,7 @@ Chooser.chooseWeightedIndex = (weights, seed = Math.random(), defaultWeight = 1)
 	// For example, if the weights are [5, 30, 10], this would build an array
 	// containing [5, 35, 45], and cumulative=45.
 	const ranges = weights.map(
-		(weight) =>
-			(cumulative += typeof weight === 'number' && weight >= 0 ? Math.abs(weight) : defaultWeight)
+		(weight) => (cumulative += typeof weight === 'number' && weight >= 0 ? Math.abs(weight) : defaultWeight)
 	);
 	// Select our value.
 	const selectedValue = Math.random() * cumulative;

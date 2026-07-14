@@ -24,7 +24,7 @@ export class Login {
 			onAccessTokenExpiry: (refreshAccessToken) => refreshAccessToken(),
 			onInvalidGrant: (_retry) => {
 				this.error = new Error('Invalid Grant!');
-			}
+			},
 		});
 	}
 
@@ -73,8 +73,8 @@ export class Login {
 		await fetch(`${lichessHost}/api/token`, {
 			method: 'DELETE',
 			headers: {
-				Authorization: `Bearer ${token}`
-			}
+				Authorization: `Bearer ${token}`,
+			},
 		});
 	}
 }

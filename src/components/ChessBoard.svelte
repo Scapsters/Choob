@@ -8,12 +8,12 @@
 		fen = $state(this.chess.fen());
 		turn = $state(this.chess.turn());
 		history = $state(this.chess.history());
-		
+
 		constructor(fen?: string) {
-			this.chess = new Chess(fen || undefined) // don't take empty string
-			this.fen = this.chess.fen()
-			this.turn = this.chess.turn()
-			this.history = this.chess.history()
+			this.chess = new Chess(fen || undefined); // don't take empty string
+			this.fen = this.chess.fen();
+			this.turn = this.chess.turn();
+			this.history = this.chess.history();
 		}
 
 		/**
@@ -59,7 +59,7 @@
 		playOpponentMove,
 		addEntryToHistory,
 		getEngineEvaluation,
-		playerColor
+		playerColor,
 	}: {
 		chess: SvelteChess;
 		playOpponentMove: (evaluation?: Promise<ChoobEvaluation>) => void;
@@ -86,10 +86,10 @@
 		return destinationLists;
 	}
 
-	const isPlayersTurn = () => playerColor === 'w' ? 'white' : 'black' === turnColor();
+	const isPlayersTurn = () => (playerColor === 'w' ? 'white' : 'black' === turnColor());
 	$effect(() => {
-		const history = chess.historyVerbose()
-		const lastMove = history && history[chess.history.length - 1]
+		const history = chess.historyVerbose();
+		const lastMove = history && history[chess.history.length - 1];
 		// https://github.com/lichess-org/chessground/blob/master/src/config.ts
 		api = Chessground(boardEl, {
 			fen: chess.fen,
@@ -99,7 +99,7 @@
 			lastMove: lastMove && [lastMove.from, lastMove.to],
 			highlight: {
 				lastMove: true,
-				check: true
+				check: true,
 			},
 			movable: {
 				free: false,
@@ -115,26 +115,26 @@
 							turnColor: turnColor(),
 							lastMove: [from, to],
 							movable: { color: isPlayersTurn() ? turnColor() : undefined, dests: getDestinations() },
-							check: chess.chess.isCheck()
+							check: chess.chess.isCheck(),
 						});
 						chess.updateSnapshot();
 
 						const evaluation = getEngineEvaluation(chess.chess.fen());
 						const common = getCommonMove({
 							apiToken: authToken?.token?.value,
-							fen: chess.fen
+							fen: chess.fen,
 						});
 						const history = chess.chess.history();
 						addEntryToHistory(turnColor() === 'white' ? 'b' : 'w', {
 							...(await evaluation),
 							san: history[history.length - 1],
 							moveSource: 'player',
-							winPercents: (await common)?.winPercents
+							winPercents: (await common)?.winPercents,
 						});
 						playOpponentMove(evaluation);
-					}
-				}
-			}
+					},
+				},
+			},
 		});
 		return () => api.destroy();
 	});

@@ -7,7 +7,5 @@ import type { Move } from 'chess.js';
  * @param chess the SvelteChess object to extract history from
  */
 export function getUCIHistory(chess: SvelteChess): string {
-	return (chess.historyVerbose() as Move[])
-		.map((move) => move.from + move.to + (move.promotion || ''))
-		.join(',');
+	return (chess.historyVerbose() as Move[]).map((move) => move.from + move.to + (move.promotion || '')).join(',');
 }

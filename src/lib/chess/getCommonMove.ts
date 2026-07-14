@@ -29,7 +29,7 @@ export async function getCommonMove({
 	ratings = ['0', '1000', '1200', '1400', '1600', '1800', '2000', '2200', '2500'],
 	movesToConsider = 12,
 	speeds = ['ultraBullet', 'bullet', 'blitz', 'rapid', 'classical', 'correspondence'],
-	fen
+	fen,
 }: {
 	apiToken?: string;
 	ratings?: LichessRating[];
@@ -52,8 +52,8 @@ export async function getCommonMove({
 
 	const response = await fetch(`${LICHESS_EXPLORER_URL}?${searchParams.toString()}`, {
 		headers: {
-			Authorization: `Bearer ${apiToken}`
-		}
+			Authorization: `Bearer ${apiToken}`,
+		},
 	});
 	const body = await response.json();
 	const movesResponse = body['moves'];
@@ -63,12 +63,10 @@ export async function getCommonMove({
 		san: string;
 		weight: number;
 	};
-	const weightedMoves: WeightedMove[] = movesResponse.map(
-		(item: { [x: string]: string | number }) => ({
-			san: item['san'],
-			weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number)
-		})
-	);
+	const weightedMoves: WeightedMove[] = movesResponse.map((item: { [x: string]: string | number }) => ({
+		san: item['san'],
+		weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number),
+	}));
 	const move = (Chooser.chooseWeightedObject(weightedMoves) as WeightedMove).san;
 
 	const { white, draws, black } = body;
@@ -78,7 +76,7 @@ export async function getCommonMove({
 			? {
 					white: white / sum,
 					draws: draws / sum,
-					black: black / sum
+					black: black / sum,
 				}
 			: undefined;
 

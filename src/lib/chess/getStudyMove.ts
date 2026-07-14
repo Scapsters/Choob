@@ -9,7 +9,7 @@ type StudyGame = ParseTree;
 type StudyMove = ParseTree['moves'][number];
 type StudyGameTree = Omit<StudyGame, 'moves'> & { moveTree: MoveNode };
 
-export type StudyGameTags = Record<string, string | undefined> | undefined
+export type StudyGameTags = Record<string, string | undefined> | undefined;
 
 interface TreeNode<T> {
 	branches: T[];
@@ -65,7 +65,7 @@ function convertStudyGameToTree(studyGame: StudyGame): StudyGameTree {
 
 	return {
 		...studyGame,
-		moveTree: convertStudyMoveToTree(studyGame.moves)
+		moveTree: convertStudyMoveToTree(studyGame.moves),
 	};
 }
 
@@ -98,9 +98,7 @@ function mapTreePassParents<R extends TreeNode<R>, T extends TreeNode<T>>(
 	func: (node: T, parents: T[], mappedBranches: R[]) => R,
 	parents: T[] = []
 ): R {
-	const mappedBranches = node.branches.map((branch) =>
-		mapTreePassParents(branch, func, [...parents, node])
-	);
+	const mappedBranches = node.branches.map((branch) => mapTreePassParents(branch, func, [...parents, node]));
 	return func(node, parents, mappedBranches);
 }
 
@@ -138,7 +136,7 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 			(node, parentMoves, mappedBranches): MoveNodeWithFEN => ({
 				...node,
 				branches: mappedBranches,
-				fen: makeFENMoveAgnostic(createBoard(game.tags?.FEN, [...parentMoves, node]).fen())
+				fen: makeFENMoveAgnostic(createBoard(game.tags?.FEN, [...parentMoves, node]).fen()),
 			})
 		)
 	);
@@ -147,9 +145,8 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 	moveTreesWithFEN.forEach((root, i) =>
 		traverseTreePassParents(root, (node, parentMoves) => {
 			const fen = makeFENMoveAgnostic(
-				(parentMoves.length === 0
-					? studyGameTrees[i].tags?.FEN
-					: parentMoves[parentMoves.length - 1].fen) ?? DEFAULT_FEN
+				(parentMoves.length === 0 ? studyGameTrees[i].tags?.FEN : parentMoves[parentMoves.length - 1].fen) ??
+					DEFAULT_FEN
 			);
 
 			const existingNextMoveSet = FENAssociations.get(fen);
@@ -199,12 +196,9 @@ export async function getStudyGames(
 	searchParams.append('variations', 'true');
 	searchParams.append('orientation', 'false');
 
-	const response = await fetch(
-		`${LICHESS_STUDY_URL}${lichessStudyId}.pgn?${searchParams.toString()}`,
-		{
-			headers: headers
-		}
-	);
+	const response = await fetch(`${LICHESS_STUDY_URL}${lichessStudyId}.pgn?${searchParams.toString()}`, {
+		headers: headers,
+	});
 
 	if (response.status !== 200) {
 		return null;
@@ -231,12 +225,10 @@ let getStudyHash = (games: StudyGame[]): string => {
 		);
 
 	const tags = games[0].tags as StudyGameTags;
-	if (!tags)
-		throw new Error(`Tags was undefined or falsy. Games: ${games}. Tags: ${games[0].tags}`);
+	if (!tags) throw new Error(`Tags was undefined or falsy. Games: ${games}. Tags: ${games[0].tags}`);
 
 	const attributes = [tags['StudyName'], tags['UTCDate'], tags['UTCTime']];
-	if (attributes.some((v) => !v))
-		throw new Error(`Tag attribute was undefined or falsy: values: ${attributes}`);
+	if (attributes.some((v) => !v)) throw new Error(`Tag attribute was undefined or falsy: values: ${attributes}`);
 
 	return attributes.join();
 };
@@ -260,7 +252,7 @@ function prepareStudy(games: StudyGame[]): {
 	// cache
 	preparedStudies.set(getStudyHash(games), {
 		studyGameTrees,
-		fenAssociationMap
+		fenAssociationMap,
 	});
 
 	return { studyGameTrees, fenAssociationMap };
