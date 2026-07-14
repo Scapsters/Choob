@@ -50,7 +50,7 @@
 
 	let choobHistory = $state<ChoobHistory>([]);
 
-	type StudyState = 'valid' | 'invalid' | 'loading'
+	type StudyState = 'valid' | 'invalid' | 'loading';
 	let studyId = $state('');
 	let studyIsPublic = $state(true);
 	$effect(() => void (weightCommonMove = authToken.token ? weightCommonMove : 0));
@@ -58,7 +58,7 @@
 	function validateStudyId() {
 		studyValidity = 'loading';
 		getStudyGames(studyId, studyIsPublic, authToken?.token?.value).then((games) => {
-			if(games?.length) {
+			if (games?.length) {
 				studyValidity = 'valid';
 			} else {
 				studyValidity = 'invalid';
@@ -66,12 +66,12 @@
 		});
 	}
 	onMount(() => {
-		const savedStudyId = window.localStorage.getItem('studyId')
-		if (savedStudyId) studyId = savedStudyId
-	})
+		const savedStudyId = window.localStorage.getItem('studyId');
+		if (savedStudyId) studyId = savedStudyId;
+	});
 	$effect(() => {
-		window.localStorage.setItem('studyId', studyId)
-	})
+		window.localStorage.setItem('studyId', studyId);
+	});
 
 	let weightCommonMove = $state(20);
 	let weightStudyMove = $state(80);
@@ -220,7 +220,7 @@
 <div>
 	Study ID: <input bind:value={studyId} placeholder="Input study Id..." oninput={validateStudyId} />
 	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
-	<br>
+	<br />
 	{studyValidity}
 </div>
 <ChapterPicker bind:selectedChapter {studyId} />
