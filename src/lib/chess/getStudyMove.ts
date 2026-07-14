@@ -16,7 +16,7 @@ interface TreeNode<T> {
 }
 type MoveNode = Omit<StudyMove, 'variations'> & TreeNode<MoveNode>;
 // A MoveNode, except with a fen. Is not `MoveNode & fen` because TreeNode's subtype also needs to have a fen
-type MoveNodeWithFEN = TreeNode<MoveNodeWithFEN> & Omit<StudyMove, 'variations'> & { fen: string };
+export type MoveNodeWithFEN = TreeNode<MoveNodeWithFEN> & Omit<StudyMove, 'variations'> & { fen: string };
 
 /**
  * Saves all immediately proceeding moves (across variations and mainline) in the `branches` property for each node in the given mainline.
@@ -141,7 +141,7 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 		)
 	);
 
-	const FENAssociations = new Map<string, MoveNode[]>();
+	const FENAssociationMap = new Map<string, MoveNode[]>();
 	moveTreesWithFEN.forEach((root, i) =>
 		traverseTreePassParents(root, (node, parentMoves) => {
 			const fen = makeFENMoveAgnostic(
@@ -149,16 +149,16 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 					DEFAULT_FEN
 			);
 
-			const existingNextMoveSet = FENAssociations.get(fen);
-			if (!existingNextMoveSet) FENAssociations.set(fen, []);
+			const existingNextMoveSet = FENAssociationMap.get(fen);
+			if (!existingNextMoveSet) FENAssociationMap.set(fen, []);
 
 			// very specific, don't add nodes that correspond to empty chapters to the initial fen's association map
 			if (node.notation) {
-				FENAssociations.get(fen)!.push(node);
+				FENAssociationMap.get(fen)!.push(node);
 			}
 		})
 	);
-	return FENAssociations;
+	return { FENAssociationMap, moveTreesWithFEN };
 }
 
 let studyGames = new Map<string, StudyGame[]>();
@@ -213,7 +213,7 @@ export async function getStudyGames(
 }
 
 /**
- * Hashes a Lichess Study by its "StudyName" field and its "UTCDate" and "UTCTime".
+ * Hashes a Lichess Study by its "StudyName" field, its "ChapterName", and its "UTCDate" and "UTCTime".
  * Some of these are a Lichess-specific tags.
  * @throws If there are no chapters or if any tags do not exist.
  * @param games An array of StudyGames representing a collection of Lichess Study Chapters.
@@ -227,7 +227,7 @@ let getStudyHash = (games: StudyGame[]): string => {
 	const tags = games[0].tags as StudyGameTags;
 	if (!tags) throw new Error(`Tags was undefined or falsy. Games: ${games}. Tags: ${games[0].tags}`);
 
-	const attributes = [tags['StudyName'], tags['UTCDate'], tags['UTCTime']];
+	const attributes = [tags['StudyName'], tags['UTCDate'], tags['UTCTime'], tags['ChapterName']];
 	if (attributes.some((v) => !v)) throw new Error(`Tag attribute was undefined or falsy: values: ${attributes}`);
 
 	return attributes.join();
@@ -238,24 +238,26 @@ let preparedStudies = new Map<string, ReturnType<typeof prepareStudy>>();
  * Mutates the given array of study games and returns a FEN association map. See {@link createFENAssociationMap}
  * @param games An array of StudyGames representing a collection of Lichess Study Chapters.
  */
-function prepareStudy(games: StudyGame[]): {
+export function prepareStudy(games: StudyGame[]): {
 	studyGameTrees: StudyGameTree[];
-	fenAssociationMap: Map<string, MoveNode[]>;
+	FENAssociationMap: Map<string, MoveNode[]>;
+	moveTreesWithFEN: MoveNodeWithFEN[];
 } {
 	// check cache
 	let preparedStudy = preparedStudies.get(getStudyHash(games));
 	if (preparedStudy) return preparedStudy;
 
 	const studyGameTrees = games.map((game) => convertStudyGameToTree(game));
-	const fenAssociationMap = createFENAssociationMap(studyGameTrees);
+	const { FENAssociationMap, moveTreesWithFEN } = createFENAssociationMap(studyGameTrees);
 
 	// cache
 	preparedStudies.set(getStudyHash(games), {
 		studyGameTrees,
-		fenAssociationMap,
+		FENAssociationMap,
+		moveTreesWithFEN,
 	});
 
-	return { studyGameTrees, fenAssociationMap };
+	return { studyGameTrees, FENAssociationMap, moveTreesWithFEN };
 }
 
 /**
@@ -275,7 +277,7 @@ export async function getStudyMove(
 	const games = await getStudyGames(lichessStudyId, isPublic, authToken);
 	if (!games?.length) return;
 	const preparedStudy = prepareStudy(games);
-	return preparedStudy.fenAssociationMap.get(makeFENMoveAgnostic(currentFEN));
+	return preparedStudy.FENAssociationMap.get(makeFENMoveAgnostic(currentFEN));
 }
 
 // const chess = new Chess();

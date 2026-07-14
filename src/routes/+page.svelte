@@ -22,12 +22,13 @@
 	import { onMount } from 'svelte';
 	import { SvelteURL } from 'svelte/reactivity';
 	import type { Color } from 'chess.js';
-	import { getStudyMove, getStudyGames } from '../lib/chess/getStudyMove.ts';
+	import { getStudyMove, getStudyGames, DEFAULT_FEN } from '../lib/chess/getStudyMove.ts';
 	import Chooser from '../lib/external-packages/Chooser.js';
 	import { getCommonMove, type ChoobCommonMove } from '../lib/chess/getCommonMove.ts';
 	import { getCloudEvaluation } from '../lib/chess/getCloudEvaluation.ts';
 	import { getLocalEvaluation, initializeStockfish } from '../lib/chess/getLocalEvaluation.ts';
 	import ChapterPicker, { type StudyChapter } from '../components/ChapterPicker.svelte';
+	import MoveSearch from '../components/MoveSearch.svelte';
 
 	let login: Login;
 	onMount(() => {
@@ -185,6 +186,15 @@
 				}
 		}
 	});
+
+	function resetBoard(fen?: string) {
+		chess = new SvelteChess(fen ?? DEFAULT_FEN);
+		choobHistory = [];
+	}
+	function restartGame() {
+		playerColor = playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
+		if (playerColor === 'b') playOpponentMove();
+	}
 </script>
 
 <button onclick={() => login.login()}> bello </button>
@@ -201,10 +211,8 @@
 <div class="mb-4">
 	<button
 		onclick={() => {
-			chess = new SvelteChess(selectedChapter?.fenToPlayFrom ?? startingFen);
-			choobHistory = [];
-			playerColor = playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
-			if (playerColor === 'b') playOpponentMove();
+			resetBoard(selectedChapter?.fenToPlayFrom ?? startingFen);
+			restartGame();
 		}}>New Game</button
 	>
 </div>
@@ -247,6 +255,9 @@
 		</div>
 	</div>
 </div>
+
+<MoveSearch {studyId} {resetBoard} />
+<br />
 
 <button
 	onclick={() => window.open(`https://lichess.org/analysis/pgn/${encodeURIComponent(chess.chess.pgn())}`, '_blank')}
