@@ -203,7 +203,7 @@
 </div>
 
 <div>
-	Study ID: <input bind:value={studyId} placeholder="Input study Id..." />
+	Study ID: <input bind:value={studyId} placeholder="Input study Id..." oninput={validateStudyId} />
 	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
 	<br>
 	{studyValidity}
