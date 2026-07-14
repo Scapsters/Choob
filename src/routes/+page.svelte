@@ -176,7 +176,7 @@
 <div class="mb-4">
 	<button
 		onclick={() => {
-			chess = new SvelteChess(selectedChapter?.fen ?? startingFen)
+			chess = new SvelteChess(selectedChapter?.fenToPlayFrom ?? startingFen)
 			choobHistory = [];
 			playerColor =
 			playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
