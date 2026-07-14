@@ -29,6 +29,11 @@ export class Login {
 	}
 
 	async login() {
+		// Redirect to authentication prompt.
+		await this.oauth.fetchAuthorizationCode();
+	}
+
+	async init() {
 		// check cache
 		const JSONifiedAuthContainer = window.localStorage.getItem('lichess-auth-token');
 		if (JSONifiedAuthContainer) {
@@ -39,12 +44,7 @@ export class Login {
 				return;
 			}
 		}
-
-		// Redirect to authentication prompt.
-		await this.oauth.fetchAuthorizationCode();
-	}
-
-	async init() {
+		
 		try {
 			const hasAuthCode = await this.oauth.isReturningFromAuthServer();
 			if (hasAuthCode) {
