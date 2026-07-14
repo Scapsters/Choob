@@ -64,6 +64,13 @@
 			}
 		});
 	}
+	onMount(() => {
+		const savedStudyId = window.localStorage.getItem('studyId')
+		if (savedStudyId) studyId = savedStudyId
+	})
+	$effect(() => {
+		window.localStorage.setItem('studyId', studyId)
+	})
 
 	let weightCommonMove = $state(20);
 	let weightStudyMove = $state(80);
