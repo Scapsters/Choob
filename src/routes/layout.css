@@ -8,4 +8,7 @@
     input[type="number"] {
         @apply pl-1 border-1 border-slate-100 w-11 disabled:text-slate-400
     }
+    input[type="text"] {
+        @apply border-1 border-slate-200
+    }
 }

@@ -64,14 +64,13 @@
 	id="moveSearch"
 	type="text"
 	bind:value={moveToSearch}
-	class="border-1 border-slate-200"
 />
 <div class="h-30 w-80 flex flex-col gap-1 text-left overflow-y-scroll items-start">
 	{#each foundChaptersWithMove as chapter (chapter)}
 		{@const name = (chapter.tags as StudyGameTags)?.['ChapterName']}
 		<button
-			class="hover:bg-slate-200 w-full text-left"
-			onclick={() => resetBoard(chapter.moveBefore?.fen ?? chapter.tags?.FEN)}>{name}</button
+			class="w-full text-left"
+			onclick={() => resetBoard(chapter.matchingMove?.fen ?? chapter.tags?.FEN)}>{name}</button
 		>
 	{/each}
 </div>
