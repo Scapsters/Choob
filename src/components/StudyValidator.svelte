@@ -30,6 +30,9 @@
 <div>
 	Study ID: <input bind:value={studyId} placeholder="Input study Id..." class="w-24"/>
 	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
-	<br />
+	<button onclick={() => {
+        const games = getStudyGames(studyId, studyIsPublic, authToken?.token?.value)
+		window.localStorage.setItem(studyId, JSON.stringify(games))
+    }}>Save current study</button>
 	{studyValidity}
 </div>

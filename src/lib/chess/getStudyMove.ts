@@ -174,9 +174,13 @@ export async function getStudyGames(
 	isPublic: boolean = true,
 	apiToken?: string
 ): Promise<StudyGame[] | null> {
-	// check cache
+	// check in-memory cache
 	let studyGame = studyGames.get(lichessStudyId);
 	if (studyGame) return studyGame;
+
+	// check browser storage
+	let storedStudyGame = window.localStorage.getItem(lichessStudyId)
+	if (storedStudyGame) return JSON.parse(storedStudyGame)
 
 	let searchParams = new URLSearchParams();
 
