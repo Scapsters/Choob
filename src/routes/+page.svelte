@@ -1,36 +1,34 @@
 <script module>
 	import type { ChoobEvaluation } from '../lib/chess/getCloudEvaluation.ts';
 
-	export type MoveType = 'study' | 'common' | 'engine (C)' | 'engine (L)' | 'player';
-	export type MoveWeight = {
-		type: MoveType;
-		weight: number;
-	};
-	export type ChoobHistoryEntry = ChoobEvaluation & {
+	
+	export type ChoobHistoryEntry = Partial<ChoobEvaluation> & {
 		san: string;
 		moveSource: MoveType;
 		winPercents?: ChoobCommonMove['winPercents'];
 	};
 	export type ChoobHistory = [ChoobHistoryEntry, ChoobHistoryEntry | null][];
+
+	export const ssr = false;
+	export const prerender = false;
 </script>
 
 <script lang="ts">
 	import 'svelte5-chessground/style.css';
-	import ChessBoard, { SvelteChess } from '../components/ChessBoard.svelte';
+	import ChessBoard, { SvelteChess, type onMoveHandler } from '../components/ChessBoard.svelte';
 	import { Login, authToken } from '../lib/login.svelte.ts';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { SvelteURL } from 'svelte/reactivity';
 	import type { Color } from 'chess.js';
-	import { getStudyMove, getStudyGames, DEFAULT_FEN } from '../lib/chess/getStudyMove.ts';
-	import Chooser from '../lib/external-packages/Chooser.js';
+	import { DEFAULT_FEN } from '../lib/chess/getStudyMove.ts';
 	import { getCommonMove, type ChoobCommonMove } from '../lib/chess/getCommonMove.ts';
-	import { getCloudEvaluation } from '../lib/chess/getCloudEvaluation.ts';
-	import { getLocalEvaluation, initializeStockfish } from '../lib/chess/getLocalEvaluation.ts';
 	import ChapterPicker, { type StudyChapter } from '../components/ChapterPicker.svelte';
 	import MoveSearch from '../components/MoveSearch.svelte';
 	import type { StudyValidity } from '../components/StudyValidator.svelte';
 	import StudyValidator from '../components/StudyValidator.svelte';
+	import Choobser, { type ChessMove, type MoveType } from '../components/Choobser.svelte';
+	
 
 	let login: Login;
 	onMount(() => {
@@ -38,8 +36,6 @@
 		url.search = '';
 		login = new Login(url.href);
 		login.init();
-
-		initializeStockfish();
 	});
 
 	let chess = $state(new SvelteChess());
@@ -51,13 +47,13 @@
 	let selectedChapter = $state<StudyChapter>();
 
 	let choobHistory = $state<ChoobHistory>([]);
-
+	
 	let studyValidity: StudyValidity = $state('invalid');
 	
 
 	let studyId = $state('');
 	let studyIsPublic = $state(true);
-	$effect(() => void (weightCommonMove = authToken.token ? weightCommonMove : 0));
+	
 	onMount(() => {
 		const savedStudyId = window.localStorage.getItem('studyId');
 		if (savedStudyId) studyId = savedStudyId;
@@ -66,29 +62,7 @@
 		window.localStorage.setItem('studyId', studyId);
 	});
 
-	let weightCommonMove = $state(20);
-	let weightStudyMove = $state(80);
-	let weightEngineMove = $state(0);
-	let weights: MoveWeight[] = $derived([
-		{
-			type: 'study',
-			weight: weightStudyMove,
-		},
-		{
-			type: 'common',
-			weight: weightCommonMove,
-		},
-		{
-			type: 'engine (C)',
-			weight: weightEngineMove,
-		},
-	]);
-	let localEvalDepth = $state(14);
-
-	let enabledCommonMove = $state(true);
-	let enabledStudyMove = $state(true);
-	let enabledEngineMove = $state(true);
-	let enabledLocalEngine = $state(true);
+	
 
 	/**
 	 * Add entry to history based on color. "white" creates a new move and
@@ -105,16 +79,13 @@
 		}
 	};
 
-	const getEngineEvaluation = async (fen: string): Promise<ChoobEvaluation> => {
-		const localEval = getLocalEvaluation(fen, localEvalDepth);
-		const cloudEval = await getCloudEvaluation(fen, authToken?.token?.value);
-		return cloudEval ?? localEval;
-	};
-
-	const makeAndRecordMove = async (move: string | { from: string; to: string }, source: MoveType) => {
+	
+	type MaybeGetEngineEvaluation = ((fen: string) => Promise<ChoobEvaluation>) | null
+	let getEngineEvaluation: MaybeGetEngineEvaluation = $state(null)
+	const makeAndRecordMove = async (move: ChessMove, source: MoveType) => {
 		chess.move(move);
 		const history = chess.chess.history();
-		const engine = getEngineEvaluation(chess.fen);
+		const engine = (getEngineEvaluation as MaybeGetEngineEvaluation)?.(chess.fen);
 		const common = getCommonMove({
 			apiToken: authToken?.token?.value,
 			fen: chess.fen,
@@ -125,75 +96,42 @@
 			moveSource: source,
 			winPercents: (await common)?.winPercents,
 		});
+		
 	};
+	let registerOnMoveHandler: ((handler: onMoveHandler) => void) | null = $state(null)
+	
+	const recordMove = async (from: string, to: string) => {
 
-	let playOpponentMove = $derived(async (engine?: Promise<ChoobEvaluation>) => {
-		// precompute certain move types for use in recording
-		// (even if we use a study move, we want to track the win percent/centipawns)
+		const history = chess.chess.history();
+		const evaluation = (getEngineEvaluation as MaybeGetEngineEvaluation)?.(chess.chess.fen());
 		const common = getCommonMove({
 			apiToken: authToken?.token?.value,
 			fen: chess.fen,
 		});
-		engine ??= getEngineEvaluation(chess.fen);
-
-		switch (Chooser.chooseWeightedObject(weights).type as MoveType) {
-			case 'study':
-				if (enabledStudyMove) {
-					console.log('Trying study move');
-					let studyMoves = await getStudyMove(studyId, chess.fen, authToken?.token?.value, studyIsPublic);
-					if (studyMoves?.length) {
-						let studyMove = studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
-						console.log(`Using study move: ${JSON.stringify(studyMove)}`);
-						makeAndRecordMove(studyMove, 'study');
-						break;
-					}
-				}
-			case 'common':
-				if (enabledCommonMove) {
-					console.log('Trying common move');
-					const awaitedCommon = await common;
-					if (awaitedCommon) {
-						console.log(`Using common move: ${JSON.stringify(awaitedCommon)}`);
-						makeAndRecordMove(awaitedCommon.move, 'common');
-						break;
-					}
-				}
-			case 'engine (C)':
-				if (enabledEngineMove) {
-					if (authToken?.token?.value !== undefined) {
-						console.log('Trying cloud engine move');
-						const awaitedEngine = await engine;
-						if (awaitedEngine.evalSource === 'cloud') {
-							console.log(`Using cloud engine move: ${JSON.stringify(awaitedEngine.move)}`);
-							makeAndRecordMove(awaitedEngine.move, 'engine (C)');
-							break;
-						}
-					}
-				}
-			case 'engine (L)':
-				if (enabledLocalEngine && enabledEngineMove) {
-					console.log('Trying local engine move');
-					const awaitedEngine = await engine;
-					console.log(`Using local engine move: ${JSON.stringify(awaitedEngine.move)}`);
-					makeAndRecordMove(awaitedEngine.move, 'engine (L)');
-				}
-		}
-	});
+		addEntryToHistory(chess.chess.turn() === 'w' ? 'b' : 'w', {
+			...(await evaluation),
+			san: history[history.length - 1],
+			moveSource: 'player',
+			winPercents: (await common)?.winPercents,
+		});			
+	}
 
 	function resetBoard(fen?: string) {
 		chess = new SvelteChess(fen ?? DEFAULT_FEN);
 		choobHistory = [];
 	}
+
+	let playChoobMove: (() => void) | null = $state(null)
 	function restartGame() {
 		playerColor = playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
-		if (playerColor === 'b') playOpponentMove();
+		if (playerColor === 'b') playChoobMove?.();
 	}
 </script>
 
 <button onclick={() => login.login()}> bello </button>
 <button onclick={() => login.logout()}> buhbye </button>
 <p><b>Access token:</b> {authToken?.token?.value || 'Not logged in'}</p>
-<ChessBoard {chess} {playOpponentMove} {addEntryToHistory} {getEngineEvaluation} {playerColor} />
+<ChessBoard {chess}{playerColor} {playChoobMove} {recordMove}/>
 
 <div>
 	<label><input type="radio" bind:group={playerColorChoice} value="w" />White</label>
@@ -212,37 +150,7 @@
 
 <StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
 <ChapterPicker bind:selectedChapter {studyId} />
-
-<div class="flex items-center gap-4">
-	<p>Enabled</p>
-	<div>
-		<div>
-			<input type="checkbox" bind:checked={enabledStudyMove} />
-			Study move weight:
-			<input type="number" bind:value={weightStudyMove} min="0" max="100" />
-			<input type="range" bind:value={weightStudyMove} min="0" max="100" />
-		</div>
-		<!-- TODO: force common/engine weight to 0 if authtoken is null, remove check in onMove -->
-		<div>
-			<input type="checkbox" bind:checked={enabledCommonMove} />
-			Common move weight:
-			<input type="number" bind:value={weightCommonMove} min="0" max="100" disabled={!authToken.token} />
-			<input type="range" bind:value={weightCommonMove} min="0" max="100" disabled={!authToken.token} />
-		</div>
-		<div>
-			<input type="checkbox" bind:checked={enabledEngineMove} />
-			Engine move weight:
-			<input type="number" bind:value={weightEngineMove} min="0" max="100" />
-			<input type="range" bind:value={weightEngineMove} min="0" max="100" />
-		</div>
-		<div>
-			<input type="checkbox" bind:checked={enabledLocalEngine} disabled={!enabledEngineMove} />
-			Local engine depth:
-			<input type="number" bind:value={localEvalDepth} min="0" max="25" />
-			<input type="range" bind:value={localEvalDepth} min="0" max="25" />
-		</div>
-	</div>
-</div>
+<Choobser {studyId} {studyValidity} {studyIsPublic} {chess} doMove={makeAndRecordMove} {registerOnMoveHandler} bind:playChoobMove={playChoobMove}/>
 
 <MoveSearch {studyId} {resetBoard} />
 <br />
@@ -252,7 +160,6 @@
 >
 	Lichess Button
 </button>
-<button onclick={() => playOpponentMove()}> Lichess Button (Evil) </button>
 
 <p>Starting FEN</p>
 <p>

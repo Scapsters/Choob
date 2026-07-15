@@ -1,4 +1,4 @@
-<script module>
+<script module lang='ts'>
 	/**
 	 * Svelte cannot track the mutations made by functions like `Chess.move`. So, wrap everything we intend to call/access :(
 	 */
@@ -40,6 +40,8 @@
 			this.updateSnapshot();
 		}
 	}
+
+	export type onMoveHandler = (from: Key, to: Key) => void
 </script>
 
 <script lang="ts">
@@ -49,23 +51,17 @@
 	import type { Color, Move } from 'chess.js';
 	import 'svelte5-chessground/style.css';
 	import { SvelteMap } from 'svelte/reactivity';
-	import type { ChoobHistoryEntry } from '../routes/+page.svelte';
-	import type { ChoobEvaluation } from '../lib/chess/getCloudEvaluation.ts';
-	import { getCommonMove } from '../lib/chess/getCommonMove.ts';
-	import { authToken } from '../lib/login.svelte.ts';
 
 	let {
 		chess,
-		playOpponentMove,
-		addEntryToHistory,
-		getEngineEvaluation,
 		playerColor,
+		playChoobMove,
+		recordMove,
 	}: {
 		chess: SvelteChess;
-		playOpponentMove: (evaluation?: Promise<ChoobEvaluation>) => void;
-		addEntryToHistory: (turn: Color, entry: ChoobHistoryEntry) => void;
-		getEngineEvaluation: (fen: string) => Promise<ChoobEvaluation>;
 		playerColor: Color;
+		playChoobMove: (() => void) | null
+		recordMove: onMoveHandler
 	} = $props();
 
 	let boardEl: HTMLElement;
@@ -119,19 +115,8 @@
 						});
 						chess.updateSnapshot();
 
-						const evaluation = getEngineEvaluation(chess.chess.fen());
-						const common = getCommonMove({
-							apiToken: authToken?.token?.value,
-							fen: chess.fen,
-						});
-						const history = chess.chess.history();
-						addEntryToHistory(turnColor() === 'white' ? 'b' : 'w', {
-							...(await evaluation),
-							san: history[history.length - 1],
-							moveSource: 'player',
-							winPercents: (await common)?.winPercents,
-						});
-						playOpponentMove(evaluation);
+						recordMove(from, to)
+						playChoobMove?.()
 					},
 				},
 			},
