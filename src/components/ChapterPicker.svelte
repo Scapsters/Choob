@@ -100,7 +100,6 @@
 				bind:value={moveNumberToPlayChapterFrom}
 				id="customValue"
 				type="number"
-				class="border-1 border-slate-200 w-11 disabled:text-slate-400"
 				disabled={whereToPlayChapterFrom !== 'custom'}
 			/>
 		</div>
