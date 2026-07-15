@@ -29,6 +29,8 @@
 	import { getLocalEvaluation, initializeStockfish } from '../lib/chess/getLocalEvaluation.ts';
 	import ChapterPicker, { type StudyChapter } from '../components/ChapterPicker.svelte';
 	import MoveSearch from '../components/MoveSearch.svelte';
+	import type { StudyValidity } from '../components/StudyValidator.svelte';
+	import StudyValidator from '../components/StudyValidator.svelte';
 
 	let login: Login;
 	onMount(() => {
@@ -50,21 +52,12 @@
 
 	let choobHistory = $state<ChoobHistory>([]);
 
-	type StudyState = 'valid' | 'invalid' | 'loading';
+	let studyValidity: StudyValidity = $state('invalid');
+	
+
 	let studyId = $state('');
 	let studyIsPublic = $state(true);
 	$effect(() => void (weightCommonMove = authToken.token ? weightCommonMove : 0));
-	let studyValidity: StudyState = $state('invalid');
-	function validateStudyId() {
-		studyValidity = 'loading';
-		getStudyGames(studyId, studyIsPublic, authToken?.token?.value).then((games) => {
-			if (games?.length) {
-				studyValidity = 'valid';
-			} else {
-				studyValidity = 'invalid';
-			}
-		});
-	}
 	onMount(() => {
 		const savedStudyId = window.localStorage.getItem('studyId');
 		if (savedStudyId) studyId = savedStudyId;
@@ -217,12 +210,7 @@
 	>
 </div>
 
-<div>
-	Study ID: <input bind:value={studyId} placeholder="Input study Id..." oninput={validateStudyId} />
-	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
-	<br />
-	{studyValidity}
-</div>
+<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
 <ChapterPicker bind:selectedChapter {studyId} />
 
 <div class="flex items-center gap-4">
