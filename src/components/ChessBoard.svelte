@@ -74,7 +74,7 @@
 	const turnColor = () => (chess.chess.turn() === 'w' ? 'white' : 'black');
 	function getDestinations(): Map<Key, Key[]> {
 		const destinationLists = new SvelteMap<Key, Key[]>();
-		for (const move of chess.chess.moves({ verbose: true })) {
+		for (const move of chess.chess.history({ verbose: true })) {
 			const from = move.from;
 			let destinationsFromSquare = destinationLists.get(from);
 			if (!destinationsFromSquare) {
