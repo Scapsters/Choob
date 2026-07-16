@@ -17,7 +17,7 @@
 <script lang="ts">
 	import 'svelte5-chessground/style.css';
 	import ChessBoard, { SvelteChess } from '../components/ChessBoard.svelte';
-	import type { Color } from 'chess.js';
+	import { Chess, type Color } from 'chess.js';
 	import { DEFAULT_FEN } from '../lib/chess/getStudyMove.ts';
 	import { type ChoobCommonMove } from '../lib/chess/getCommonMove.ts';
 	import ChapterPicker, { type StudyChapter } from '../components/ChapterPicker.svelte';
@@ -37,6 +37,10 @@
 
 	let startingFen = $state<string>('');
 	let selectedChapter = $state<StudyChapter>();
+	$effect(() => {
+		const fenToPlayFrom = selectedChapter?.fenToPlayFrom
+		if (fenToPlayFrom) chess = new SvelteChess(fenToPlayFrom)
+	})
 
 	let studyValidity: StudyValidity = $state('invalid');
 
@@ -50,8 +54,8 @@
 
 	let isChoobEnabled = $state(false);
 
-	function resetBoard(fen?: string) {
-		chess = new SvelteChess(fen ?? DEFAULT_FEN);
+	function resetBoard() {
+		chess = new SvelteChess(chess.fen ?? DEFAULT_FEN);
 		resetHistory?.();
 	}
 
@@ -85,7 +89,6 @@
 			disabled={!playerColorChoice}
 			onclick={() => {
 				isChoobEnabled = true;
-				startingFen = chess.fen;
 				startGame();
 			}}>Start new game from here</Button
 		>
@@ -93,7 +96,7 @@
 		disabled={!playerColorChoice || chess.history.length === 0 || !isChoobEnabled}
 		onclick={() => {
 			isChoobEnabled = true;
-			resetBoard(selectedChapter?.fenToPlayFrom ?? startingFen);
+			resetBoard();
 			startGame();
 		}}>Restart game</Button
 	>
