@@ -27,9 +27,10 @@
 	import Choobser, { type MoveType } from '../components/Choobser.svelte';
 	import GameHistory, { type RecordMove } from '../components/GameHistory.svelte';
 	import LichessLogin from '../components/LichessLogin.svelte';
+	import Button from '../components/ui/Button.svelte';
 
 	let chess = $state(new SvelteChess());
-	
+
 	type ColorChoice = Color | 'random' | null;
 	let playerColor = $state<Color>();
 	let playerColorChoice = $state<ColorChoice>(null);
@@ -47,7 +48,7 @@
 	let recordMove: RecordMove = $state(null);
 	let resetHistory: (() => void) | null = $state(null);
 
-	let isChoobEnabled = $state(false)
+	let isChoobEnabled = $state(false);
 
 	function resetBoard(fen?: string) {
 		chess = new SvelteChess(fen ?? DEFAULT_FEN);
@@ -56,7 +57,7 @@
 
 	let playChoobve: (() => void) | null = $state(null);
 	function restartGame() {
-		if (playerColorChoice === null) return
+		if (playerColorChoice === null) return;
 
 		playerColor = playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
 
@@ -73,11 +74,12 @@
 	<label><input type="radio" bind:group={playerColorChoice} value="b" />Black</label>
 </div>
 <div class="mb-4">
-	<button
+	<Button
+		disabled={!playerColorChoice}
 		onclick={() => {
 			resetBoard(selectedChapter?.fenToPlayFrom ?? startingFen);
 			restartGame();
-		}}>New Game</button
+		}}>{chess.history.length > 0 ? 'Restart Game' : 'Play from here'}</Button
 	>
 </div>
 
