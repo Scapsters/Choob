@@ -1,4 +1,4 @@
-<script module lang='ts'>
+<script module lang="ts">
 	/**
 	 * Svelte cannot track the mutations made by functions like `Chess.move`. So, wrap everything we intend to call/access :(
 	 */
@@ -39,84 +39,110 @@
 			this.chess.reset();
 			this.updateSnapshot();
 		}
+
+		isCheck() {
+			return this.chess.isCheck();
+		}
 	}
 
-	export type onMoveHandler = (from: Key, to: Key) => void
+	export type onMoveHandler = (from: Key, to: Key) => void;
 </script>
 
 <script lang="ts">
 	import { Chessground } from 'chessground';
-	import { type Key } from 'svelte5-chessground';
+	import { type Config, type Key } from 'svelte5-chessground';
 	import { Chess } from 'chess.js';
 	import type { Color, Move } from 'chess.js';
 	import 'svelte5-chessground/style.css';
 	import type { RecordMove } from './GameHistory.svelte';
+	import { onMount } from 'svelte';
 
 	let {
 		chess,
 		playerColor,
+		isChoobEnabled,
 		playChoobve,
 		recordMove,
 	}: {
 		chess: SvelteChess;
 		playerColor: Color;
-		playChoobve: (() => void) | null
-		recordMove: RecordMove
+		isChoobEnabled: boolean;
+		playChoobve: (() => void) | null;
+		recordMove: RecordMove;
 	} = $props();
 
 	let boardEl: HTMLElement;
 	let api: ReturnType<typeof Chessground>;
 
-	const turnColor = () => (chess.chess.turn() === 'w' ? 'white' : 'black');
-	function getDestinations(): Map<Key, Key[]> {
+	function getDestinations(chess: SvelteChess): Map<Key, Key[]> {
+		// Calling get marks the map as a dependency in the effect this function
+		// is called in, and then setting the map alters the dependency.
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const destinationLists = new Map<Key, Key[]>();
 		for (const move of chess.chess.moves({ verbose: true })) {
 			const from = move.from;
+
 			let destinationsFromSquare = destinationLists.get(from);
-			if (!destinationsFromSquare) {
-				destinationLists.set(from, []);
-				destinationsFromSquare = destinationLists.get(from)!;
-			}
+			if (!destinationsFromSquare) destinationLists.set(from, []);
+
+			destinationsFromSquare = destinationLists.get(from)!;
 			destinationsFromSquare.push(move.to);
 		}
 		return destinationLists;
 	}
 
-	const isPlayersTurn = () => ((playerColor === 'w' ? 'white' : 'black') === turnColor());
-	$effect(() => {
-		const history = chess.chess.history({ verbose: true });
-		const lastMove = history && history[chess.history.length - 1];
+	const convertColor = (color: Color) => (color === 'w' ? 'white' : 'black');
+	function getConfigFromChess(chess: SvelteChess): Config {
+		const history = chess.historyVerbose();
+		const lastMove = history && history[history.length - 1];
+		return {
+			fen: chess.fen,
+			turnColor: convertColor(chess.turn),
+			orientation: convertColor(playerColor),
+			check: chess.isCheck(),
+			lastMove: lastMove && [lastMove.from, lastMove.to],
+			movable: {
+				color:
+					convertColor(playerColor) === convertColor(chess.turn) || !isChoobEnabled
+						? convertColor(chess.turn)
+						: undefined,
+				dests: getDestinations(chess),
+			},
+		};
+	}
+
+	onMount(() => {
+		const config = getConfigFromChess(chess);
 		// https://github.com/lichess-org/chessground/blob/master/src/config.ts
 		api = Chessground(boardEl, {
-			fen: chess.chess.fen(),
-			turnColor: turnColor(),
-			orientation: playerColor === 'w' ? 'white' : 'black',
-			check: chess.chess.isCheck(),
-			lastMove: lastMove && [lastMove.from, lastMove.to],
+			...config,
 			highlight: {
 				lastMove: true,
 				check: true,
 			},
 			animation: {
 				enabled: true,
-				duration: 500
+				duration: 500,
 			},
 			movable: {
+				...config.movable,
 				free: false,
-				color: isPlayersTurn() ? turnColor() : undefined,
-				dests: getDestinations(),
 				showDests: true,
 				events: {
 					after: async (from, to) => {
-						chess.chess.move({ from, to });
+						chess.move({ from, to });
 						chess.updateSnapshot();
-						recordMove?.(chess, 'player')
-						playChoobve?.()
+						recordMove?.(chess, 'player');
+						playChoobve?.();
 					},
 				},
 			},
 		});
 		return () => api.destroy();
+	});
+
+	$effect(() => {
+		api.set(getConfigFromChess(chess));
 	});
 </script>
 

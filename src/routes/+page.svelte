@@ -62,7 +62,7 @@
 </script>
 
 <LichessLogin />
-<ChessBoard {chess} {playerColor} {playChoobve} {recordMove} />
+<ChessBoard {chess} {playerColor} {isChoobEnabled} {playChoobve} {recordMove} />
 
 <div>
 	<label><input type="radio" bind:group={playerColorChoice} value="w" />White</label>
