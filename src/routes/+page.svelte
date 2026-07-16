@@ -116,12 +116,6 @@
 
 <MoveSearch {resetBoard} {studyId} />
 
-<p>Starting FEN</p>
-<p>
-	<input type="text" bind:value={startingFen} placeholder="Input FEN..." />
-</p>
-<button onclick={() => (startingFen = chess.fen)}>Make current FEN starting FEN</button>
-
 <GameHistory bind:recordMove bind:resetHistory {getEngineEvaluation} />
 
 <button
