@@ -4,7 +4,7 @@
 
 <script lang="ts">
 	import { getCommonMove } from '$lib/chess/getCommonMove';
-	import { authToken } from '$lib/login.svelte';
+	import { auth } from '$lib/login.svelte';
 	import type { Color } from 'chess.js';
 	import type { MoveType } from './Choobser.svelte';
 	import type { ChoobHistory, ChoobHistoryEntry, MaybeGetEngineEvaluation } from '../routes/+page.svelte';
@@ -44,7 +44,7 @@
 		const history = chess.chess.history();
 		const evaluation = (getEngineEvaluation as MaybeGetEngineEvaluation)?.(chess.fen);
 		const common = getCommonMove({
-			apiToken: authToken?.token?.value,
+			apiToken: auth?.token?.value,
 			fen: chess.fen,
 		});
 		addEntryToHistory(chess.chess.turn() === 'w' ? 'b' : 'w', {

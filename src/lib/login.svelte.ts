@@ -5,7 +5,7 @@ import { SvelteDate } from 'svelte/reactivity';
 export const lichessHost = 'https://lichess.org';
 export const scopes = ['study:read'];
 export const clientId = 'choob.com';
-export let authToken = $state<{ token: AccessToken | null }>({ token: null });
+export let auth = $state<{ token?: AccessToken, username?: string }>({});
 
 export class Login {
 	redirectUrl: string;
@@ -35,12 +35,14 @@ export class Login {
 
 	async init() {
 		// check cache
-		const JSONifiedAuthContainer = window.localStorage.getItem('lichess-auth-token');
-		if (JSONifiedAuthContainer) {
-			const cachedAuthToken = (JSON.parse(JSONifiedAuthContainer) as typeof authToken)?.token;
+		const JSONcachedAuth = window.localStorage.getItem('lichess-auth-token');
+		if (JSONcachedAuth) {
+			const cachedAuth = JSON.parse(JSONcachedAuth) as typeof auth
+			const cachedAuthToken = cachedAuth?.token;
 			// Assumes that putting the expiry into the date constructor works! https://jsdate.wtf/ reference
 			if (cachedAuthToken && new SvelteDate() < new SvelteDate(cachedAuthToken.expiry)) {
-				authToken.token = cachedAuthToken;
+				auth.token = cachedAuthToken;
+				auth.username = cachedAuth.username;
 				return;
 			}
 		}
@@ -53,10 +55,17 @@ export class Login {
 
 				const token = this.accessContext.token;
 				if (!token) throw new Error('Token received but is undefined!');
-				authToken.token = token;
+				auth.token = token;
 
-				// cache
-				window.localStorage.setItem('lichess-auth-token', JSON.stringify(authToken));
+				
+				// set username
+				fetch("https://lichess.org/api/account", { headers: { Authorization: `Bearer ${auth?.token?.value}`}}).then(async response => {
+					const json = await response.json()
+					auth.username = json.username
+					
+					// cache
+					window.localStorage.setItem('lichess-auth-token', JSON.stringify(auth));
+				})
 			}
 		} catch (err) {
 			this.error = err;
@@ -67,7 +76,11 @@ export class Login {
 		const token = this.accessContext?.token?.value;
 		this.accessContext = undefined;
 		this.error = undefined;
-		authToken.token = null;
+		auth.token = undefined;
+		auth.username = undefined;
+
+		// clear cache
+		window.localStorage.removeItem('lichess-auth-token');
 
 		// Example request using vanilla fetch: Revoke access token.
 		await fetch(`${lichessHost}/api/token`, {

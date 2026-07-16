@@ -11,7 +11,7 @@
 
 <script lang="ts">
 	import { DEFAULT_FEN, getStudyGames, type StudyGameTags } from '$lib/chess/getStudyMove';
-	import { authToken } from '$lib/login.svelte';
+	import { auth } from '$lib/login.svelte';
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 	import { Chess } from 'chess.js';
 
@@ -25,9 +25,9 @@
 
 	$effect(() => {
 		const updateChapters = async () => {
-			if (!studyId || !authToken.token) return;
+			if (!studyId || !auth.token) return;
 
-			const study = await getStudyGames(studyId, false, authToken.token.value);
+			const study = await getStudyGames(studyId, false, auth.token.value);
 			chapters =
 				study?.map((chapter) => {
 					const name = (chapter.tags as StudyGameTags)?.['ChapterName'];

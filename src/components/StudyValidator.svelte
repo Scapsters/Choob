@@ -4,7 +4,7 @@
 
 <script lang="ts">
 	import { getStudyGames } from '$lib/chess/getStudyMove';
-	import { authToken } from '$lib/login.svelte';
+	import { auth } from '$lib/login.svelte';
 	import { onMount } from 'svelte';
 	import Button from './ui/Button.svelte';
 
@@ -21,7 +21,7 @@
 		}
 
 		studyValidity = 'loading';
-		getStudyGames(idToValidate, isPublic, authToken?.token?.value).then((games) => {
+		getStudyGames(idToValidate, isPublic, auth?.token?.value).then((games) => {
 			if (games?.length) {
 				studyValidity = 'valid';
 			} else {
@@ -48,7 +48,7 @@
 	<Button
 		disabled={studyValidity !== 'valid'}
 		onclick={async () => {
-			const games = await getStudyGames(studyId, studyIsPublic, authToken?.token?.value, false);
+			const games = await getStudyGames(studyId, studyIsPublic, auth?.token?.value, false);
 			if (games) window.localStorage.setItem(studyId, JSON.stringify(games));
 		}}>Save current study</Button
 	>

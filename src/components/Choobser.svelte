@@ -13,7 +13,7 @@
 	import { getLocalEvaluation } from '../lib/chess/getLocalEvaluation.ts';
 	import Chooser from '$lib/external-packages/Chooser.js';
 
-	import { authToken } from '../lib/login.svelte.ts';
+	import { auth } from '../lib/login.svelte.ts';
 	import type { StudyValidity } from './StudyValidator.svelte';
 	import { getStudyMove } from '$lib/chess/getStudyMove.js';
 	import type { SvelteChess } from './ChessBoard.svelte';
@@ -40,14 +40,14 @@
 
 	const getEngineEvaluation = async (fen: string): Promise<ChoobEvaluation> => {
 		const localEval = getLocalEvaluation(fen, localEvalDepth);
-		const cloudEval = await getCloudEvaluation(fen, authToken?.token?.value);
+		const cloudEval = await getCloudEvaluation(fen, auth?.token?.value);
 		return cloudEval ?? localEval;
 	};
 
 	let userWeightCommonMove = $state(20);
 
 	let weightStudyMove = $state(80);
-	let weightCommonMove = $derived(authToken.token ? userWeightCommonMove : 0);
+	let weightCommonMove = $derived(auth.token ? userWeightCommonMove : 0);
 	let weightEngineMove = $state(0);
 	let weights: MoveWeight[] = $derived([
 		{
@@ -69,7 +69,7 @@
 	let userEnabledStudyMove = $state(true);
 
 	let enabledStudyMove = $derived((studyValidity as StudyValidity) === 'valid' ? userEnabledStudyMove : false);
-	let enabledCommonMove = $derived(authToken.token ? userEnabledCommonMove : false);
+	let enabledCommonMove = $derived(auth.token ? userEnabledCommonMove : false);
 	let enabledEngineMove = $state(true);
 	let enabledLocalEngine = $state(true);
 
@@ -77,7 +77,7 @@
 		// precompute certain move types for use in recording
 		// (even if we use a study move, we want to track the win percent/centipawns)
 		const common = getCommonMove({
-			apiToken: authToken?.token?.value,
+			apiToken: auth?.token?.value,
 			fen: chess.fen,
 		});
 		engine ??= getEngineEvaluation(chess.fen);
@@ -86,7 +86,7 @@
 			case 'study':
 				if (enabledStudyMove) {
 					console.log('Trying study move');
-					let studyMoves = await getStudyMove(studyId, chess.fen, authToken?.token?.value, studyIsPublic);
+					let studyMoves = await getStudyMove(studyId, chess.fen, auth?.token?.value, studyIsPublic);
 					if (studyMoves?.length) {
 						let studyMove = studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
 						console.log(`Using study move: ${JSON.stringify(studyMove)}`);
@@ -96,7 +96,7 @@
 					}
 				}
 			case 'common':
-				if (enabledCommonMove && authToken.token) {
+				if (enabledCommonMove && auth.token) {
 					console.log('Trying common move');
 					const awaitedCommon = await common;
 					if (awaitedCommon) {
@@ -107,7 +107,7 @@
 					}
 				}
 			case 'engine (C)':
-				if (enabledEngineMove && authToken.token) {
+				if (enabledEngineMove && auth.token) {
 					console.log('Trying cloud engine move');
 					const awaitedEngine = await engine;
 					if (awaitedEngine.evalSource === 'cloud') {
@@ -153,8 +153,8 @@
 		</div>
 		<div>
 			<p>Weight</p>
-			<input type="number" bind:value={weightCommonMove} min="0" max="100" disabled={!authToken.token} />
-			<input type="range" bind:value={weightCommonMove} min="0" max="100" disabled={!authToken.token} />
+			<input type="number" bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
+			<input type="range" bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
 		</div>
 		<div>
 			<p>Engine enabled:</p>

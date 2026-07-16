@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { getStudyGames, prepareStudy, type MoveNodeWithFEN, type StudyGameTags } from '$lib/chess/getStudyMove';
-	import { authToken } from '$lib/login.svelte';
+	import { auth } from '$lib/login.svelte';
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 
 	let { studyId, resetBoard }: { studyId: string; resetBoard: (fen?: string) => void } = $props();
@@ -11,9 +11,9 @@
 
 	$effect(() => {
 		async function searchForMoveInStudy(move: string) {
-			if (!moveToSearch || !authToken.token) return;
+			if (!moveToSearch || !auth.token) return;
 
-			const chapters = await getStudyGames(studyId, false, authToken.token.value);
+			const chapters = await getStudyGames(studyId, false, auth.token.value);
 			if (!chapters) return;
 
 			const chaptersWithMoveTrees = chapters.map((chapter) => ({

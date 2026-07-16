@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { authToken, Login } from '$lib/login.svelte';
+	import { auth, Login } from '$lib/login.svelte';
 	import { onMount } from 'svelte';
 	import { SvelteURL } from 'svelte/reactivity';
+	import Button from './ui/Button.svelte';
 
 	let login: Login;
 	onMount(() => {
@@ -13,6 +14,11 @@
 	});
 </script>
 
-<button onclick={() => login.login()}> bello </button>
-<button onclick={() => login.logout()}> buhbye </button>
-<p><b>Access token:</b> {authToken?.token?.value || 'Not logged in'}</p>
+<div class="flex items-center gap-3">
+	{#if auth.username}
+	<p>Logged in as <b>{auth.username}</b></p>
+	{:else}
+	<Button onclick={() => login.login()}> Log in to Lichess </Button>
+	{/if}
+	<Button disabled={!auth.token} onclick={() => login.logout()}> Byebye </Button>
+</div>
