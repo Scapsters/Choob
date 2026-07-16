@@ -172,15 +172,18 @@ let studyGames = new Map<string, StudyGame[]>();
 export async function getStudyGames(
 	lichessStudyId: string,
 	isPublic: boolean = true,
-	apiToken?: string
+	apiToken?: string,
+	checkBrowserStorage: boolean = true
 ): Promise<StudyGame[] | null> {
 	// check in-memory cache
 	let studyGame = studyGames.get(lichessStudyId);
 	if (studyGame) return studyGame;
 
 	// check browser storage
-	let storedStudyGame = window.localStorage.getItem(lichessStudyId)
-	if (storedStudyGame) return JSON.parse(storedStudyGame)
+	if (checkBrowserStorage) {
+		let storedStudyGame = window.localStorage.getItem(lichessStudyId)
+		if (storedStudyGame) return JSON.parse(storedStudyGame)
+	}
 
 	let searchParams = new URLSearchParams();
 

@@ -50,18 +50,18 @@
 	import { Chess } from 'chess.js';
 	import type { Color, Move } from 'chess.js';
 	import 'svelte5-chessground/style.css';
-	import { SvelteMap } from 'svelte/reactivity';
+	import type { RecordMove } from './GameHistory.svelte';
 
 	let {
 		chess,
 		playerColor,
-		playChoobMove,
+		playChoobve,
 		recordMove,
 	}: {
 		chess: SvelteChess;
 		playerColor: Color;
-		playChoobMove: (() => void) | null
-		recordMove: onMoveHandler
+		playChoobve: (() => void) | null
+		recordMove: RecordMove
 	} = $props();
 
 	let boardEl: HTMLElement;
@@ -69,8 +69,8 @@
 
 	const turnColor = () => (chess.chess.turn() === 'w' ? 'white' : 'black');
 	function getDestinations(): Map<Key, Key[]> {
-		const destinationLists = new SvelteMap<Key, Key[]>();
-		for (const move of chess.chess.history({ verbose: true })) {
+		const destinationLists = new Map<Key, Key[]>();
+		for (const move of chess.chess.moves({ verbose: true })) {
 			const from = move.from;
 			let destinationsFromSquare = destinationLists.get(from);
 			if (!destinationsFromSquare) {
@@ -82,13 +82,13 @@
 		return destinationLists;
 	}
 
-	const isPlayersTurn = () => (playerColor === 'w' ? 'white' : 'black' === turnColor());
+	const isPlayersTurn = () => ((playerColor === 'w' ? 'white' : 'black') === turnColor());
 	$effect(() => {
-		const history = chess.historyVerbose();
+		const history = chess.chess.history({ verbose: true });
 		const lastMove = history && history[chess.history.length - 1];
 		// https://github.com/lichess-org/chessground/blob/master/src/config.ts
 		api = Chessground(boardEl, {
-			fen: chess.fen,
+			fen: chess.chess.fen(),
 			turnColor: turnColor(),
 			orientation: playerColor === 'w' ? 'white' : 'black',
 			check: chess.chess.isCheck(),
@@ -96,6 +96,10 @@
 			highlight: {
 				lastMove: true,
 				check: true,
+			},
+			animation: {
+				enabled: true,
+				duration: 500
 			},
 			movable: {
 				free: false,
@@ -105,18 +109,9 @@
 				events: {
 					after: async (from, to) => {
 						chess.chess.move({ from, to });
-
-						api.set({
-							fen: chess.chess.fen(),
-							turnColor: turnColor(),
-							lastMove: [from, to],
-							movable: { color: isPlayersTurn() ? turnColor() : undefined, dests: getDestinations() },
-							check: chess.chess.isCheck(),
-						});
 						chess.updateSnapshot();
-
-						recordMove(from, to)
-						playChoobMove?.()
+						recordMove?.(chess, 'player')
+						playChoobve?.()
 					},
 				},
 			},
