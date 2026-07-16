@@ -14,6 +14,11 @@
 	}: { studyId: string; studyIsPublic: boolean; studyValidity: StudyValidity } = $props();
 
 	function validateStudyId(idToValidate: string, isPublic: boolean) {
+		if (idToValidate.length !== 8) {
+			studyValidity = 'invalid'
+			return
+		}
+		
 		studyValidity = 'loading';
 		getStudyGames(idToValidate, isPublic, authToken?.token?.value).then((games) => {
 			if (games?.length) {
