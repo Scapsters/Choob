@@ -6,6 +6,7 @@
 	import { getStudyGames } from '$lib/chess/getStudyMove';
 	import { authToken } from '$lib/login.svelte';
 	import { onMount } from 'svelte';
+	import Button from './ui/Button.svelte';
 
 	let {
 		studyId = $bindable(),
@@ -18,7 +19,7 @@
 			studyValidity = 'invalid'
 			return
 		}
-		
+
 		studyValidity = 'loading';
 		getStudyGames(idToValidate, isPublic, authToken?.token?.value).then((games) => {
 			if (games?.length) {
@@ -44,12 +45,12 @@
 <div>
 	Study ID: <input bind:value={studyId} placeholder="Input study Id..." class="w-24" />
 	Study is public? <input type="checkbox" bind:checked={studyIsPublic} />
-	<button
+	<Button
 		disabled={studyValidity !== 'valid'}
 		onclick={async () => {
 			const games = await getStudyGames(studyId, studyIsPublic, authToken?.token?.value, false);
 			if (games) window.localStorage.setItem(studyId, JSON.stringify(games));
-		}}>Save current study</button
+		}}>Save current study</Button
 	>
 	{studyValidity}
 </div>
