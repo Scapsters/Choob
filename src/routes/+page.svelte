@@ -29,9 +29,10 @@
 	import LichessLogin from '../components/LichessLogin.svelte';
 
 	let chess = $state(new SvelteChess());
-	type ColorChoice = Color | 'random';
-	let playerColor = $state<Color>('w');
-	let playerColorChoice = $state<ColorChoice>('w');
+	
+	type ColorChoice = Color | 'random' | null;
+	let playerColor = $state<Color>();
+	let playerColorChoice = $state<ColorChoice>(null);
 
 	let startingFen = $state<string>('');
 	let selectedChapter = $state<StudyChapter>();
@@ -55,6 +56,8 @@
 
 	let playChoobve: (() => void) | null = $state(null);
 	function restartGame() {
+		if (playerColorChoice === null) return
+
 		playerColor = playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
 
 		if (playerColor === 'b') playChoobve?.();

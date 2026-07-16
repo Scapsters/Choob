@@ -65,7 +65,7 @@
 		recordMove,
 	}: {
 		chess: SvelteChess;
-		playerColor: Color;
+		playerColor?: Color;
 		isChoobEnabled: boolean;
 		playChoobve: (() => void) | null;
 		recordMove: RecordMove;
@@ -98,12 +98,12 @@
 		return {
 			fen: chess.fen,
 			turnColor: convertColor(chess.turn),
-			orientation: convertColor(playerColor),
+			orientation: convertColor(playerColor ?? 'w'),
 			check: chess.isCheck(),
 			lastMove: lastMove && [lastMove.from, lastMove.to],
 			movable: {
 				color:
-					convertColor(playerColor) === convertColor(chess.turn) || !isChoobEnabled
+					playerColor && (convertColor(playerColor) === convertColor(chess.turn) || !isChoobEnabled)
 						? convertColor(chess.turn)
 						: undefined,
 				dests: getDestinations(chess),
