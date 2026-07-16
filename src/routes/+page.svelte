@@ -33,7 +33,7 @@
 
 	type ColorChoice = Color | 'random' | null;
 	let playerColor = $state<Color>();
-	let playerColorChoice = $state<ColorChoice>(null);
+	let playerColorChoice = $state<ColorChoice>('w');
 
 	let startingFen = $state<string>('');
 	let selectedChapter = $state<StudyChapter>();
@@ -56,17 +56,24 @@
 	}
 
 	let playChoobve: (() => void) | null = $state(null);
-	function restartGame() {
+	function playChoobveIfPossible() {
+		if (chess.turn !== playerColor && isChoobEnabled) playChoobve?.();
+	}
+	function startGame() {
 		if (playerColorChoice === null) return;
-
 		playerColor = playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
 
-		if (playerColor === 'b') playChoobve?.();
+		game.isActive = true
+		playChoobveIfPossible();
 	}
+
+	let game = $state({
+		isActive: false
+	})
 </script>
 
 <LichessLogin />
-<ChessBoard {chess} {playerColor} {isChoobEnabled} {playChoobve} {recordMove} />
+<ChessBoard bind:startingFen {chess} {playerColor} {isChoobEnabled} {playChoobveIfPossible} {recordMove} />
 
 <div>
 	<label><input type="radio" bind:group={playerColorChoice} value="w" />White</label>
@@ -74,12 +81,27 @@
 	<label><input type="radio" bind:group={playerColorChoice} value="b" />Black</label>
 </div>
 <div class="mb-4">
+		<Button
+			disabled={!playerColorChoice}
+			onclick={() => {
+				isChoobEnabled = true;
+				startingFen = chess.fen;
+				startGame();
+			}}>Start new game from here</Button
+		>
 	<Button
-		disabled={!playerColorChoice}
+		disabled={!playerColorChoice || chess.history.length === 0 || !isChoobEnabled}
 		onclick={() => {
+			isChoobEnabled = true;
 			resetBoard(selectedChapter?.fenToPlayFrom ?? startingFen);
-			restartGame();
-		}}>{chess.history.length > 0 ? 'Restart Game' : 'Play from here'}</Button
+			startGame();
+		}}>Restart game</Button
+	>
+	<Button
+		disabled={!game.isActive}
+		onclick={() => {
+			isChoobEnabled = !isChoobEnabled;
+		}}>{(isChoobEnabled || !game.isActive) ? "Stop Choob" : "Start Choob"}</Button
 	>
 </div>
 

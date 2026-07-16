@@ -61,13 +61,15 @@
 		chess,
 		playerColor,
 		isChoobEnabled,
-		playChoobve,
+		startingFen = $bindable(),
+		playChoobveIfPossible,
 		recordMove,
 	}: {
 		chess: SvelteChess;
 		playerColor?: Color;
 		isChoobEnabled: boolean;
-		playChoobve: (() => void) | null;
+		startingFen: string;
+		playChoobveIfPossible: () => void;
 		recordMove: RecordMove;
 	} = $props();
 
@@ -103,7 +105,7 @@
 			lastMove: lastMove && [lastMove.from, lastMove.to],
 			movable: {
 				color:
-					playerColor && (convertColor(playerColor) === convertColor(chess.turn) || !isChoobEnabled)
+					(playerColor &&  convertColor(playerColor) === convertColor(chess.turn) || !isChoobEnabled)
 						? convertColor(chess.turn)
 						: undefined,
 				dests: getDestinations(chess),
@@ -133,7 +135,7 @@
 						chess.move({ from, to });
 						chess.updateSnapshot();
 						recordMove?.(chess, 'player');
-						playChoobve?.();
+						playChoobveIfPossible();
 					},
 				},
 			},

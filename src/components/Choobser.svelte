@@ -45,9 +45,9 @@
 	};
 
 	let userWeightCommonMove = $state(20);
-	
+
 	let weightStudyMove = $state(80);
-	let weightCommonMove = $derived(authToken.token ? userWeightCommonMove : 0)
+	let weightCommonMove = $derived(authToken.token ? userWeightCommonMove : 0);
 	let weightEngineMove = $state(0);
 	let weights: MoveWeight[] = $derived([
 		{
@@ -67,15 +67,13 @@
 
 	let userEnabledCommonMove = $state(true);
 	let userEnabledStudyMove = $state(true);
-	
+
 	let enabledStudyMove = $derived((studyValidity as StudyValidity) === 'valid' ? userEnabledStudyMove : false);
 	let enabledCommonMove = $derived(authToken.token ? userEnabledCommonMove : false);
 	let enabledEngineMove = $state(true);
 	let enabledLocalEngine = $state(true);
 
 	playChoobve = async (engine?: Promise<ChoobEvaluation>) => {
-		if (!isChoobEnabled) return
-
 		// precompute certain move types for use in recording
 		// (even if we use a study move, we want to track the win percent/centipawns)
 		const common = getCommonMove({
@@ -131,10 +129,6 @@
 	};
 </script>
 
-<div class="flex items-center p-5">
-	<p class="mr-70">Activate Choob</p>
-	<input class="w-10 h-10" class:choob={!isChoobEnabled} type="checkbox" bind:checked={isChoobEnabled} onclick={playChoobve}/>
-</div>
 <div class="flex items-center gap-4">
 	<div
 		class="
@@ -182,11 +176,3 @@
 		</div>
 	</div>
 </div>
-
-<style>
-	.choob {
-		-webkit-box-shadow: 0px 0px 69px 45px rgba(235, 0, 0, 0.9);
-		-moz-box-shadow: 0px 0px 69px 45px rgba(235, 0, 0, 0.9);
-		box-shadow: 0px 0px 69px 45px rgba(235, 0, 0, 0.9);
-	}
-</style>
