@@ -16,8 +16,8 @@
 
 	function validateStudyId(idToValidate: string, isPublic: boolean) {
 		if (idToValidate.length !== 8) {
-			studyValidity = 'invalid'
-			return
+			studyValidity = 'invalid';
+			return;
 		}
 
 		studyValidity = 'loading';

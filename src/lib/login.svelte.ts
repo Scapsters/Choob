@@ -44,7 +44,7 @@ export class Login {
 				return;
 			}
 		}
-		
+
 		try {
 			const hasAuthCode = await this.oauth.isReturningFromAuthServer();
 			if (hasAuthCode) {

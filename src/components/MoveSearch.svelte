@@ -68,9 +68,8 @@
 <div class="h-30 w-80 flex flex-col gap-1 text-left overflow-y-scroll items-start">
 	{#each foundChaptersWithMove as chapter (chapter)}
 		{@const name = (chapter.tags as StudyGameTags)?.['ChapterName']}
-		<button
-			class="w-full text-left"
-			onclick={() => resetBoard(chapter.matchingMove?.fen ?? chapter.tags?.FEN)}>{name}</button
+		<button class="w-full text-left" onclick={() => resetBoard(chapter.matchingMove?.fen ?? chapter.tags?.FEN)}
+			>{name}</button
 		>
 	{/each}
 </div>

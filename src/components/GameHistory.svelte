@@ -1,5 +1,5 @@
 <script module lang="ts">
-    export type RecordMove = ((chess: SvelteChess, source: MoveType) => Promise<void>) | null
+	export type RecordMove = ((chess: SvelteChess, source: MoveType) => Promise<void>) | null;
 </script>
 
 <script lang="ts">
@@ -12,12 +12,12 @@
 
 	let {
 		getEngineEvaluation,
-        recordMove = $bindable(),
-        resetHistory = $bindable(),
+		recordMove = $bindable(),
+		resetHistory = $bindable(),
 	}: {
-        getEngineEvaluation: MaybeGetEngineEvaluation,
+		getEngineEvaluation: MaybeGetEngineEvaluation;
 		recordMove: RecordMove;
-        resetHistory: (() => void) | null;
+		resetHistory: (() => void) | null;
 	} = $props();
 
 	let choobHistory = $state<ChoobHistory>([]);
@@ -37,9 +37,9 @@
 		}
 	};
 
-    /**
-     * Record the last move made in the given chess object. Adds eval, common move info,
-     */
+	/**
+	 * Record the last move made in the given chess object. Adds eval, common move info,
+	 */
 	recordMove = async function (chess: SvelteChess, moveType: MoveType) {
 		const history = chess.chess.history();
 		const evaluation = (getEngineEvaluation as MaybeGetEngineEvaluation)?.(chess.fen);
@@ -55,9 +55,9 @@
 		});
 	};
 
-    resetHistory = async function () {
-        choobHistory = []
-    }
+	resetHistory = async function () {
+		choobHistory = [];
+	};
 </script>
 
 <table>

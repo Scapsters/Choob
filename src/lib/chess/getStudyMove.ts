@@ -181,8 +181,8 @@ export async function getStudyGames(
 
 	// check browser storage
 	if (checkBrowserStorage) {
-		let storedStudyGame = window.localStorage.getItem(lichessStudyId)
-		if (storedStudyGame) return JSON.parse(storedStudyGame)
+		let storedStudyGame = window.localStorage.getItem(lichessStudyId);
+		if (storedStudyGame) return JSON.parse(storedStudyGame);
 	}
 
 	let searchParams = new URLSearchParams();

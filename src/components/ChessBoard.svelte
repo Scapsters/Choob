@@ -105,7 +105,7 @@
 			lastMove: lastMove && [lastMove.from, lastMove.to],
 			movable: {
 				color:
-					(playerColor &&  convertColor(playerColor) === convertColor(chess.turn) || !isChoobEnabled)
+					(playerColor && convertColor(playerColor) === convertColor(chess.turn)) || !isChoobEnabled
 						? convertColor(chess.turn)
 						: undefined,
 				dests: getDestinations(chess),

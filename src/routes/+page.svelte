@@ -17,7 +17,7 @@
 <script lang="ts">
 	import 'svelte5-chessground/style.css';
 	import ChessBoard, { SvelteChess } from '../components/ChessBoard.svelte';
-	import { Chess, type Color } from 'chess.js';
+	import { type Color } from 'chess.js';
 	import { DEFAULT_FEN } from '../lib/chess/getStudyMove.ts';
 	import { type ChoobCommonMove } from '../lib/chess/getCommonMove.ts';
 	import ChapterPicker, { type StudyChapter } from '../components/ChapterPicker.svelte';
@@ -38,9 +38,9 @@
 	let startingFen = $state<string>('');
 	let selectedChapter = $state<StudyChapter>();
 	$effect(() => {
-		const fenToPlayFrom = selectedChapter?.fenToPlayFrom
-		if (fenToPlayFrom) chess = new SvelteChess(fenToPlayFrom)
-	})
+		const fenToPlayFrom = selectedChapter?.fenToPlayFrom;
+		if (fenToPlayFrom) chess = new SvelteChess(fenToPlayFrom);
+	});
 
 	let studyValidity: StudyValidity = $state('invalid');
 
@@ -67,13 +67,13 @@
 		if (playerColorChoice === null) return;
 		playerColor = playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice;
 
-		game.isActive = true
+		game.isActive = true;
 		playChoobveIfPossible();
 	}
 
 	let game = $state({
-		isActive: false
-	})
+		isActive: false,
+	});
 </script>
 
 <LichessLogin />
@@ -85,13 +85,13 @@
 	<label><input type="radio" bind:group={playerColorChoice} value="b" />Black</label>
 </div>
 <div class="mb-4">
-		<Button
-			disabled={!playerColorChoice}
-			onclick={() => {
-				isChoobEnabled = true;
-				startGame();
-			}}>Start new game from here</Button
-		>
+	<Button
+		disabled={!playerColorChoice}
+		onclick={() => {
+			isChoobEnabled = true;
+			startGame();
+		}}>Start new game from here</Button
+	>
 	<Button
 		disabled={!playerColorChoice || chess.history.length === 0 || !isChoobEnabled}
 		onclick={() => {
@@ -104,7 +104,7 @@
 		disabled={!game.isActive}
 		onclick={() => {
 			isChoobEnabled = !isChoobEnabled;
-		}}>{(isChoobEnabled || !game.isActive) ? "Stop Choob" : "Start Choob"}</Button
+		}}>{isChoobEnabled || !game.isActive ? 'Stop Choob' : 'Start Choob'}</Button
 	>
 </div>
 
