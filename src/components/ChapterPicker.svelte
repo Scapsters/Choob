@@ -14,8 +14,9 @@
 	import { auth } from '$lib/login.svelte';
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 	import { Chess } from 'chess.js';
+	import type { HTMLAttributes } from 'svelte/elements';
 
-	let { studyId, selectedChapter = $bindable() }: { studyId: string; selectedChapter?: StudyChapter } = $props();
+	let { studyId, selectedChapter = $bindable(), ...rest }: { studyId: string; selectedChapter?: StudyChapter } & HTMLAttributes<HTMLDivElement> = $props();
 
 	let chapters: IncompleteStudyChapter[] = $state([]);
 
@@ -71,7 +72,7 @@
 	});
 </script>
 
-<div>
+<div class="w-full h-full">
 	<div>
 		<p>Select Study Chapter for Starting FEN</p>
 		<div>
@@ -104,7 +105,7 @@
 			/>
 		</div>
 	</div>
-	<div class="p-1 h-28 w-70 overflow-y-scroll">
+	<div class="p-1 h-full w-full overflow-y-scroll">
 		{#each chapters as chapter (chapter)}
 			{const name = chapter.name}
 			<div>
