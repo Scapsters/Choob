@@ -19,6 +19,9 @@
 	import type { SvelteChess } from './ChessBoard.svelte';
 	import type { Chess } from 'chess.js';
 	import type { RecordMove } from './GameHistory.svelte';
+	import Checkbox from './ui/Checkbox.svelte';
+	import NumberInput from './ui/NumberInput.svelte';
+	import RangeInput from './ui/RangeInput.svelte';
 
 	let {
 		studyId,
@@ -132,47 +135,47 @@
 <div class="flex items-center gap-4">
 	<div
 		class="
-			grid grid-cols-[fit-content(100%)_1fr] gap-x-4
-			*:flex *:gap-2
-			*:*:first:flex-grow
+			grid grid-cols-[fit-content(100%)_1fr] gap-x-4 gap-y-2
+			*:flex *:gap-2 *:items-center
+			*:*:first:flex-grow *:*:text-right
 		"
 	>
 		<div>
 			<p>Study enabled:</p>
-			<input type="checkbox" bind:checked={userEnabledStudyMove} disabled={studyValidity !== 'valid'} />
+			<Checkbox bind:checked={userEnabledStudyMove} disabled={studyValidity !== 'valid'}/>
 		</div>
 		<div>
 			<p>Weight</p>
-			<input type="number" bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
-			<input type="range" bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
+			<NumberInput bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
+			<RangeInput bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
 		</div>
 		<!-- TODO: force common/engine weight to 0 if authtoken is null, remove check in onMove -->
 		<div>
 			<p>Common enabled:</p>
-			<input type="checkbox" bind:checked={enabledCommonMove} />
+			<Checkbox bind:checked={enabledCommonMove} />
 		</div>
 		<div>
 			<p>Weight</p>
-			<input type="number" bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
-			<input type="range" bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
+			<NumberInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
+			<RangeInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
 		</div>
 		<div>
 			<p>Engine enabled:</p>
-			<input type="checkbox" bind:checked={enabledEngineMove} />
+			<Checkbox bind:checked={enabledEngineMove} />
 		</div>
 		<div>
 			<p>Weight</p>
-			<input type="number" bind:value={weightEngineMove} min="0" max="100" />
-			<input type="range" bind:value={weightEngineMove} min="0" max="100" />
+			<NumberInput bind:value={weightEngineMove} min="0" max="100" />
+			<RangeInput bind:value={weightEngineMove} min="0" max="100" />
 		</div>
 		<div>
 			<p>Local engine enabled:</p>
-			<input type="checkbox" bind:checked={enabledLocalEngine} disabled={!enabledEngineMove} />
+			<Checkbox bind:checked={enabledLocalEngine} disabled={!enabledEngineMove} />
 		</div>
 		<div>
 			<p>Depth</p>
-			<input type="number" bind:value={localEvalDepth} min="0" max="25" />
-			<input type="range" bind:value={localEvalDepth} min="0" max="25" />
+			<NumberInput bind:value={localEvalDepth} min="0" max="25" />
+			<RangeInput bind:value={localEvalDepth} min="0" max="25" />
 		</div>
 	</div>
 </div>

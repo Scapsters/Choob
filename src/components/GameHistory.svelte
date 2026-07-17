@@ -60,31 +60,33 @@
 	};
 </script>
 
-<table>
-	<thead>
-		<tr class="*:px-3">
-			<td>Move</td>
-			<td>Eval</td>
-			<td>Source</td>
-			<td>Win% (W)</td>
-			<td>Move</td>
-			<td>Eval</td>
-			<td>Source</td>
-			<td>Win% (W)</td>
-		</tr>
-	</thead>
-	<tbody>
-		{#each choobHistory as entry (entry)}
-			<tr class="*:text-center">
-				<td>{entry[0].san}</td>
-				<td>{entry[0].centipawns}</td>
-				<td>{entry[0].moveType}</td>
-				<td>{Math.round((entry[0].winPercents?.white ?? 0) * 100) || '-'}</td>
-				<td>{entry[1]?.san ?? '-'}</td>
-				<td>{entry[1]?.centipawns ?? '-'}</td>
-				<td>{entry[1]?.moveType ?? '-'}</td>
-				<td>{Math.round((entry[1]?.winPercents?.white ?? 0) * 100) || '-'}</td>
+<div class="h-100">
+	<table>
+		<thead>
+			<tr class="*:px-3">
+				<td>Move</td>
+				<td>Eval</td>
+				<td>Source</td>
+				<td>Win% (W)</td>
+				<td>Move</td>
+				<td>Eval</td>
+				<td>Source</td>
+				<td>Win% (W)</td>
 			</tr>
-		{/each}
-	</tbody>
-</table>
+		</thead>
+		<tbody>
+			{#each choobHistory as entry (entry)}
+				<tr class="*:text-center">
+					<td>{entry[0].san}</td>
+					<td>{entry[0].centipawns}</td>
+					<td>{entry[0].moveType}</td>
+					<td>{Math.round((entry[0].winPercents?.white ?? 0) * 100) || '-'}</td>
+					<td>{entry[1]?.san ?? '-'}</td>
+					<td>{entry[1]?.centipawns ?? '-'}</td>
+					<td>{entry[1]?.moveType ?? '-'}</td>
+					<td>{Math.round((entry[1]?.winPercents?.white ?? 0) * 100) || '-'}</td>
+				</tr>
+			{/each}
+		</tbody>
+	</table>
+</div>

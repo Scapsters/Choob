@@ -1,4 +1,4 @@
-<script module>
+<script module lang="ts">
 	import type { ChoobEvaluation } from '../lib/chess/getCloudEvaluation.ts';
 
 	export type ChoobHistoryEntry = Partial<ChoobEvaluation> & {
@@ -27,6 +27,8 @@
 	import Choobser, { type MoveType } from '../components/Choobser.svelte';
 	import GameHistory, { type RecordMove } from '../components/GameHistory.svelte';
 	import LichessLogin from '../components/LichessLogin.svelte';
+	import RadioInput from '../components/ui/RadioInput.svelte';
+	import Checkbox from '../components/ui/Checkbox.svelte';
 	import Button from '../components/ui/Button.svelte';
 
 	let chess = $state(new SvelteChess());
@@ -76,15 +78,50 @@
 	});
 </script>
 
-<LichessLogin />
-<ChessBoard bind:startingFen {chess} {playerColor} {isChoobEnabled} {playChoobveIfPossible} {recordMove} />
+<div class="grid grid-flow-col grid-rows-4 xl:grid-rows-2 gap-6 justify-center mx-auto p-6 max-w-400">
+	<div class="flex justify-center min-w-0 grow basis-80">
+		<div class="max-w-150 w-full">
+			<ChessBoard bind:startingFen {chess} {playerColor} {isChoobEnabled} {playChoobveIfPossible} {recordMove} />
+		</div>
+	</div>
 
-<div>
-	<label><input type="radio" bind:group={playerColorChoice} value="w" />White</label>
-	<label><input type="radio" bind:group={playerColorChoice} value="random" />Random</label>
-	<label><input type="radio" bind:group={playerColorChoice} value="b" />Black</label>
+	<div class="flex flex-col items-center gap-6">
+		<div class="flex h-min">
+			<div class="flex flex-col items-center gap-3 p-3">
+				{@render divider()}
+				<div class="flex gap-3">{@render colorSettings()}</div>
+				<div class="flex gap-3">{@render gameControls()}</div>
+				{@render divider()}
+			</div>
+		</div>
+		<div class="flex flex-col">
+			<div class="flex justify-center">
+				<Choobser bind:playChoobve bind:isChoobEnabled {recordMove} {chess} {studyId} {studyValidity} {studyIsPublic} />
+			</div>
+		</div>
+	</div>
+
+	<div class="flex flex-col gap-6 items-start grow basis-80">
+		<div class="flex w-full flex-col items-center gap-3">
+			<LichessLogin />
+			{@render divider()}
+			<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
+			{@render divider()}
+		</div>
+		<div class="flex w-full justify-between flex-wrap gap-x-3 gap-y-6">
+			<ChapterPicker bind:selectedChapter {studyId} />
+			<MoveSearch {resetBoard} {studyId} />
+		</div>
+	</div>
+
+	<div class="flex flex-col gap-3 items-center">
+		{@render lichessButton()}
+		<GameHistory bind:recordMove bind:resetHistory {getEngineEvaluation} />
+	</div>
 </div>
-<div class="mb-4">
+
+{#snippet gameControls()}
+	<label class="flex gap-3 items-center">Allow Choob to move <Checkbox class="toggle" /></label>
 	<Button
 		disabled={!playerColorChoice}
 		onclick={() => {
@@ -106,20 +143,24 @@
 			isChoobEnabled = !isChoobEnabled;
 		}}>{isChoobEnabled || !game.isActive ? 'Stop Choob' : 'Start Choob'}</Button
 	>
-</div>
+{/snippet}
 
-<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
+{#snippet colorSettings()}
+	<label class="flex flex-col items-end w-15"><RadioInput bind:group={playerColorChoice} value="w" /> White</label>
+	<label class="flex flex-col items-center"><RadioInput bind:group={playerColorChoice} value="b" /> Black</label>
+	<label class="flex flex-col items-start w-15"
+		><RadioInput bind:group={playerColorChoice} value="random" /> Random</label
+	>
+{/snippet}
 
-<ChapterPicker bind:selectedChapter {studyId} />
+{#snippet lichessButton()}
+	<Button
+		onclick={() => window.open(`https://lichess.org/analysis/pgn/${encodeURIComponent(chess.chess.pgn())}`, '_blank')}
+	>
+		Lichess Button
+	</Button>
+{/snippet}
 
-<Choobser bind:playChoobve bind:isChoobEnabled {recordMove} {chess} {studyId} {studyValidity} {studyIsPublic} />
-
-<MoveSearch {resetBoard} {studyId} />
-
-<GameHistory bind:recordMove bind:resetHistory {getEngineEvaluation} />
-
-<button
-	onclick={() => window.open(`https://lichess.org/analysis/pgn/${encodeURIComponent(chess.chess.pgn())}`, '_blank')}
->
-	Lichess Button
-</button>
+{#snippet divider()}
+	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
+{/snippet}

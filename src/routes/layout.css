@@ -3,9 +3,25 @@
 
 @layer components {
 	input[type='number'] {
-		@apply w-11.5 border-1 border-slate-100 pl-1 disabled:text-slate-400;
+		@apply h-min! w-17! rounded-xs leading-[2]!;
 	}
 	input[type='text'] {
-		@apply border-1 border-slate-200;
+		@apply h-min! rounded-xs! leading-[2]!;
 	}
+	button {
+		@apply h-min! rounded-xs! leading-[2]!;
+	}
+}
+
+:root {
+	--foreground: oklch(15% 0.1 70);
+	--foreground-gray: oklch(50% 0.01 70);
+	--background-gray: oklch(92% 0.015 70);
+	--background: oklch(97% .01 70);
+
+	--accent-color: oklch(60% 0.15 140);
+	--disabled-color: oklch(75% 0.01 70);
+	--line-thickness: round(0.15em, 1px);
+
+	background-color: var(--background)
 }

@@ -15,8 +15,14 @@
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 	import { Chess } from 'chess.js';
 	import type { HTMLAttributes } from 'svelte/elements';
+	import RadioInput from './ui/RadioInput.svelte';
+	import NumberInput from './ui/NumberInput.svelte';
 
-	let { studyId, selectedChapter = $bindable(), ...rest }: { studyId: string; selectedChapter?: StudyChapter } & HTMLAttributes<HTMLDivElement> = $props();
+	let {
+		studyId,
+		selectedChapter = $bindable(),
+		...rest
+	}: { studyId: string; selectedChapter?: StudyChapter } & HTMLAttributes<HTMLDivElement> = $props();
 
 	let chapters: IncompleteStudyChapter[] = $state([]);
 
@@ -72,46 +78,35 @@
 	});
 </script>
 
-<div class="w-full h-full">
+<div class="flex flex-col gap-1">
 	<div>
 		<p>Select Study Chapter for Starting FEN</p>
-		<div>
-			<label for="start">Use Start</label><input
-				bind:group={whereToPlayChapterFrom}
-				id="start"
-				value="start"
-				type="radio"
-				name="fenSide"
-			/>
-			<label class="pl-3 pr-1" for="end">Use End</label><input
-				bind:group={whereToPlayChapterFrom}
-				id="end"
-				value="end"
-				type="radio"
-				name="fenSide"
-			/>
-			<label class="pl-3 pr-1" for="custom">Use Move Number</label><input
-				bind:group={whereToPlayChapterFrom}
-				id="custom"
-				value="custom"
-				type="radio"
-				name="fenSide"
-			/>
-			<input
-				bind:value={moveNumberToPlayChapterFrom}
-				id="customValue"
-				type="number"
-				disabled={whereToPlayChapterFrom !== 'custom'}
-			/>
-		</div>
 	</div>
+	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
 	<div class="p-1 h-full w-full overflow-y-scroll">
 		{#each chapters as chapter (chapter)}
 			{const name = chapter.name}
-			<div>
-				<input id={name} name="chapterSelect" type="radio" bind:group={selectedIncompleteChapter} value={chapter} />
+			<div class="flex gap-3 items-center">
+				<RadioInput id={name} name="chapterSelect" bind:group={selectedIncompleteChapter} value={chapter} />
 				<label for={name}>{name}</label>
 			</div>
 		{/each}
+	</div>
+	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
+	<div class="flex flex-col *:flex *:gap-3 *:items-center">
+		<label><RadioInput bind:group={whereToPlayChapterFrom} value="start" name="fenSide" />Use Start</label>
+		<label><RadioInput bind:group={whereToPlayChapterFrom} value="end" name="fenSide" />Use End</label>
+		<div class="*:flex *:gap-3 *:items-center">
+			<label>
+				<RadioInput bind:group={whereToPlayChapterFrom} value="custom" name="fenSide" />
+				Use Move Number</label
+			>
+			<NumberInput
+				bind:value={moveNumberToPlayChapterFrom}
+				disabled={whereToPlayChapterFrom !== 'custom'}
+				class="max-w-12"
+				spinner
+			/>
+		</div>
 	</div>
 </div>

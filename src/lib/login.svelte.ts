@@ -40,7 +40,7 @@ export class Login {
 			const cachedAuth = JSON.parse(JSONcachedAuth) as typeof auth
 			const cachedAuthToken = cachedAuth?.token;
 			// Assumes that putting the expiry into the date constructor works! https://jsdate.wtf/ reference
-			if (cachedAuthToken && new SvelteDate() < new SvelteDate(cachedAuthToken.expiry)) {
+			if (cachedAuthToken && cachedAuth.username && new SvelteDate() < new SvelteDate(cachedAuthToken.expiry)) {
 				auth.token = cachedAuthToken;
 				auth.username = cachedAuth.username;
 				return;

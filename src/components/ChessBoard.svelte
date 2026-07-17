@@ -148,13 +148,11 @@
 	});
 </script>
 
-<div class="container" bind:this={boardEl}></div>
+<div class="w-full h-full rounded-lg">
+	<div class="w-full aspect-square rounded-lg board" bind:this={boardEl}></div>
+</div>
 
 <style>
-	.container {
-		width: 512px;
-		height: 512px;
-	}
 	:global square.last-move {
 		background-color: rgba(155, 199, 0, 0.41);
 	}

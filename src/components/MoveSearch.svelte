@@ -2,6 +2,8 @@
 	import { getStudyGames, prepareStudy, type MoveNodeWithFEN, type StudyGameTags } from '$lib/chess/getStudyMove';
 	import { auth } from '$lib/login.svelte';
 	import type { ParseTree } from '@mliebelt/pgn-parser';
+	import Button from './ui/Button.svelte';
+	import TextInput from './ui/TextInput.svelte';
 
 	let { studyId, resetBoard }: { studyId: string; resetBoard: (fen?: string) => void } = $props();
 
@@ -60,16 +62,19 @@
 	});
 </script>
 
-<label for="moveSearch" class="pr-1">Search for move in study:</label><input
-	id="moveSearch"
-	type="text"
-	bind:value={moveToSearch}
-/>
-<div class="h-30 w-80 flex flex-col gap-1 text-left overflow-y-scroll items-start">
-	{#each foundChaptersWithMove as chapter (chapter)}
-		{@const name = (chapter.tags as StudyGameTags)?.['ChapterName']}
-		<button class="w-full text-left" onclick={() => resetBoard(chapter.matchingMove?.fen ?? chapter.tags?.FEN)}
-			>{name}</button
-		>
-	{/each}
+<div>
+	<div class="flex gap-3">
+		<label for="moveSearch">Search for move in study:</label>
+		<TextInput id="moveSearch" class="w-20" bind:value={moveToSearch} />
+	</div>
+	{#if foundChaptersWithMove}
+		<div class="w-full flex flex-col gap-1 text-left overflow-y-scroll items-start">
+			{#each foundChaptersWithMove as chapter (chapter)}
+				{@const name = (chapter.tags as StudyGameTags)?.['ChapterName']}
+				<Button class="w-full text-left" onclick={() => resetBoard(chapter.matchingMove?.fen ?? chapter.tags?.FEN)}
+					>{name}</Button
+				>
+			{/each}
+		</div>
+	{/if}
 </div>
