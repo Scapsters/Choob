@@ -15,6 +15,8 @@
 		studyValidity = $bindable(),
 	}: { studyId: string; studyIsPublic: boolean; studyValidity: StudyValidity } = $props();
 
+	let studyIdIsDirty = $derived(studyId || false);
+
 	function validateStudyId(idToValidate: string, isPublic: boolean) {
 		if (idToValidate.length !== 8) {
 			studyValidity = 'invalid';
@@ -46,10 +48,18 @@
 <div class="flex gap-x-6 flex-wrap">
 	<div class='flex gap-3 items-center'>
 		<p>Study ID:</p>
-		<TextInput bind:value={studyId} placeholder="Study ID..."/>
-		<p class="w-12">
-			{studyValidity}
-		</p>
+		<TextInput
+			bind:value={studyId}
+			placeholder="Study ID..."
+			onchange={() => {
+				if (studyId) studyIdIsDirty = true;
+			}}
+		/>
+		{#if studyIdIsDirty}
+			<p class="w-12">
+				{studyValidity}
+			</p>
+		{/if}
 	</div>
 
 	<div class="flex gap-3 items-center">
