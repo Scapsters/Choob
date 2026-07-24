@@ -188,7 +188,7 @@ export async function getStudyGames(
 	let searchParams = new URLSearchParams();
 
 	let headers = new Headers();
-	if (!isPublic && !apiToken) {
+	if (!isPublic) {
 		if (apiToken) {
 			headers.append('Authorization', `Bearer ${apiToken}`);
 		} else {
