@@ -20,9 +20,9 @@
 
 	$effect(() => {
 		async function searchForMoveInStudy(move: string) {
-			if (!moveToSearch || !auth.token) return;
+			if (!moveToSearch) return;
 
-			const chapters = await getStudyGames(studyId, false, auth.token.value);
+			const chapters = await getStudyGames(studyId, false, auth?.token?.value);
 			if (!chapters) return;
 
 			const chaptersWithMoveTrees = chapters.map((chapter) => ({
