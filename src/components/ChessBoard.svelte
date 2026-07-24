@@ -54,6 +54,11 @@
 			this.chess = new Chess(fen);
 			this.updateSnapshot();
 		}
+
+		undo() {
+			this.chess.undo();
+			this.updateSnapshot();
+		}
 	}
 
 	export type onMoveHandler = (from: Key, to: Key) => void;
@@ -65,19 +70,21 @@
 	import { Chess } from 'chess.js';
 	import type { Color, Move } from 'chess.js';
 	import 'svelte5-chessground/style.css';
-	import type { RecordMove } from './GameHistory.svelte';
+	import type { ChoobHistory, ChoobHistoryEntry, RecordMove } from './GameHistory.svelte';
 	import { onMount } from 'svelte';
 
 	let {
 		chess,
 		playerColor,
 		isChoobEnabled,
+		choobHistory,
 		playChoobveIfPossible,
 		recordMove,
 	}: {
 		chess: SvelteChess;
 		playerColor?: Color;
 		isChoobEnabled: boolean;
+		choobHistory: ChoobHistory;
 		playChoobveIfPossible: () => void;
 		recordMove: RecordMove;
 	} = $props();
@@ -144,6 +151,14 @@
 						chess.move({ from, to });
 						chess.updateSnapshot();
 						recordMove?.(chess, 'player').then(playChoobveIfPossible);
+						
+						if (undoneMoves.length > 0) {
+							if (areMovesEqual(undoneMoves[undoneMoves.length - 1].move, { from, to })) {
+								undoneMoves.pop();
+							} else {
+								undoneMoves = [];
+							}
+						}
 					},
 				},
 			},
@@ -154,6 +169,57 @@
 	$effect(() => {
 		api.set(getConfigFromChess(chess));
 	});
+
+	let undoneMoves: { move: Move, choobHistoryEntry: ChoobHistoryEntry }[] = $state([])
+	$effect(() => {
+		function handleArrowKeys(e: Event) {
+			const event = e as KeyboardEvent
+			if (event.key === 'ArrowLeft') {
+				if (choobHistory.length === 0) return
+				const history = chess.historyVerbose()
+				const lastChoobHistoryMove = choobHistory[choobHistory.length - 1]
+				const lastChoobHistoryHalfMove = lastChoobHistoryMove.findLast(move => move) ?? null
+				if (lastChoobHistoryHalfMove === null) {
+					throw new Error("unexpected null in choob history")
+				}
+
+				undoneMoves.push({ move: history[history.length - 1], choobHistoryEntry: lastChoobHistoryHalfMove })
+				
+				const isMoveFull = !!lastChoobHistoryMove[1]
+				if (isMoveFull) {
+					lastChoobHistoryMove.pop()
+					lastChoobHistoryMove.push(null)
+				} else {
+					choobHistory.pop()
+				}
+				chess.undo()
+			}
+			if (event.key === 'ArrowRight') {
+				const undoneMove = undoneMoves.pop() 
+				if (!undoneMove) return
+
+				chess.move(undoneMove.move ?? null)
+
+				if (choobHistory.length === 0) {
+					choobHistory.push([undoneMove.choobHistoryEntry, null])
+					return
+				}
+				const lastChoobHistoryMove = choobHistory[choobHistory.length - 1]
+				const isMoveFull = !!lastChoobHistoryMove[1]
+				if (!isMoveFull) {
+					lastChoobHistoryMove.pop()
+					lastChoobHistoryMove.push(undoneMove.choobHistoryEntry)
+				} else {
+					choobHistory.push([undoneMove.choobHistoryEntry, null])
+				}
+			}
+		}
+		document.addEventListener('keydown', handleArrowKeys)
+		return () => document.removeEventListener('keydown', handleArrowKeys)
+	})
+	function areMovesEqual(move1: { to: Key, from: Key }, move2: { to: Key, from: Key }) {
+		return move1.from === move2.from && move1.to === move2.to
+	}
 </script>
 
 <div class="w-full h-full rounded-lg">
