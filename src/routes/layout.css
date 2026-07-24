@@ -23,5 +23,16 @@
 	--disabled-color: oklch(75% 0.01 70);
 	--line-thickness: round(0.15em, 1px);
 
+	color: var(--foreground);
 	background-color: var(--background)
+}
+
+:root.dark {
+	--foreground: oklch(90% .01 70);
+	--foreground-gray: oklch(87% 0.015 70);
+	--background-gray: oklch(37% 0.01 70);
+	--background: oklch(25% 0.01 70);
+
+	--accent-color: oklch(65% 0.1 140);
+	--disabled-color: oklch(50% 0.01 70);
 }

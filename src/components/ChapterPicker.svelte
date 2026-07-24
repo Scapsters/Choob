@@ -18,7 +18,17 @@
 	import NumberInput from './ui/NumberInput.svelte';
 	import type { StudyValidity } from './StudyValidator.svelte';
 
-	let { studyId, studyValidity, setBoard }: { studyId: string; studyValidity: StudyValidity, setBoard: (fen?: string) => void } = $props();
+	let {
+		studyId,
+		studyValidity,
+		setBoard,
+		playChoobveIfPossible,
+	}: {
+		studyId: string;
+		studyValidity: StudyValidity;
+		setBoard: (fen?: string) => void;
+		playChoobveIfPossible: () => void;
+	} = $props();
 
 	let chapters: IncompleteStudyChapter[] = $state([]);
 
@@ -83,7 +93,10 @@
 
 		selectedChapter = { ...selectedIncompleteChapter, fenToPlayFrom };
 
-		if (fenToPlayFrom) setBoard(fenToPlayFrom);
+		if (fenToPlayFrom) {
+			setBoard(fenToPlayFrom);
+			playChoobveIfPossible();
+		}
 	}
 </script>
 
@@ -94,8 +107,8 @@
 	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
 	<div class="p-1 h-full w-full overflow-y-scroll">
 		{#each chapters as chapter (chapter)}
-		{const name = chapter.name}
-		<div class="flex gap-3 items-center">
+			{const name = chapter.name}
+			<div class="flex gap-3 items-center">
 				<RadioInput
 					id={name}
 					name="chapterSelect"
@@ -104,8 +117,8 @@
 				/>
 				<label for={name}>{name}</label>
 			</div>
-			{/each}
-		</div>
+		{/each}
+	</div>
 	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
 	<div class="flex flex-col *:flex *:gap-3 *:items-center">
 		<label
@@ -130,7 +143,7 @@
 					name="fenSide"
 				/>
 				Use Move Number</label
-				>
+			>
 			<NumberInput
 				bind:value={moveNumberToPlayChapterFrom}
 				disabled={whereToPlayChapterFrom !== 'custom'}

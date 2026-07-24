@@ -18,6 +18,7 @@
 	import Choobser from '../components/Choobser.svelte';
 	import GameHistory, { type ChoobHistory, type RecordMove } from '../components/GameHistory.svelte';
 	import LichessLogin from '../components/LichessLogin.svelte';
+	import ThemeToggle from '../components/ThemeToggle.svelte';
 	import RadioInput from '../components/ui/RadioInput.svelte';
 	import Checkbox from '../components/ui/Checkbox.svelte';
 	import Button from '../components/ui/Button.svelte';
@@ -111,17 +112,30 @@
 		</div>
 	</div>
 
-	<div class="flex flex-col gap-6 items-start grow basis-80">
+	<div class="flex flex-col gap-6 items-start grow">
 		<div class="flex w-full flex-col items-center gap-3">
-			<LichessLogin />
-			{@render divider()}
-			<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
-			{@render divider()}
+			<div class="flex items-center w-full">
+				<div class="w-30">
+				</div>
+				<div class="grow flex justify-center">
+					<LichessLogin />
+				</div>
+				<div class="w-30 flex justify-end">
+					<ThemeToggle />
+				</div>
+			</div>
+				{@render divider()}
+				<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
+				{@render divider()}
 		</div>
 		{#if studyId}
-			<div class="flex w-full justify-between flex-wrap gap-x-3 gap-y-6">
-				<ChapterPicker {setBoard} {studyId} {studyValidity} />
-				<MoveSearch {setBoard} {studyId} {chess} />
+			<div class="flex w-full justify-between flex-wrap xl:flex-nowrap gap-x-6 gap-y-6">
+				<div class="h-full grow">
+					<ChapterPicker {setBoard} {studyId} {studyValidity} {playChoobveIfPossible} />
+				</div>
+				<div class="h-full grow">
+					<MoveSearch {setBoard} {studyId} {chess} {playChoobveIfPossible} />
+				</div>
 			</div>
 		{/if}
 	</div>

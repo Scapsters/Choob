@@ -6,7 +6,12 @@
 	import TextInput from './ui/TextInput.svelte';
 	import type { SvelteChess } from './ChessBoard.svelte';
 
-	let { studyId, setBoard, chess }: { studyId: string; setBoard: (fen?: string) => void; chess: SvelteChess } =
+	let {
+		studyId,
+		setBoard,
+		chess,
+		playChoobveIfPossible,
+	}: { studyId: string; setBoard: (fen?: string) => void; chess: SvelteChess; playChoobveIfPossible: () => void } =
 		$props();
 
 	let moveToSearch = $state('');
@@ -81,8 +86,12 @@
 		<div class="w-full flex flex-col gap-1 text-left overflow-y-scroll items-start">
 			{#each foundChaptersWithMove as chapter (chapter)}
 				{@const name = (chapter.tags as StudyGameTags)?.['ChapterName']}
-				<Button class="w-full text-left" onclick={() => setBoard(chapter.moveBefore?.fen ?? chapter.tags?.FEN)}
-					>{name}</Button
+				<Button
+					class="w-full text-left"
+					onclick={() => {
+						setBoard(chapter.matchingMove?.fen ?? chapter.tags?.FEN);
+						playChoobveIfPossible();
+					}}>{name}</Button
 				>
 			{/each}
 		</div>
