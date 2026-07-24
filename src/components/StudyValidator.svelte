@@ -45,8 +45,8 @@
 	});
 </script>
 
-<div class="flex gap-x-6 flex-wrap">
-	<div class='flex gap-3 items-center'>
+<div class="flex gap-x-6 flex-wrap w-full justify-between">
+	<div class="flex gap-3 items-center">
 		<p>Study ID:</p>
 		<TextInput
 			bind:value={studyId}

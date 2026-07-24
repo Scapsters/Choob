@@ -119,7 +119,7 @@
 	</div>
 
 	<div class="flex flex-col gap-6 items-start grow">
-		<div class="flex w-full flex-col items-center gap-3">
+		<div class="flex w-200 flex-col items-center gap-3">
 			<div class="flex items-center w-full">
 				<div class="w-30"></div>
 				<div class="grow flex justify-center">
@@ -134,11 +134,11 @@
 			{@render divider()}
 		</div>
 		{#if studyId}
-			<div class="flex w-full justify-between flex-wrap xl:flex-nowrap gap-x-6 gap-y-6">
+			<div class="flex w-full justify-between flex-wrap xl:flex-nowrap gap-x-12 gap-y-6">
 				<div class="h-full grow">
 					<ChapterPicker {setBoard} {studyId} {studyValidity} {playChoobveIfPossible} />
 				</div>
-				<div class="h-full grow">
+				<div class="h-full grow justify-self-end">
 					<MoveSearch {setBoard} {studyId} {chess} {playChoobveIfPossible} />
 				</div>
 			</div>

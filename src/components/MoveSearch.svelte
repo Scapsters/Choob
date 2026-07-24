@@ -70,9 +70,11 @@
 </script>
 
 <div>
-	<div class="flex gap-3 items-center">
-		<label for="moveSearch">Search for move in study:</label>
-		<TextInput id="moveSearch" class="w-20" bind:value={moveToSearch} />
+	<div class="flex gap-3 items-center justify-between">
+		<div class="flex gap-3 items-center">
+			<label for="moveSearch">Search for move in study:</label>
+			<TextInput id="moveSearch" class="w-20" bind:value={moveToSearch} />
+		</div>
 		<Button
 			disabled={chess.history.length === 0}
 			onclick={() => {
