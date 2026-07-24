@@ -89,7 +89,13 @@
 					<div class="grow w-full"></div>
 					{@render colorSettings()}
 					<div class="grow w-full flex justify-end items-center">
-						<Button disabled={chess.fen === DEFAULT_FEN} onclick={() => setBoard()}>Reset Board</Button>
+						<Button
+							disabled={chess.fen === DEFAULT_FEN}
+							onclick={() => {
+								setBoard();
+								playChoobveIfPossible();
+							}}>Reset Board</Button
+						>
 					</div>
 				</div>
 				<div class="flex gap-3">{@render gameControls()}</div>
@@ -115,8 +121,7 @@
 	<div class="flex flex-col gap-6 items-start grow">
 		<div class="flex w-full flex-col items-center gap-3">
 			<div class="flex items-center w-full">
-				<div class="w-30">
-				</div>
+				<div class="w-30"></div>
 				<div class="grow flex justify-center">
 					<LichessLogin />
 				</div>
@@ -124,9 +129,9 @@
 					<ThemeToggle />
 				</div>
 			</div>
-				{@render divider()}
-				<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
-				{@render divider()}
+			{@render divider()}
+			<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
+			{@render divider()}
 		</div>
 		{#if studyId}
 			<div class="flex w-full justify-between flex-wrap xl:flex-nowrap gap-x-6 gap-y-6">
