@@ -21,6 +21,16 @@
 	input::-webkit-slider-runnable-track,
     input::-moz-range-track {
 		height: var(--line-thickness);
-		background: black;
+		background: var(--foreground);
+	}
+
+    input:disabled::-webkit-slider-thumb,
+	input:disabled::-moz-range-thumb {
+        background-color: var(--disabled-color);
+    }
+
+	input:disabled::-webkit-slider-runnable-track,
+    input:disabled::-moz-range-track {
+		background: var(--disabled-color);
 	}
 </style>

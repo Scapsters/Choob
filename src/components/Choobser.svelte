@@ -31,6 +31,7 @@
 		recordMove,
 		isChoobEnabled = $bindable(),
 		playChoobve = $bindable(),
+		maybeGetEngineEvaluation = $bindable(),
 	}: {
 		studyId: string;
 		studyValidity: StudyValidity;
@@ -39,13 +40,15 @@
 		recordMove: RecordMove;
 		isChoobEnabled: boolean;
 		playChoobve: (() => void) | null;
+		maybeGetEngineEvaluation: ((fen: string) => Promise<ChoobEvaluation>) | null;
 	} = $props();
 
-	const getEngineEvaluation = async (fen: string): Promise<ChoobEvaluation> => {
+	const getEvaluation = async (fen: string): Promise<ChoobEvaluation> => {
 		const localEval = getLocalEvaluation(fen, localEvalDepth);
 		const cloudEval = await getCloudEvaluation(fen, auth?.token?.value);
 		return cloudEval ?? localEval;
 	};
+	maybeGetEngineEvaluation = getEvaluation;
 
 	let userWeightCommonMove = $state(20);
 
@@ -83,41 +86,53 @@
 			apiToken: auth?.token?.value,
 			fen: chess.fen,
 		});
-		engine ??= getEngineEvaluation(chess.fen);
+		engine ??= getEvaluation(chess.fen);
 
 		switch (Chooser.chooseWeightedObject(weights).type as MoveType) {
 			case 'study':
 				if (enabledStudyMove) {
 					console.log('Trying study move');
-					let studyMoves = await getStudyMove(studyId, chess.fen, auth?.token?.value, studyIsPublic);
-					if (studyMoves?.length) {
-						let studyMove = studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
-						console.log(`Using study move: ${JSON.stringify(studyMove)}`);
-						chess.move(studyMove);
-						recordMove?.(chess, 'study');
-						break;
+					try {
+						let studyMoves = await getStudyMove(studyId, chess.fen, auth?.token?.value, studyIsPublic);
+						if (studyMoves?.length) {
+							let studyMove = studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
+							console.log(`Using study move: ${JSON.stringify(studyMove)}`);
+							chess.move(studyMove);
+							recordMove?.(chess, 'study');
+							break;
+						}
+					} catch (error) {
+						console.error(error);
 					}
 				}
 			case 'common':
 				if (enabledCommonMove && auth.token) {
 					console.log('Trying common move');
-					const awaitedCommon = await common;
-					if (awaitedCommon) {
-						console.log(`Using common move: ${JSON.stringify(awaitedCommon)}`);
-						chess.move(awaitedCommon.move);
-						recordMove?.(chess, 'common');
-						break;
+					try {
+						const awaitedCommon = await common;
+						if (awaitedCommon) {
+							console.log(`Using common move: ${JSON.stringify(awaitedCommon)}`);
+							chess.move(awaitedCommon.move);
+							recordMove?.(chess, 'common');
+							break;
+						}
+					} catch (error) {
+						console.error(error);
 					}
 				}
 			case 'engine (C)':
 				if (enabledEngineMove && auth.token) {
 					console.log('Trying cloud engine move');
-					const awaitedEngine = await engine;
-					if (awaitedEngine.evalSource === 'cloud') {
-						console.log(`Using cloud engine move: ${JSON.stringify(awaitedEngine.move)}`);
-						chess.move(awaitedEngine.move);
-						recordMove?.(chess, 'engine (C)');
-						break;
+					try {
+						const awaitedEngine = await engine;
+						if (awaitedEngine.evalSource === 'cloud') {
+							console.log(`Using cloud engine move: ${JSON.stringify(awaitedEngine.move)}`);
+							chess.move(awaitedEngine.move);
+							recordMove?.(chess, 'engine (C)');
+							break;
+						}
+					} catch (error) {
+						console.error(error);
 					}
 				}
 			case 'engine (L)':
@@ -130,6 +145,12 @@
 				}
 		}
 	};
+
+	$effect(() => {
+		if (!auth.token) {
+			weightCommonMove = 0;
+		}
+	});
 </script>
 
 <div class="flex items-center gap-4">
@@ -142,17 +163,16 @@
 	>
 		<div>
 			<p>Study enabled:</p>
-			<Checkbox bind:checked={userEnabledStudyMove} disabled={studyValidity !== 'valid'}/>
+			<Checkbox bind:checked={userEnabledStudyMove} disabled={studyValidity !== 'valid'} />
 		</div>
 		<div>
 			<p>Weight</p>
 			<NumberInput bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
 			<RangeInput bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
 		</div>
-		<!-- TODO: force common/engine weight to 0 if authtoken is null, remove check in onMove -->
 		<div>
 			<p>Common enabled:</p>
-			<Checkbox bind:checked={enabledCommonMove} />
+			<Checkbox bind:checked={enabledCommonMove} disabled={!auth.token} />
 		</div>
 		<div>
 			<p>Weight</p>
@@ -165,8 +185,8 @@
 		</div>
 		<div>
 			<p>Weight</p>
-			<NumberInput bind:value={weightEngineMove} min="0" max="100" />
-			<RangeInput bind:value={weightEngineMove} min="0" max="100" />
+			<NumberInput bind:value={weightEngineMove} min="0" max="100" disabled={!enabledEngineMove} />
+			<RangeInput bind:value={weightEngineMove} min="0" max="100" disabled={!enabledEngineMove} />
 		</div>
 		<div>
 			<p>Local engine enabled:</p>
@@ -174,8 +194,8 @@
 		</div>
 		<div>
 			<p>Depth</p>
-			<NumberInput bind:value={localEvalDepth} min="0" max="25" />
-			<RangeInput bind:value={localEvalDepth} min="0" max="25" />
+			<NumberInput bind:value={localEvalDepth} min="0" max="25" disabled={!enabledEngineMove || !enabledLocalEngine} />
+			<RangeInput bind:value={localEvalDepth} min="0" max="25" disabled={!enabledEngineMove || !enabledLocalEngine} />
 		</div>
 	</div>
 </div>

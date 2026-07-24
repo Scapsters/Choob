@@ -4,8 +4,10 @@
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 	import Button from './ui/Button.svelte';
 	import TextInput from './ui/TextInput.svelte';
+	import type { SvelteChess } from './ChessBoard.svelte';
 
-	let { studyId, resetBoard }: { studyId: string; resetBoard: (fen?: string) => void } = $props();
+	let { studyId, setBoard, chess }: { studyId: string; setBoard: (fen?: string) => void; chess: SvelteChess } =
+		$props();
 
 	let moveToSearch = $state('');
 	type FoundChapterWithMove = ParseTree & { matchingMove: MoveNodeWithFEN; moveBefore?: MoveNodeWithFEN };
@@ -63,15 +65,23 @@
 </script>
 
 <div>
-	<div class="flex gap-3">
+	<div class="flex gap-3 items-center">
 		<label for="moveSearch">Search for move in study:</label>
 		<TextInput id="moveSearch" class="w-20" bind:value={moveToSearch} />
+		<Button
+			disabled={chess.history.length === 0}
+			onclick={() => {
+				const history = chess.historyVerbose();
+				if (history.length === 0) return;
+				moveToSearch = history[history.length - 1].san;
+			}}>Search last move</Button
+		>
 	</div>
 	{#if foundChaptersWithMove}
 		<div class="w-full flex flex-col gap-1 text-left overflow-y-scroll items-start">
 			{#each foundChaptersWithMove as chapter (chapter)}
 				{@const name = (chapter.tags as StudyGameTags)?.['ChapterName']}
-				<Button class="w-full text-left" onclick={() => resetBoard(chapter.matchingMove?.fen ?? chapter.tags?.FEN)}
+				<Button class="w-full text-left" onclick={() => setBoard(chapter.moveBefore?.fen ?? chapter.tags?.FEN)}
 					>{name}</Button
 				>
 			{/each}

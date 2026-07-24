@@ -43,6 +43,17 @@
 		isCheck() {
 			return this.chess.isCheck();
 		}
+
+		loadPgn(pgn: Parameters<Chess['loadPgn']>[0]) {
+			this.chess.loadPgn(pgn);
+			this.updateSnapshot();
+			return this;
+		}
+
+		setBoard(fen: string) {
+			this.chess = new Chess(fen);
+			this.updateSnapshot();
+		}
 	}
 
 	export type onMoveHandler = (from: Key, to: Key) => void;
@@ -61,14 +72,12 @@
 		chess,
 		playerColor,
 		isChoobEnabled,
-		startingFen = $bindable(),
 		playChoobveIfPossible,
 		recordMove,
 	}: {
 		chess: SvelteChess;
 		playerColor?: Color;
 		isChoobEnabled: boolean;
-		startingFen: string;
 		playChoobveIfPossible: () => void;
 		recordMove: RecordMove;
 	} = $props();
@@ -134,8 +143,7 @@
 					after: async (from, to) => {
 						chess.move({ from, to });
 						chess.updateSnapshot();
-						recordMove?.(chess, 'player');
-						playChoobveIfPossible();
+						recordMove?.(chess, 'player').then(playChoobveIfPossible);
 					},
 				},
 			},

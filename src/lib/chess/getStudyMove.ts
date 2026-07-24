@@ -188,11 +188,11 @@ export async function getStudyGames(
 	let searchParams = new URLSearchParams();
 
 	let headers = new Headers();
-	if (!isPublic) {
+	if (!isPublic && !apiToken) {
 		if (apiToken) {
 			headers.append('Authorization', `Bearer ${apiToken}`);
 		} else {
-			throw new Error('A non-public study must provide an apiToken!');
+			console.warn('A non-public study must provide an apiToken!');
 		}
 	}
 

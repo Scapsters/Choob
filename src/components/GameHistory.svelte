@@ -1,26 +1,32 @@
 <script module lang="ts">
+	export type ChoobHistory = [ChoobHistoryEntry, ChoobHistoryEntry | null][];
+	export type ChoobHistoryEntry = Partial<ChoobEvaluation> & {
+		san: string;
+		moveType: MoveType;
+		winPercents?: ChoobCommonMove['winPercents'];
+	};
+
 	export type RecordMove = ((chess: SvelteChess, source: MoveType) => Promise<void>) | null;
 </script>
 
 <script lang="ts">
-	import { getCommonMove } from '$lib/chess/getCommonMove';
+	import { getCommonMove, type ChoobCommonMove } from '$lib/chess/getCommonMove';
 	import { auth } from '$lib/login.svelte';
 	import type { Color } from 'chess.js';
 	import type { MoveType } from './Choobser.svelte';
-	import type { ChoobHistory, ChoobHistoryEntry, MaybeGetEngineEvaluation } from '../routes/+page.svelte';
+	import type { MaybeGetEngineEvaluation } from '../routes/+page.svelte';
 	import type { SvelteChess } from './ChessBoard.svelte';
+	import type { ChoobEvaluation } from '$lib/chess/getCloudEvaluation';
 
 	let {
-		getEngineEvaluation,
+		maybeGetEngineEvaluation,
 		recordMove = $bindable(),
-		resetHistory = $bindable(),
+		choobHistory = $bindable(),
 	}: {
-		getEngineEvaluation: MaybeGetEngineEvaluation;
+		maybeGetEngineEvaluation: MaybeGetEngineEvaluation;
 		recordMove: RecordMove;
-		resetHistory: (() => void) | null;
+		choobHistory: ChoobHistory;
 	} = $props();
-
-	let choobHistory = $state<ChoobHistory>([]);
 
 	/**
 	 * Add entry to history based on color. "white" creates a new move and
@@ -42,7 +48,7 @@
 	 */
 	recordMove = async function (chess: SvelteChess, moveType: MoveType) {
 		const history = chess.chess.history();
-		const evaluation = (getEngineEvaluation as MaybeGetEngineEvaluation)?.(chess.fen);
+		const evaluation = (maybeGetEngineEvaluation as MaybeGetEngineEvaluation)?.(chess.fen);
 		const common = getCommonMove({
 			apiToken: auth?.token?.value,
 			fen: chess.fen,
@@ -53,10 +59,6 @@
 			moveType,
 			winPercents: (await common)?.winPercents,
 		});
-	};
-
-	resetHistory = async function () {
-		choobHistory = [];
 	};
 </script>
 

@@ -14,27 +14,34 @@
 	import { auth } from '$lib/login.svelte';
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 	import { Chess } from 'chess.js';
-	import type { HTMLAttributes } from 'svelte/elements';
 	import RadioInput from './ui/RadioInput.svelte';
 	import NumberInput from './ui/NumberInput.svelte';
+	import type { StudyValidity } from './StudyValidator.svelte';
 
-	let {
-		studyId,
-		selectedChapter = $bindable(),
-		...rest
-	}: { studyId: string; selectedChapter?: StudyChapter } & HTMLAttributes<HTMLDivElement> = $props();
+	let { studyId, studyValidity, setBoard }: { studyId: string; studyValidity: StudyValidity, setBoard: (fen?: string) => void } = $props();
 
 	let chapters: IncompleteStudyChapter[] = $state([]);
 
 	let selectedIncompleteChapter: IncompleteStudyChapter | null = $state(null);
+	function setSelectedIncompleteChapter(v: IncompleteStudyChapter | null) {
+		selectedIncompleteChapter = v;
+		handleChapterSelect();
+	}
 	let whereToPlayChapterFrom: 'start' | 'end' | 'custom' = $state('start');
+	function setWhereToPlayChapterFrom(v: 'start' | 'end' | 'custom') {
+		whereToPlayChapterFrom = v;
+		handleChapterSelect();
+	}
 	let moveNumberToPlayChapterFrom = $state(0);
+
+	let selectedChapter = $state<StudyChapter>();
 
 	$effect(() => {
 		const updateChapters = async () => {
-			if (!studyId || !auth.token) return;
+			if (!studyId) return;
+			if (studyValidity !== 'valid') chapters = [];
 
-			const study = await getStudyGames(studyId, false, auth.token.value);
+			const study = await getStudyGames(studyId, false, auth?.token?.value);
 			chapters =
 				study?.map((chapter) => {
 					const name = (chapter.tags as StudyGameTags)?.['ChapterName'];
@@ -47,7 +54,7 @@
 		updateChapters();
 	});
 
-	$effect(() => {
+	function handleChapterSelect() {
 		if (!selectedIncompleteChapter) return;
 
 		const startingFen = selectedIncompleteChapter.startingFen;
@@ -75,7 +82,9 @@
 		}
 
 		selectedChapter = { ...selectedIncompleteChapter, fenToPlayFrom };
-	});
+
+		if (fenToPlayFrom) setBoard(fenToPlayFrom);
+	}
 </script>
 
 <div class="flex flex-col gap-1">
@@ -85,26 +94,48 @@
 	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
 	<div class="p-1 h-full w-full overflow-y-scroll">
 		{#each chapters as chapter (chapter)}
-			{const name = chapter.name}
-			<div class="flex gap-3 items-center">
-				<RadioInput id={name} name="chapterSelect" bind:group={selectedIncompleteChapter} value={chapter} />
+		{const name = chapter.name}
+		<div class="flex gap-3 items-center">
+				<RadioInput
+					id={name}
+					name="chapterSelect"
+					bind:selected={() => selectedIncompleteChapter, setSelectedIncompleteChapter}
+					value={chapter}
+				/>
 				<label for={name}>{name}</label>
 			</div>
-		{/each}
-	</div>
+			{/each}
+		</div>
 	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
 	<div class="flex flex-col *:flex *:gap-3 *:items-center">
-		<label><RadioInput bind:group={whereToPlayChapterFrom} value="start" name="fenSide" />Use Start</label>
-		<label><RadioInput bind:group={whereToPlayChapterFrom} value="end" name="fenSide" />Use End</label>
+		<label
+			><RadioInput
+				bind:selected={() => whereToPlayChapterFrom, setWhereToPlayChapterFrom}
+				value="start"
+				name="fenSide"
+			/>Use Start</label
+		>
+		<label
+			><RadioInput
+				bind:selected={() => whereToPlayChapterFrom, setWhereToPlayChapterFrom}
+				value="end"
+				name="fenSide"
+			/>Use End</label
+		>
 		<div class="*:flex *:gap-3 *:items-center">
 			<label>
-				<RadioInput bind:group={whereToPlayChapterFrom} value="custom" name="fenSide" />
+				<RadioInput
+					bind:selected={() => whereToPlayChapterFrom, setWhereToPlayChapterFrom}
+					value="custom"
+					name="fenSide"
+				/>
 				Use Move Number</label
-			>
+				>
 			<NumberInput
 				bind:value={moveNumberToPlayChapterFrom}
 				disabled={whereToPlayChapterFrom !== 'custom'}
 				class="max-w-12"
+				onchange={handleChapterSelect}
 				spinner
 			/>
 		</div>

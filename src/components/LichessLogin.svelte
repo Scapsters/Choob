@@ -12,8 +12,6 @@
 		login = new Login(url.href);
 		login.init();
 	});
-
-	$inspect(auth)
 </script>
 
 <div class="flex items-center gap-3">

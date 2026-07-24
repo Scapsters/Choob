@@ -6,7 +6,6 @@
 	import { getStudyGames } from '$lib/chess/getStudyMove';
 	import { auth } from '$lib/login.svelte';
 	import { onMount } from 'svelte';
-	import Checkbox from './ui/Checkbox.svelte';
 	import Button from './ui/Button.svelte';
 	import TextInput from './ui/TextInput.svelte';
 
@@ -45,12 +44,12 @@
 </script>
 
 <div class="flex gap-x-6 flex-wrap">
-	<div class="flex gap-3 items-center">
+	<div class='flex gap-3 items-center'>
 		<p>Study ID:</p>
-		<TextInput bind:value={studyId} placeholder="Input study Id..." />
-		{studyValidity}
-		<p>Study is public?</p>
-		<Checkbox bind:checked={studyIsPublic} />
+		<TextInput bind:value={studyId} placeholder="Study ID..."/>
+		<p class="w-12">
+			{studyValidity}
+		</p>
 	</div>
 
 	<div class="flex gap-3 items-center">
@@ -62,6 +61,10 @@
 				if (games) window.localStorage.setItem(studyId, JSON.stringify(games));
 			}}>Save current study</Button
 		>
-		<Button class="btn" onclick={() => window.open(`https://lichess.org/study/${studyId}`, '_blank')}>Open Study in Lichess</Button>
+		<Button
+			class="btn"
+			disabled={studyValidity !== 'valid'}
+			onclick={() => window.open(`https://lichess.org/study/${studyId}`, '_blank')}>Open Study in Lichess</Button
+		>
 	</div>
 </div>
