@@ -12,6 +12,11 @@ const extractMoveFromUci = (uci: string) => {
 	let from = uci.slice(0, 2);
 	let to = uci.slice(2, 4);
 
+	// TODO: promotion
+	return convertCastling({ from, to })
+};
+
+export const convertCastling = ({ from, to }: { from: string, to: string }) => {
 	// stockfish shows castling differently than how chess.js likes it
 	if (from === 'e1' && to === 'h1') {
 		to = 'g1';
@@ -23,10 +28,8 @@ const extractMoveFromUci = (uci: string) => {
 		to = 'c8';
 	}
 
-	// TODO: promotion
-
-	return { from, to };
-};
+	return { from, to }
+}
 
 /**
  * Sends the given commands to stockfish one at a time, then waits until stockfish sends a matching message for each given desired response.
@@ -99,7 +102,9 @@ export async function getLocalEvaluation(fen: string, depth: number): Promise<Ch
 
 	const bestMoveParts = data.get('bestmove')!.split(' ');
 	const bestMoveIndex = bestMoveParts.findIndex((part) => part === 'bestmove')!;
+	console.log(bestMoveParts[bestMoveIndex + 1])
 	const move = extractMoveFromUci(bestMoveParts[bestMoveIndex + 1]);
+	console.log(move)
 
 	return { move, centipawns, evalSource: 'local' };
 }

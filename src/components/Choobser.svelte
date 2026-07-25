@@ -28,6 +28,9 @@
 		studyValidity,
 		studyIsPublic,
 		chess,
+		forceEngine,
+		disableMostCommonMoves,
+		disableCloudEngine,
 		recordMove,
 		isChoobEnabled = $bindable(),
 		playChoobve = $bindable(),
@@ -37,6 +40,9 @@
 		studyValidity: StudyValidity;
 		studyIsPublic: boolean;
 		chess: SvelteChess;
+		forceEngine: boolean;
+		disableMostCommonMoves: boolean;
+		disableCloudEngine: boolean;
 		recordMove: RecordMove;
 		isChoobEnabled: boolean;
 		playChoobve: (() => void) | null;
@@ -75,7 +81,7 @@
 	let userEnabledStudyMove = $state(true);
 
 	let enabledStudyMove = $derived((studyValidity as StudyValidity) === 'valid' ? userEnabledStudyMove : false);
-	let enabledCommonMove = $derived(auth.token ? userEnabledCommonMove : false);
+	let enabledCommonMove = $derived(!auth.token ? false : disableMostCommonMoves ? false : userEnabledCommonMove);
 	let enabledEngineMove = $state(true);
 	let enabledLocalEngine = $state(true);
 
@@ -88,7 +94,9 @@
 		});
 		engine ??= getEvaluation(chess.fen);
 
-		switch (Chooser.chooseWeightedObject(weights).type as MoveType) {
+		const previousFEN = chess.fen;
+
+		switch (forceEngine ? 'engine (C)' : (Chooser.chooseWeightedObject(weights).type as MoveType)) {
 			case 'study':
 				if (enabledStudyMove) {
 					console.log('Trying study move');
@@ -98,7 +106,7 @@
 							let studyMove = studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
 							console.log(`Using study move: ${JSON.stringify(studyMove)}`);
 							chess.move(studyMove);
-							recordMove?.(chess, 'study');
+							recordMove?.(chess, 'study', previousFEN);
 							break;
 						}
 					} catch (error) {
@@ -113,7 +121,7 @@
 						if (awaitedCommon) {
 							console.log(`Using common move: ${JSON.stringify(awaitedCommon)}`);
 							chess.move(awaitedCommon.move);
-							recordMove?.(chess, 'common');
+							recordMove?.(chess, 'common', previousFEN);
 							break;
 						}
 					} catch (error) {
@@ -121,14 +129,14 @@
 					}
 				}
 			case 'engine (C)':
-				if (enabledEngineMove && auth.token) {
+				if (!disableCloudEngine && enabledEngineMove && auth.token) {
 					console.log('Trying cloud engine move');
 					try {
 						const awaitedEngine = await engine;
 						if (awaitedEngine.evalSource === 'cloud') {
 							console.log(`Using cloud engine move: ${JSON.stringify(awaitedEngine.move)}`);
 							chess.move(awaitedEngine.move);
-							recordMove?.(chess, 'engine (C)');
+							recordMove?.(chess, 'engine (C)', previousFEN);
 							break;
 						}
 					} catch (error) {
@@ -141,16 +149,10 @@
 					const awaitedEngine = await engine;
 					console.log(`Using local engine move: ${JSON.stringify(awaitedEngine.move)}`);
 					chess.move(awaitedEngine.move);
-					recordMove?.(chess, 'engine (L)');
+					recordMove?.(chess, 'engine (L)', previousFEN);
 				}
 		}
 	};
-
-	$effect(() => {
-		if (!auth.token) {
-			weightCommonMove = 0;
-		}
-	});
 </script>
 
 <div class="flex items-center gap-4">
@@ -162,7 +164,7 @@
 		"
 	>
 		<div>
-			<p>Study enabled:</p>
+			<p>Study Enabled</p>
 			<Checkbox bind:checked={userEnabledStudyMove} disabled={studyValidity !== 'valid'} />
 		</div>
 		<div>
@@ -171,8 +173,8 @@
 			<RangeInput bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
 		</div>
 		<div>
-			<p>Common enabled:</p>
-			<Checkbox bind:checked={enabledCommonMove} disabled={!auth.token} />
+			<p>Common Enabled</p>
+			<Checkbox bind:checked={userEnabledCommonMove} disabled={!auth.token || disableMostCommonMoves} />
 		</div>
 		<div>
 			<p>Weight</p>
@@ -180,7 +182,7 @@
 			<RangeInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
 		</div>
 		<div>
-			<p>Engine enabled:</p>
+			<p>Engine Enabled</p>
 			<Checkbox bind:checked={enabledEngineMove} />
 		</div>
 		<div>
@@ -189,7 +191,7 @@
 			<RangeInput bind:value={weightEngineMove} min="0" max="100" disabled={!enabledEngineMove} />
 		</div>
 		<div>
-			<p>Local engine enabled:</p>
+			<p>Local Engine Enabled</p>
 			<Checkbox bind:checked={enabledLocalEngine} disabled={!enabledEngineMove} />
 		</div>
 		<div>

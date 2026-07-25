@@ -72,15 +72,12 @@
 	import 'svelte5-chessground/style.css';
 	import type { ChoobHistory, ChoobHistoryEntry, RecordMove } from './GameHistory.svelte';
 	import { onMount } from 'svelte';
-	import { getStudyGames, getStudyMove, prepareStudy } from '$lib/chess/getStudyMove';
-	import { auth } from '$lib/login.svelte';
 
 	let {
 		chess,
 		playerColor,
 		isChoobEnabled,
 		choobHistory,
-		studyId,
 		playChoobveIfPossible,
 		recordMove,
 	}: {
@@ -88,7 +85,6 @@
 		playerColor?: Color;
 		isChoobEnabled: boolean;
 		choobHistory: ChoobHistory;
-		studyId: string;
 		playChoobveIfPossible: () => void;
 		recordMove: RecordMove;
 	} = $props();
@@ -152,24 +148,10 @@
 				showDests: true,
 				events: {
 					after: async (from, to) => {
-						const studyMovesTheyCouldHavePlayed =
-							(await getStudyMove(studyId, chess.fen, auth.token?.value, false))?.map(
-								(move) => move.notation.notation
-							) || [];
-
+						const previousFEN = chess.fen
 						chess.move({ from, to });
 
-						const moveTheyPlayed = chess.history[chess.history.length - 1];
-						console.log(moveTheyPlayed, studyMovesTheyCouldHavePlayed);
-						const studyDeviation =
-							(studyMovesTheyCouldHavePlayed.length > 0 &&
-								studyMovesTheyCouldHavePlayed?.every((studyMove) => studyMove !== moveTheyPlayed) &&
-								studyMovesTheyCouldHavePlayed[0]) ||
-							undefined;
-
-						console.log(studyDeviation);
-
-						recordMove?.(chess, 'player', studyDeviation).then(playChoobveIfPossible);
+						recordMove?.(chess, 'player', previousFEN).then(playChoobveIfPossible);
 
 						if (undoneMoves.length > 0) {
 							if (areMovesEqual(undoneMoves[undoneMoves.length - 1].move, { from, to })) {

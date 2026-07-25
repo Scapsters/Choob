@@ -38,6 +38,8 @@
 	let maybeGetEngineEvaluation: MaybeGetEngineEvaluation = $state(null);
 
 	let recordMove: RecordMove = $state(null);
+	let isGameOver = $state(false);
+	let forceEngine = $state(false);
 	let choobHistory = $state<ChoobHistory>([]);
 	function getPositionToSave() {
 		return {
@@ -51,6 +53,9 @@
 		pgn: string;
 		choobHistory: ChoobHistory;
 	}>(getPositionToSave());
+
+	let disableMostCommonMoves = $state(false);
+	let disableCloudEngine = $state(false);
 
 	function setBoard(fen?: string) {
 		startingFen = fen ?? DEFAULT_FEN;
@@ -77,7 +82,14 @@
 <div class="grid grid-flow-col grid-rows-4 xl:grid-rows-2 gap-6 justify-center mx-auto p-6 max-w-400">
 	<div class="flex justify-center min-w-0 grow basis-80">
 		<div class="max-w-150 w-full">
-			<ChessBoard {chess} {playerColor} {studyId} {isChoobEnabled} {choobHistory} {playChoobveIfPossible} {recordMove} />
+			<ChessBoard
+				{chess}
+				{playerColor}
+				{isChoobEnabled}
+				{choobHistory}
+				{playChoobveIfPossible}
+				{recordMove}
+			/>
 		</div>
 	</div>
 
@@ -94,15 +106,16 @@
 							onclick={() => {
 								setBoard();
 								playChoobveIfPossible();
+								isGameOver = false;
 							}}>Reset Board</Button
 						>
 					</div>
 				</div>
-				<div class="flex gap-3">{@render gameControls()}</div>
+				<div class="flex gap-3 flex-wrap justify-center">{@render gameControls()}</div>
 				{@render divider()}
 			</div>
 		</div>
-		<div class="flex flex-col">
+		<div class="flex flex-col gap-6">
 			<div class="flex justify-center">
 				<Choobser
 					bind:playChoobve
@@ -110,10 +123,20 @@
 					{recordMove}
 					{chess}
 					{studyId}
+					{forceEngine}
 					{studyValidity}
+					{disableMostCommonMoves}
+					{disableCloudEngine}
 					{studyIsPublic}
 					bind:maybeGetEngineEvaluation
 				/>
+			</div>
+			<div class="flex flex-col items-center gap-3">
+				<p>API Settings (For rate limit)</p>
+				<div class="flex flex-col gap-1">
+					<label class="flex gap-3 items-center"><Checkbox bind:checked={disableMostCommonMoves} /> Disable Most Common Moves</label>
+					<label class="flex gap-3 items-center"><Checkbox bind:checked={disableCloudEngine} /> Disable Cloud Engine</label>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -146,7 +169,7 @@
 	</div>
 
 	<div class="flex flex-col gap-3 items-center">
-		<GameHistory {chess} bind:recordMove bind:choobHistory {maybeGetEngineEvaluation} />
+		<GameHistory {chess} {studyId} {forceEngine} {disableMostCommonMoves} bind:isGameOver bind:recordMove bind:choobHistory {maybeGetEngineEvaluation} />
 	</div>
 </div>
 
@@ -163,21 +186,24 @@
 			}
 		/></label
 	>
-	<Button
-		onclick={() => {
-			savedPosition = getPositionToSave();
-		}}>Set Board Checkpoint</Button
-	>
-	<Button
-		disabled={savedPosition.startingFen === DEFAULT_FEN}
-		onclick={() => {
-			if (!savedPosition) return;
-			chess = new SvelteChess(savedPosition.startingFen).loadPgn(savedPosition.pgn);
-			choobHistory = structuredClone($state.snapshot(savedPosition.choobHistory));
-			refreshPlayerColorChoice();
-			playChoobveIfPossible?.();
-		}}>Restore Board Checkpoint</Button
-	>
+	<div class="flex flex-wrap gap-3">
+		<Button
+			onclick={() => {
+				savedPosition = getPositionToSave();
+			}}>Set Board Checkpoint</Button
+		>
+		<Button
+			disabled={savedPosition.startingFen === DEFAULT_FEN}
+			onclick={() => {
+				if (!savedPosition) return;
+				chess = new SvelteChess(savedPosition.startingFen).loadPgn(savedPosition.pgn);
+				choobHistory = structuredClone($state.snapshot(savedPosition.choobHistory));
+				refreshPlayerColorChoice();
+				playChoobveIfPossible?.();
+				isGameOver = false;
+			}}>Restore Board Checkpoint</Button
+		>
+	</div>
 {/snippet}
 
 {#snippet colorSettings()}

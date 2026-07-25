@@ -1,3 +1,5 @@
+import { convertCastling } from "./getLocalEvaluation"
+
 // https://lichess.org/api#tag/analysis/GET/api/cloud-eval
 type LichessCloudEvaluation = {
 	fen: string;
@@ -40,12 +42,13 @@ export async function getCloudEvaluation(fen: string, apiToken?: string): Promis
 	}
 
 	const body = (await response.json()) as LichessCloudEvaluation;
+	
 	return {
 		centipawns: body.pvs[0].cp,
-		move: {
+		move: convertCastling({
 			from: body.pvs[0].moves.split(' ')[0].substring(0, 2),
 			to: body.pvs[0].moves.split(' ')[0].substring(2, 4),
-		},
+		}),
 		evalSource: 'cloud',
 	};
 }
