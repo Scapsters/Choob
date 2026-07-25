@@ -77,7 +77,7 @@
 <div class="grid grid-flow-col grid-rows-4 xl:grid-rows-2 gap-6 justify-center mx-auto p-6 max-w-400">
 	<div class="flex justify-center min-w-0 grow basis-80">
 		<div class="max-w-150 w-full">
-			<ChessBoard {chess} {playerColor} {isChoobEnabled} {choobHistory} {playChoobveIfPossible} {recordMove} />
+			<ChessBoard {chess} {playerColor} {studyId} {isChoobEnabled} {choobHistory} {playChoobveIfPossible} {recordMove} />
 		</div>
 	</div>
 
@@ -146,8 +146,7 @@
 	</div>
 
 	<div class="flex flex-col gap-3 items-center">
-		{@render lichessButton()}
-		<GameHistory bind:recordMove bind:choobHistory {maybeGetEngineEvaluation} />
+		<GameHistory {chess} bind:recordMove bind:choobHistory {maybeGetEngineEvaluation} />
 	</div>
 </div>
 
@@ -191,14 +190,6 @@
 	<label class="flex flex-col items-start w-15"
 		><RadioInput bind:selected={() => playerColorChoice, setPlayerColorChoice} value="random" /> Random</label
 	>
-{/snippet}
-
-{#snippet lichessButton()}
-	<Button
-		onclick={() => window.open(`https://lichess.org/analysis/pgn/${encodeURIComponent(chess.chess.pgn())}`, '_blank')}
-	>
-		Lichess Button
-	</Button>
 {/snippet}
 
 {#snippet divider()}

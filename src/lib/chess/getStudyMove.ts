@@ -163,7 +163,8 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 
 let studyGames = new Map<string, StudyGame[]>();
 /**
- * Retrieves a list of PNG strings given a lichess study. Removes overlaps
+ * Retrieves a list of PNG strings given a lichess study. Removes overlaps.
+ * Network is cached.
  * @param lichessStudyId the id of the study to retrieve PGNs from
  * @param isPublic true if the study is public
  * @param apiToken required if the study is not public (private/unlisted)
@@ -243,6 +244,7 @@ let preparedStudies = new Map<string, ReturnType<typeof prepareStudy>>();
 
 /**
  * Mutates the given array of study games and returns a FEN association map. See {@link createFENAssociationMap}
+ * Network requests and heavy-processing is cached.
  * @param games An array of StudyGames representing a collection of Lichess Study Chapters.
  */
 export function prepareStudy(games: StudyGame[]): {
@@ -269,6 +271,7 @@ export function prepareStudy(games: StudyGame[]): {
 
 /**
  * Returns a random move from the given Study's chapters that follow the given FEN.
+ * Network requests and heavy-processing is cached.
  * @param lichessStudyId id of Lichess Study to search
  * @param currentFEN fen to search
  * @param authToken the API token to use to lichess
