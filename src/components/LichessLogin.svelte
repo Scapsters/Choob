@@ -17,8 +17,8 @@
 <div class="flex items-center gap-3">
 	{#if auth.username}
 	<p>Logged in as <b>{auth.username}</b></p>
+	<Button disabled={!auth.token} onclick={() => login.logout()}> Logout </Button>
 	{:else}
 	<Button onclick={() => login.login()}> Log in to Lichess </Button>
 	{/if}
-	<Button disabled={!auth.token} onclick={() => login.logout()}> Byebye </Button>
 </div>

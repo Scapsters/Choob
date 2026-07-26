@@ -289,19 +289,3 @@ export async function getStudyMove(
 	const preparedStudy = prepareStudy(games);
 	return preparedStudy.FENAssociationMap.get(makeFENMoveAgnostic(currentFEN));
 }
-
-// const chess = new Chess();
-// chess.loadPgn('1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6');
-
-// getStudyMove('Utd758xx', chess.fen()).then((move) => {
-// 	console.log(move?.notation.notation);
-// });
-// getStudyMove('Utd758xx', chess.fen()).then((move) => {
-// 	console.log(move?.notation.notation);
-// });
-// getStudyMove('Utd758xx', chess.fen()).then((move) => {
-// 	console.log(move?.notation.notation);
-// });
-// getStudyMove('Utd758xx', chess.fen()).then((move) => {
-// 	console.log(move?.notation.notation);
-// });

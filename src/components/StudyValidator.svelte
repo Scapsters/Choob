@@ -69,12 +69,12 @@
 			onclick={async () => {
 				const games = await getStudyGames(studyId, studyIsPublic, auth?.token?.value, false);
 				if (games) window.localStorage.setItem(studyId, JSON.stringify(games));
-			}}>Save current study</Button
+			}}>Save study</Button
 		>
 		<Button
 			class="btn"
 			disabled={studyValidity !== 'valid'}
-			onclick={() => window.open(`https://lichess.org/study/${studyId}`, '_blank')}>Open Study in Lichess</Button
+			onclick={() => window.open(`https://lichess.org/study/${studyId}`, '_blank')}>Open in Lichess</Button
 		>
 	</div>
 </div>

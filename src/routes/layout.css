@@ -13,6 +13,10 @@
 	}
 }
 
+@theme {
+	--breakpoint-2xl: 90rem;
+}
+
 :root {
 	--foreground: oklch(15% 0.1 70);
 	--foreground-gray: oklch(50% 0.01 70);

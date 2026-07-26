@@ -39,46 +39,72 @@ export async function getCommonMove({
 }): Promise<ChoobCommonMove | null> {
 	if (!apiToken) return null;
 
-	let searchParams = new URLSearchParams();
-	searchParams.append('speeds', speeds.toString());
-	searchParams.append('ratings', ratings.toString());
-	searchParams.append('moves', movesToConsider.toString());
-	if (fen) searchParams.append('fen', fen);
+	console.log('EEEE');
+	console.trace();
+	let choobCommonMoves: ChoobCommonMove[] = [];
 
-	// these are non-default parameters that i think should always be these values
-	// refer to https://lichess.org/api#tag/opening-explorer/GET/lichess for more info
-	searchParams.append('topGames', '0');
-	searchParams.append('recentGames', '0');
+	// check cache
+	const queryHash = getCommonMoveQueryHash({ ratings, movesToConsider, speeds, fen });
+	const cachedValue = cachedCommonMoves.get(queryHash);
+	if (cachedValue) {
+		choobCommonMoves = cachedValue;
+	} else {
+		let searchParams = new URLSearchParams();
+		searchParams.append('speeds', speeds.toString());
+		searchParams.append('ratings', ratings.toString());
+		searchParams.append('moves', movesToConsider.toString());
+		if (fen) searchParams.append('fen', fen);
 
-	const response = await fetch(`${LICHESS_EXPLORER_URL}?${searchParams.toString()}`, {
-		headers: {
-			Authorization: `Bearer ${apiToken}`,
-		},
-	});
-	const body = await response.json();
-	const movesResponse = body['moves'];
-	if (movesResponse.length === 0) return null;
+		// these are non-default parameters that i think should always be these values
+		// refer to https://lichess.org/api#tag/opening-explorer/GET/lichess for more info
+		searchParams.append('topGames', '0');
+		searchParams.append('recentGames', '0');
 
-	type WeightedMove = {
-		san: string;
-		weight: number;
-	};
-	const weightedMoves: WeightedMove[] = movesResponse.map((item: { [x: string]: string | number }) => ({
-		san: item['san'],
-		weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number),
-	}));
-	const move = (Chooser.chooseWeightedObject(weightedMoves) as WeightedMove).san;
+		const response = await fetch(`${LICHESS_EXPLORER_URL}?${searchParams.toString()}`, {
+			headers: {
+				Authorization: `Bearer ${apiToken}`,
+			},
+		});
+		const body = await response.json();
+		const movesResponse = body['moves'];
+		if (movesResponse.length === 0) return null;
 
-	const { white, draws, black } = body;
-	const sum = white + draws + black;
-	const winPercents =
-		sum > 25
-			? {
-					white: white / sum,
-					draws: draws / sum,
-					black: black / sum,
-				}
-			: undefined;
+		const weightedMoves = movesResponse.map((item: { [x: string]: string | number }) => ({
+			san: item['san'],
+			weight: (item['white'] as number) + (item['draws'] as number) + (item['black'] as number),
+		})) as WeightedMove[];
 
-	return { move, winPercents };
+		const { white, draws, black } = body;
+		const sum = white + draws + black;
+		const winPercents =
+			sum > 25
+				? {
+						white: white / sum,
+						draws: draws / sum,
+						black: black / sum,
+					}
+				: undefined;
+
+		choobCommonMoves = weightedMoves.map((move: WeightedMove) => {
+			return { move: move.san, winPercents };
+		});
+
+		// cache
+		cachedCommonMoves.set(queryHash, choobCommonMoves);
+	}
+
+	return Chooser.chooseWeightedObject(choobCommonMoves);
 }
+function getCommonMoveQueryHash(query: Parameters<typeof getCommonMove>[0]) {
+	return (
+		(query?.ratings?.join(',') ?? '') +
+		(query?.movesToConsider ?? '') +
+		(query?.speeds?.join(',') ?? '') +
+		(query?.fen ?? '')
+	);
+}
+let cachedCommonMoves: Map<string, ChoobCommonMove[]> = new Map();
+type WeightedMove = {
+	san: string;
+	weight: number;
+};

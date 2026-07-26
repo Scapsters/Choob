@@ -81,7 +81,7 @@
 	let userEnabledStudyMove = $state(true);
 
 	let enabledStudyMove = $derived((studyValidity as StudyValidity) === 'valid' ? userEnabledStudyMove : false);
-	let enabledCommonMove = $derived(!auth.token ? false : disableMostCommonMoves ? false : userEnabledCommonMove);
+	let enabledCommonMove = $derived(!auth.token ? false : userEnabledCommonMove);
 	let enabledEngineMove = $state(true);
 	let enabledLocalEngine = $state(true);
 
@@ -89,11 +89,12 @@
 		// precompute certain move types for use in recording
 		// (even if we use a study move, we want to track the win percent/centipawns)
 		const getCommonMoveClosure = () =>
-			getCommonMove({
-			apiToken: auth?.token?.value,
-			fen: chess.fen,
-		});
-		const common = !disableMostCommonMoves && getCommonMoveClosure()
+		{console.log(chess.fen);
+			return getCommonMove({
+				apiToken: auth?.token?.value,
+				fen: chess.fen,
+			});}
+		const common = !disableMostCommonMoves && getCommonMoveClosure();
 		engine ??= getEvaluation(chess.fen);
 
 		const previousFEN = chess.fen;
@@ -101,14 +102,12 @@
 		switch (forceEngine ? 'engine (C)' : (Chooser.chooseWeightedObject(weights).type as MoveType)) {
 			case 'study':
 				if (enabledStudyMove) {
-					console.log('Trying study move');
 					try {
 						let studyMoves = await getStudyMove(studyId, chess.fen, auth?.token?.value, studyIsPublic);
 						if (studyMoves?.length) {
 							let studyMove = studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
-							console.log(`Using study move: ${JSON.stringify(studyMove)}`);
 							chess.move(studyMove);
-							recordMove?.(chess, 'study', previousFEN);
+							recordMove?.(chess, 'study', previousFEN, await common);
 							break;
 						}
 					} catch (error) {
@@ -117,13 +116,11 @@
 				}
 			case 'common':
 				if (enabledCommonMove && auth.token) {
-					console.log('Trying common move');
 					try {
-						const awaitedCommon = await common ?? await getCommonMoveClosure();
+						const awaitedCommon = (await common) || (await getCommonMoveClosure());
 						if (awaitedCommon) {
-							console.log(`Using common move: ${JSON.stringify(awaitedCommon)}`);
 							chess.move(awaitedCommon.move);
-							recordMove?.(chess, 'common', previousFEN);
+							recordMove?.(chess, 'common', previousFEN, awaitedCommon);
 							break;
 						}
 					} catch (error) {
@@ -132,13 +129,11 @@
 				}
 			case 'engine (C)':
 				if (!disableCloudEngine && enabledEngineMove && auth.token) {
-					console.log('Trying cloud engine move');
 					try {
 						const awaitedEngine = await engine;
 						if (awaitedEngine.evalSource === 'cloud') {
-							console.log(`Using cloud engine move: ${JSON.stringify(awaitedEngine.move)}`);
 							chess.move(awaitedEngine.move);
-							recordMove?.(chess, 'engine (C)', previousFEN);
+							recordMove?.(chess, 'engine (C)', previousFEN, await common);
 							break;
 						}
 					} catch (error) {
@@ -147,11 +142,9 @@
 				}
 			case 'engine (L)':
 				if (enabledLocalEngine && enabledEngineMove) {
-					console.log('Trying local engine move');
 					const awaitedEngine = await engine;
-					console.log(`Using local engine move: ${JSON.stringify(awaitedEngine.move)}`);
 					chess.move(awaitedEngine.move);
-					recordMove?.(chess, 'engine (L)', previousFEN);
+					recordMove?.(chess, 'engine (L)', previousFEN, await common);
 				}
 		}
 	};
@@ -185,7 +178,7 @@
 			</div>
 			<div>
 				<p>Common</p>
-				<Checkbox bind:checked={userEnabledCommonMove} disabled={!auth.token || disableMostCommonMoves} />
+				<Checkbox bind:checked={userEnabledCommonMove} disabled={!auth.token} />
 			</div>
 			<div>
 				<p>Weight</p>

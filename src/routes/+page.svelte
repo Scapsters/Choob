@@ -24,6 +24,7 @@
 	import RadioInput from '../components/ui/inputs/RadioInput.svelte';
 	import { browser } from '$app/environment';
 	import Accordion from '../components/ui/Accordion.svelte';
+	import { MediaQuery } from 'svelte/reactivity';
 
 	let chess = $state(new SvelteChess());
 
@@ -80,23 +81,23 @@
 		playerColor = (playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice) ?? 'w';
 	}
 
-	let isMobile = $state(browser && window?.innerWidth < 768);
+	let isMobile = new MediaQuery('(max-width: 1279px)')
 </script>
 
 <div
 	class="
-grid-flow-col gap-x-6 gap-y-0 lg:gap-y-6 justify-center mx-auto max-w-400
+grid-flow-col gap-x-6 gap-y-0 xl:gap-y-6 justify-center mx-auto max-w-400
 flex flex-col p-1
-xl:grid xl:grid-cols-2 xl:grid-rows-2 xl:p-6
+xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 "
 >
-	<div class="flex justify-center min-w-0 grow basis-80">
+	<div class="flex justify-center min-w-0 basis-80">
 		<div class="max-w-150 w-full">
 			<ChessBoard {chess} {playerColor} {isChoobEnabled} {choobHistory} {playChoobveIfPossible} {recordMove} />
 		</div>
 	</div>
 
-	<Accordion title="Game Controls" actuallyUseAccordion={isMobile}>
+	<Accordion title="Game Controls" actuallyUseAccordion={isMobile.current}>
 		<div class="flex flex-col items-center gap-3 p-3">
 			<div class="flex h-min">
 				<div class="flex flex-col items-center gap-3 p-3">
@@ -139,7 +140,7 @@ xl:grid xl:grid-cols-2 xl:grid-rows-2 xl:p-6
 					<p>API Settings (For rate limit)</p>
 					<div class="flex flex-col gap-1">
 						<label class="flex gap-3 items-center"
-							><Checkbox bind:checked={disableMostCommonMoves} /> Disable Most Common Moves</label
+							><Checkbox bind:checked={disableMostCommonMoves} /> Disable Some Common Moves</label
 						>
 						<label class="flex gap-3 items-center"
 							><Checkbox bind:checked={disableCloudEngine} /> Disable Cloud Engine</label
@@ -150,18 +151,12 @@ xl:grid xl:grid-cols-2 xl:grid-rows-2 xl:p-6
 		</div>
 	</Accordion>
 
-	<Accordion title="Study Settings" actuallyUseAccordion={isMobile}>
-		<div class="flex flex-col gap-6 items-start grow p-3">
+	<Accordion title="Study Settings" actuallyUseAccordion={isMobile.current}>
+		<div class="flex flex-col gap-3 items-start grow p-3">
 			<div class="flex max-w-200 w-full flex-col items-center gap-3">
-				<div class="flex justify-center items-center w-full">
-					<div class="lg:w-30"></div>
-					<div class="grow flex justify-center">
-						<LichessLogin />
-					</div>
-					<div class="w-30 flex lg:justify-end">
-						<ThemeToggle />
-					</div>
-				</div>
+				{#if !isMobile.current}
+					{@render loginAndTheme()}
+				{/if}
 				{@render divider()}
 				<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
 				{@render divider()}
@@ -179,7 +174,7 @@ xl:grid xl:grid-cols-2 xl:grid-rows-2 xl:p-6
 		</div>
 	</Accordion>
 
-	<Accordion title="History" actuallyUseAccordion={isMobile}>
+	<Accordion title="History" actuallyUseAccordion={isMobile.current}>
 		<div class="flex flex-col gap-3 items-center p-3">
 			<GameHistory
 				{chess}
@@ -193,6 +188,11 @@ xl:grid xl:grid-cols-2 xl:grid-rows-2 xl:p-6
 			/>
 		</div>
 	</Accordion>
+
+	{#if isMobile.current}
+		<div class="h-6"></div>
+		{@render loginAndTheme()}
+	{/if}
 </div>
 
 {#snippet gameControls()}
@@ -241,5 +241,17 @@ xl:grid xl:grid-cols-2 xl:grid-rows-2 xl:p-6
 {/snippet}
 
 {#snippet divider(inVisibleOnMobile?: boolean)}
-	<div class={`${inVisibleOnMobile ? 'hidden lg:block' : ''} w-full border-b-1 border-(--foreground-gray)`}></div>
+	<div class={`${inVisibleOnMobile ? 'hidden xl:block' : ''} w-full border-b-1 border-(--foreground-gray)`}></div>
+{/snippet}
+
+{#snippet loginAndTheme()}
+	<div class="flex flex-wrap justify-center items-center w-full gap-3">
+		<div class="xl:w-30"></div>
+		<div class="grow flex justify-center">
+			<LichessLogin />
+		</div>
+		<div class="w-30 flex xl:justify-end">
+			<ThemeToggle />
+		</div>
+	</div>
 {/snippet}

@@ -102,9 +102,7 @@ export async function getLocalEvaluation(fen: string, depth: number): Promise<Ch
 
 	const bestMoveParts = data.get('bestmove')!.split(' ');
 	const bestMoveIndex = bestMoveParts.findIndex((part) => part === 'bestmove')!;
-	console.log(bestMoveParts[bestMoveIndex + 1])
 	const move = extractMoveFromUci(bestMoveParts[bestMoveIndex + 1]);
-	console.log(move)
 
 	return { move, centipawns, evalSource: 'local' };
 }

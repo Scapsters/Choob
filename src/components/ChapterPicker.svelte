@@ -102,7 +102,7 @@
 
 <div class="flex flex-col gap-1">
 	<div>
-		<p>Select Study Chapter for Starting FEN</p>
+		<p>Chapter for Starting FEN</p>
 	</div>
 	<div class="hidden lg:block w-full border-b-1 border-(--foreground-gray)"></div>
 	<div class="p-1 h-full w-full overflow-y-scroll">
