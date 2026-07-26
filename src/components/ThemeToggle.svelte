@@ -1,5 +1,6 @@
 <script lang="ts">
-	import Checkbox from './ui/Checkbox.svelte';
+	import Checkbox from "./ui/inputs/Checkbox.svelte";
+
 
 	let isDark = $state(false);
 

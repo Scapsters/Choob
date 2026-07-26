@@ -19,9 +19,9 @@
 	import type { SvelteChess } from './ChessBoard.svelte';
 	import type { Chess } from 'chess.js';
 	import type { RecordMove } from './GameHistory.svelte';
-	import Checkbox from './ui/Checkbox.svelte';
-	import NumberInput from './ui/NumberInput.svelte';
-	import RangeInput from './ui/RangeInput.svelte';
+	import Checkbox from './ui/inputs/Checkbox.svelte';
+	import NumberInput from './ui/inputs/NumberInput.svelte';
+	import RangeInput from './ui/inputs/RangeInput.svelte';
 
 	let {
 		studyId,

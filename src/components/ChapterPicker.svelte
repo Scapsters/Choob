@@ -14,9 +14,9 @@
 	import { auth } from '$lib/login.svelte';
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 	import { Chess } from 'chess.js';
-	import RadioInput from './ui/RadioInput.svelte';
-	import NumberInput from './ui/NumberInput.svelte';
 	import type { StudyValidity } from './StudyValidator.svelte';
+	import NumberInput from './ui/inputs/NumberInput.svelte';
+	import RadioInput from './ui/inputs/RadioInput.svelte';
 
 	let {
 		studyId,

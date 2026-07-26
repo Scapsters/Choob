@@ -3,8 +3,8 @@
 	import { auth } from '$lib/login.svelte';
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 	import Button from './ui/Button.svelte';
-	import TextInput from './ui/TextInput.svelte';
 	import type { SvelteChess } from './ChessBoard.svelte';
+	import TextInput from './ui/inputs/TextInput.svelte';
 
 	let {
 		studyId,

@@ -19,9 +19,11 @@
 	import GameHistory, { type ChoobHistory, type RecordMove } from '../components/GameHistory.svelte';
 	import LichessLogin from '../components/LichessLogin.svelte';
 	import ThemeToggle from '../components/ThemeToggle.svelte';
-	import RadioInput from '../components/ui/RadioInput.svelte';
-	import Checkbox from '../components/ui/Checkbox.svelte';
 	import Button from '../components/ui/Button.svelte';
+	import Checkbox from '../components/ui/inputs/Checkbox.svelte';
+	import RadioInput from '../components/ui/inputs/RadioInput.svelte';
+	import { browser } from '$app/environment';
+	import Accordion from '../components/ui/Accordion.svelte';
 
 	let chess = $state(new SvelteChess());
 
@@ -77,6 +79,8 @@
 	function refreshPlayerColorChoice() {
 		playerColor = (playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice) ?? 'w';
 	}
+
+	let isMobile = $state(browser && window?.innerWidth < 768);
 </script>
 
 <div
@@ -92,97 +96,103 @@ xl:grid xl:grid-cols-2 xl:grid-rows-2 xl:p-6
 		</div>
 	</div>
 
-	<div class="flex flex-col items-center gap-3 p-3">
-		<div class="flex h-min">
-			<div class="flex flex-col items-center gap-3 p-3">
-				{@render divider()}
-				<div class="flex gap-3 w-full">
-					<div class="grow lg:w-full"></div>
-					{@render colorSettings()}
-					<div class="grow w-full flex justify-end items-center">
-						<Button
-							disabled={chess.fen === DEFAULT_FEN}
-							onclick={() => {
-								setBoard();
-								playChoobveIfPossible();
-								isGameOver = false;
-							}}>Reset Board</Button
+	<Accordion title="Game Controls" actuallyUseAccordion={isMobile}>
+		<div class="flex flex-col items-center gap-3 p-3">
+			<div class="flex h-min">
+				<div class="flex flex-col items-center gap-3 p-3">
+					{@render divider()}
+					<div class="flex gap-3 w-full">
+						<div class="grow lg:w-full"></div>
+						{@render colorSettings()}
+						<div class="grow w-full flex justify-end items-center">
+							<Button
+								disabled={chess.fen === DEFAULT_FEN}
+								onclick={() => {
+									setBoard();
+									playChoobveIfPossible();
+									isGameOver = false;
+								}}>Reset Board</Button
+							>
+						</div>
+					</div>
+					<div class="flex gap-3 flex-wrap justify-center">{@render gameControls()}</div>
+					{@render divider()}
+				</div>
+			</div>
+			<div class="flex flex-col gap-6">
+				<div class="flex justify-center">
+					<Choobser
+						bind:playChoobve
+						bind:isChoobEnabled
+						{recordMove}
+						{chess}
+						{studyId}
+						{forceEngine}
+						{studyValidity}
+						{disableMostCommonMoves}
+						{disableCloudEngine}
+						{studyIsPublic}
+						bind:maybeGetEngineEvaluation
+					/>
+				</div>
+				<div class="flex flex-col items-center gap-3">
+					<p>API Settings (For rate limit)</p>
+					<div class="flex flex-col gap-1">
+						<label class="flex gap-3 items-center"
+							><Checkbox bind:checked={disableMostCommonMoves} /> Disable Most Common Moves</label
+						>
+						<label class="flex gap-3 items-center"
+							><Checkbox bind:checked={disableCloudEngine} /> Disable Cloud Engine</label
 						>
 					</div>
 				</div>
-				<div class="flex gap-3 flex-wrap justify-center">{@render gameControls()}</div>
+			</div>
+		</div>
+	</Accordion>
+
+	<Accordion title="Study Settings" actuallyUseAccordion={isMobile}>
+		<div class="flex flex-col gap-6 items-start grow p-3">
+			<div class="flex max-w-200 w-full flex-col items-center gap-3">
+				<div class="flex justify-center items-center w-full">
+					<div class="lg:w-30"></div>
+					<div class="grow flex justify-center">
+						<LichessLogin />
+					</div>
+					<div class="w-30 flex lg:justify-end">
+						<ThemeToggle />
+					</div>
+				</div>
+				{@render divider()}
+				<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
 				{@render divider()}
 			</div>
-		</div>
-		<div class="flex flex-col gap-6">
-			<div class="flex justify-center">
-				<Choobser
-					bind:playChoobve
-					bind:isChoobEnabled
-					{recordMove}
-					{chess}
-					{studyId}
-					{forceEngine}
-					{studyValidity}
-					{disableMostCommonMoves}
-					{disableCloudEngine}
-					{studyIsPublic}
-					bind:maybeGetEngineEvaluation
-				/>
-			</div>
-			<div class="flex flex-col items-center gap-3">
-				<p>API Settings (For rate limit)</p>
-				<div class="flex flex-col gap-1">
-					<label class="flex gap-3 items-center"
-						><Checkbox bind:checked={disableMostCommonMoves} /> Disable Most Common Moves</label
-					>
-					<label class="flex gap-3 items-center"
-						><Checkbox bind:checked={disableCloudEngine} /> Disable Cloud Engine</label
-					>
+			{#if studyId}
+				<div class="flex w-full justify-between flex-wrap xl:flex-nowrap gap-x-12 gap-y-6">
+					<div class="h-full grow">
+						<ChapterPicker {setBoard} {studyId} {studyValidity} {playChoobveIfPossible} />
+					</div>
+					<div class="h-full grow justify-self-end">
+						<MoveSearch {setBoard} {studyId} {chess} {playChoobveIfPossible} />
+					</div>
 				</div>
-			</div>
+			{/if}
 		</div>
-	</div>
+	</Accordion>
 
-	<div class="flex flex-col gap-6 items-start grow p-3">
-		<div class="flex max-w-200 w-full flex-col items-center gap-3">
-			<div class="flex justify-center items-center w-full">
-				<div class="lg:w-30"></div>
-				<div class="grow flex justify-center">
-					<LichessLogin />
-				</div>
-				<div class="w-30 flex lg:justify-end">
-					<ThemeToggle />
-				</div>
-			</div>
-			{@render divider()}
-			<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
-			{@render divider()}
+	<Accordion title="History" actuallyUseAccordion={isMobile}>
+		<div class="flex flex-col gap-3 items-center p-3">
+			<GameHistory
+				{chess}
+				{studyId}
+				{forceEngine}
+				{disableMostCommonMoves}
+				bind:isGameOver
+				bind:recordMove
+				bind:choobHistory
+				{maybeGetEngineEvaluation}
+			/>
 		</div>
-		{#if studyId}
-			<div class="flex w-full justify-between flex-wrap xl:flex-nowrap gap-x-12 gap-y-6">
-				<div class="h-full grow">
-					<ChapterPicker {setBoard} {studyId} {studyValidity} {playChoobveIfPossible} />
-				</div>
-				<div class="h-full grow justify-self-end">
-					<MoveSearch {setBoard} {studyId} {chess} {playChoobveIfPossible} />
-				</div>
-			</div>
-		{/if}
-	</div>
-
-	<div class="flex flex-col gap-3 items-center p-3">
-		<GameHistory
-			{chess}
-			{studyId}
-			{forceEngine}
-			{disableMostCommonMoves}
-			bind:isGameOver
-			bind:recordMove
-			bind:choobHistory
-			{maybeGetEngineEvaluation}
-		/>
-	</div>
+	</Accordion>
 </div>
 
 {#snippet gameControls()}

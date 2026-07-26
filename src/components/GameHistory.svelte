@@ -19,9 +19,9 @@
 	import type { SvelteChess } from './ChessBoard.svelte';
 	import type { ChoobEvaluation } from '$lib/chess/getCloudEvaluation';
 	import Button from './ui/Button.svelte';
-	import Checkbox from './ui/Checkbox.svelte';
-	import NumberInput from './ui/NumberInput.svelte';
 	import { getStudyMove } from '$lib/chess/getStudyMove';
+	import Checkbox from './ui/inputs/Checkbox.svelte';
+	import NumberInput from './ui/inputs/NumberInput.svelte';
 
 	let {
 		maybeGetEngineEvaluation,

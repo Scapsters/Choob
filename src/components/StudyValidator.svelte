@@ -7,7 +7,7 @@
 	import { auth } from '$lib/login.svelte';
 	import { onMount } from 'svelte';
 	import Button from './ui/Button.svelte';
-	import TextInput from './ui/TextInput.svelte';
+	import TextInput from './ui/inputs/TextInput.svelte';
 
 	let {
 		studyId = $bindable(),
