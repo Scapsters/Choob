@@ -35,6 +35,7 @@
 		recordMove = $bindable(),
 		choobHistory = $bindable(),
 		isGameOver = $bindable(),
+		maybeEndGame = $bindable(),
 		studyId,
 		disableMostCommonMoves,
 		forceEngine,
@@ -42,6 +43,7 @@
 	}: {
 		maybeGetEngineEvaluation: MaybeGetEngineEvaluation;
 		recordMove: RecordMove;
+		maybeEndGame: ((reason: string) => Promise<void>) | null;
 		choobHistory: ChoobHistory;
 		chess: SvelteChess;
 		studyId: string;
@@ -104,10 +106,10 @@
 		});
 
 		forceEngine = false;
-		maybeEndGame();
+		tryToEndGame();
 	};
 
-	function maybeEndGame() {
+	function tryToEndGame() {
 		if (choobHistory.length === 0) return;
 
 		const lastMove = choobHistory[choobHistory.length - 1].findLast((entry) => !!entry) as ChoobHistoryEntry;
@@ -136,21 +138,21 @@
 			if (useEngineOnBlunder) {
 				forceEngine = true;
 			} else {
-				endGame();
+				endGame("Blunder");
 			}
 			return;
 		}
 		if (endOnDeviation && lastMove.studyDeviation) {
-			endGame();
+			endGame("Deviation");
 			return;
 		}
 		if (endOnRarity && isPositionRareEnough) {
-			endGame();
+			endGame("Rarity");
 			return;
 		}
 	}
 
-	async function endGame() {
+	const endGame = async (reason: string) => {
 		const lastMove = choobHistory[choobHistory.length - 1].findLast((entry) => !!entry) as ChoobHistoryEntry;
 		if (!lastMove.winPercents) {
 			lastMove.winPercents = (
@@ -160,8 +162,10 @@
 				})
 			)?.winPercents;
 		}
+		reasonForEnd = reason
 		isGameOver = true;
 	}
+	maybeEndGame = endGame
 
 	let recordWinPercent = $state(false);
 	let showStudyDeviations = $state(true);
@@ -177,16 +181,29 @@
 	let blunderThreshold = $state(250);
 
 	let useEngineOnBlunder = $state(false);
+
+	let reasonForEnd = $state('')
 </script>
 
 <div class="grid grid-rows-[1fr,1fr,1fr] gap-y-3 w-full">
 	<div class="flex justify-around items-center flex-col lg:flex-row lex-wrap gap-6">
 		<div class="flex flex-col items-center gap-2">
+		<div class="flex flex-row xl:flex-col gap-x-3 gap-y-1">
 			<div class="flex flex-col 2xl:flex-row gap-x-3 items-center">
 				<p>Game Status:</p>
 				<p class="font-bold">{isGameOver ? 'Ended' : 'Active'}</p>
 			</div>
-			<Button onclick={() => (isGameOver = !isGameOver)}>
+			{#if isGameOver && reasonForEnd}
+			<div class="flex flex-col 2xl:flex-row gap-x-3 items-center">
+				<p>Reason:</p>
+				<p class="font-bold">{reasonForEnd}</p>
+			</div>
+			{/if}
+		</div>
+			<Button onclick={() => {
+				isGameOver = !isGameOver
+				reasonForEnd = 'Stopped'
+			}}>
 				{isGameOver ? 'Start Game' : 'End Game'}
 			</Button>
 		</div>

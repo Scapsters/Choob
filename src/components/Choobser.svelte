@@ -35,6 +35,7 @@
 		isChoobEnabled = $bindable(),
 		playChoobve = $bindable(),
 		maybeGetEngineEvaluation = $bindable(),
+		maybeEndGame = $bindable(),
 	}: {
 		studyId: string;
 		studyValidity: StudyValidity;
@@ -47,6 +48,7 @@
 		isChoobEnabled: boolean;
 		playChoobve: (() => void) | null;
 		maybeGetEngineEvaluation: ((fen: string) => Promise<ChoobEvaluation>) | null;
+		maybeEndGame: ((reason: string) => void) | null;
 	} = $props();
 
 	const getEvaluation = async (fen: string): Promise<ChoobEvaluation> => {
@@ -174,6 +176,8 @@
 					recordMove?.(chess, 'engine (L)', previousFEN, await common);
 				}
 		}
+
+		maybeEndGame?.("No Moves")
 	};
 </script>
 
@@ -250,9 +254,11 @@
 		</div>
 	</div>
 
-	<div class="flex flex-col items-center mt-6 gap-3">
-		<div class="flex flex-col 2xl:flex-row gap-1">
-			<div class="flex items-center w-full 2xl:w-auto justify-center"><p>Common Move ratings</p></div>
+	<p class="text-right mt-6">Common Move Settings</p>
+
+	<div class="flex flex-col items-center mt-3 gap-3">
+		<div class="flex flex-col 2xl:flex-row gap-3">
+			<div class="flex items-center w-full 2xl:w-auto justify-center"><p>Ratings</p></div>
 			<div class="gap-3 grid-cols-5 grid-rows-2 grid xl:flex">
 				{#each Object.entries(enabledRatings) as entry (entry[0])}
 					<label class="flex flex-col items-center">
@@ -262,8 +268,8 @@
 				{/each}
 			</div>
 		</div>
-		<div class="flex flex-col 2xl:flex-row gap-1">
-			<div class="flex items-center w-full 2xl:w-auto justify-center"><p>Common Move speeds</p></div>
+		<div class="flex flex-col 2xl:flex-row gap-3">
+			<div class="flex items-center w-full 2xl:w-auto justify-center"><p>Speeds</p></div>
 			<div class="gap-3 grid-cols-3 grid-rows-2 grid xl:flex">
 				{#each Object.entries(enabledSpeeds) as entry (entry[0])}
 					<label class="flex flex-col items-center">

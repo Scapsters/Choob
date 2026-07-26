@@ -41,6 +41,7 @@
 
 	let recordMove: RecordMove = $state(null);
 	let isGameOver = $state(false);
+	let maybeEndGame: ((reason: string) => Promise<void>) | null = $state(null)
 	let forceEngine = $state(false);
 	let choobHistory = $state<ChoobHistory>([]);
 	function getPositionToSave() {
@@ -56,7 +57,7 @@
 		choobHistory: ChoobHistory;
 	}>(getPositionToSave());
 
-	let disableMostCommonMoves = $state(false);
+	let disableMostCommonMoves = $state(true);
 	let disableCloudEngine = $state(false);
 
 	function setBoard(fen?: string) {
@@ -132,11 +133,12 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 						{disableMostCommonMoves}
 						{disableCloudEngine}
 						{studyIsPublic}
+						{maybeEndGame}
 						bind:maybeGetEngineEvaluation
 					/>
 				</div>
 				<div class="flex flex-col items-center gap-3">
-					<p>API Settings (For rate limit)</p>
+					<p>API Settings (For rate limits)</p>
 					<div class="flex flex-col gap-1">
 						<label class="flex gap-3 items-center"
 							><Checkbox bind:checked={disableMostCommonMoves} /> Disable Some Common Moves</label
@@ -174,12 +176,13 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 	</Accordion>
 
 	<Accordion title="History" actuallyUseAccordion={isMobile.current}>
-		<div class="flex flex-col gap-3 items-center p-3">
+		<div class="flex flex-col gap-3 items-center p-3 2xl:w-210">
 			<GameHistory
 				{chess}
 				{studyId}
 				{forceEngine}
 				{disableMostCommonMoves}
+				bind:maybeEndGame
 				bind:isGameOver
 				bind:recordMove
 				bind:choobHistory
