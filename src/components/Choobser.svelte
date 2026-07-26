@@ -88,10 +88,12 @@
 	playChoobve = async (engine?: Promise<ChoobEvaluation>) => {
 		// precompute certain move types for use in recording
 		// (even if we use a study move, we want to track the win percent/centipawns)
-		const common = getCommonMove({
+		const getCommonMoveClosure = () =>
+			getCommonMove({
 			apiToken: auth?.token?.value,
 			fen: chess.fen,
 		});
+		const common = !disableMostCommonMoves && getCommonMoveClosure()
 		engine ??= getEvaluation(chess.fen);
 
 		const previousFEN = chess.fen;
@@ -117,7 +119,7 @@
 				if (enabledCommonMove && auth.token) {
 					console.log('Trying common move');
 					try {
-						const awaitedCommon = await common;
+						const awaitedCommon = await common ?? await getCommonMoveClosure();
 						if (awaitedCommon) {
 							console.log(`Using common move: ${JSON.stringify(awaitedCommon)}`);
 							chess.move(awaitedCommon.move);
@@ -155,49 +157,76 @@
 	};
 </script>
 
-<div class="flex items-center gap-4">
-	<div
-		class="
+<div class="flex flex-col items-center gap-3">
+	<p class="text-right">Choob's Settings</p>
+
+	<div class="flex items-center gap-4">
+		<div
+			class="
 			grid grid-cols-[fit-content(100%)_1fr] gap-x-4 gap-y-2
 			*:flex *:gap-2 *:items-center
 			*:*:first:flex-grow *:*:text-right
 		"
-	>
-		<div>
-			<p>Study Enabled</p>
-			<Checkbox bind:checked={userEnabledStudyMove} disabled={studyValidity !== 'valid'} />
-		</div>
-		<div>
-			<p>Weight</p>
-			<NumberInput bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
-			<RangeInput bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
-		</div>
-		<div>
-			<p>Common Enabled</p>
-			<Checkbox bind:checked={userEnabledCommonMove} disabled={!auth.token || disableMostCommonMoves} />
-		</div>
-		<div>
-			<p>Weight</p>
-			<NumberInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
-			<RangeInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
-		</div>
-		<div>
-			<p>Engine Enabled</p>
-			<Checkbox bind:checked={enabledEngineMove} />
-		</div>
-		<div>
-			<p>Weight</p>
-			<NumberInput bind:value={weightEngineMove} min="0" max="100" disabled={!enabledEngineMove} />
-			<RangeInput bind:value={weightEngineMove} min="0" max="100" disabled={!enabledEngineMove} />
-		</div>
-		<div>
-			<p>Local Engine Enabled</p>
-			<Checkbox bind:checked={enabledLocalEngine} disabled={!enabledEngineMove} />
-		</div>
-		<div>
-			<p>Depth</p>
-			<NumberInput bind:value={localEvalDepth} min="0" max="25" disabled={!enabledEngineMove || !enabledLocalEngine} />
-			<RangeInput bind:value={localEvalDepth} min="0" max="25" disabled={!enabledEngineMove || !enabledLocalEngine} />
+		>
+			<div>
+				<p>Study</p>
+				<Checkbox bind:checked={userEnabledStudyMove} disabled={studyValidity !== 'valid'} />
+			</div>
+			<div>
+				<p>Weight</p>
+				<NumberInput bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
+				<RangeInput
+					bind:value={weightStudyMove}
+					min="0"
+					max="100"
+					disabled={studyValidity !== 'valid'}
+					class="lg:w-50 w-35"
+				/>
+			</div>
+			<div>
+				<p>Common</p>
+				<Checkbox bind:checked={userEnabledCommonMove} disabled={!auth.token || disableMostCommonMoves} />
+			</div>
+			<div>
+				<p>Weight</p>
+				<NumberInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
+				<RangeInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} class="lg:w-50 w-35" />
+			</div>
+			<div>
+				<p>Engine</p>
+				<Checkbox bind:checked={enabledEngineMove} />
+			</div>
+			<div>
+				<p>Weight</p>
+				<NumberInput bind:value={weightEngineMove} min="0" max="100" disabled={!enabledEngineMove} />
+				<RangeInput
+					bind:value={weightEngineMove}
+					min="0"
+					max="100"
+					disabled={!enabledEngineMove}
+					class="lg:w-50 w-35"
+				/>
+			</div>
+			<div>
+				<p>Local Engine</p>
+				<Checkbox bind:checked={enabledLocalEngine} disabled={!enabledEngineMove} />
+			</div>
+			<div>
+				<p>Depth</p>
+				<NumberInput
+					bind:value={localEvalDepth}
+					min="0"
+					max="25"
+					disabled={!enabledEngineMove || !enabledLocalEngine}
+				/>
+				<RangeInput
+					bind:value={localEvalDepth}
+					min="0"
+					max="25"
+					disabled={!enabledEngineMove || !enabledLocalEngine}
+					class="lg:w-50 w-35"
+				/>
+			</div>
 		</div>
 	</div>
 </div>

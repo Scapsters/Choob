@@ -45,8 +45,8 @@
 	});
 </script>
 
-<div class="flex gap-x-6 flex-wrap w-full justify-between">
-	<div class="flex gap-3 items-center">
+<div class="flex gap-x-6 gap-y-3 flex-wrap w-full justify-between">
+	<div class="flex gap-3 items-center justify-center grow-1 xl:grow-0">
 		<p>Study ID:</p>
 		<TextInput
 			bind:value={studyId}
@@ -62,7 +62,7 @@
 		{/if}
 	</div>
 
-	<div class="flex gap-3 items-center">
+	<div class="flex gap-3 items-center justify-center grow-1 xl:grow-0">
 		<Button
 			class="btn"
 			disabled={studyValidity !== 'valid'}

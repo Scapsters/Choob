@@ -70,8 +70,8 @@
 </script>
 
 <div>
-	<div class="flex gap-3 items-center justify-between">
-		<div class="flex gap-3 items-center">
+	<div class="flex gap-3 items-center justify-around lg:justify-between">
+		<div class="flex flex-col lg:flex-row gap-3 items-center">
 			<label for="moveSearch">Search for move in study:</label>
 			<TextInput id="moveSearch" class="w-20" bind:value={moveToSearch} />
 		</div>

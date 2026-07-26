@@ -79,26 +79,25 @@
 	}
 </script>
 
-<div class="grid grid-flow-col grid-rows-4 xl:grid-rows-2 gap-6 justify-center mx-auto p-6 max-w-400">
+<div
+	class="
+grid-flow-col gap-x-6 gap-y-0 lg:gap-y-6 justify-center mx-auto max-w-400
+flex flex-col p-1
+xl:grid xl:grid-cols-2 xl:grid-rows-2 xl:p-6
+"
+>
 	<div class="flex justify-center min-w-0 grow basis-80">
 		<div class="max-w-150 w-full">
-			<ChessBoard
-				{chess}
-				{playerColor}
-				{isChoobEnabled}
-				{choobHistory}
-				{playChoobveIfPossible}
-				{recordMove}
-			/>
+			<ChessBoard {chess} {playerColor} {isChoobEnabled} {choobHistory} {playChoobveIfPossible} {recordMove} />
 		</div>
 	</div>
 
-	<div class="flex flex-col items-center gap-6">
+	<div class="flex flex-col items-center gap-3 p-3">
 		<div class="flex h-min">
 			<div class="flex flex-col items-center gap-3 p-3">
 				{@render divider()}
 				<div class="flex gap-3 w-full">
-					<div class="grow w-full"></div>
+					<div class="grow lg:w-full"></div>
 					{@render colorSettings()}
 					<div class="grow w-full flex justify-end items-center">
 						<Button
@@ -134,21 +133,25 @@
 			<div class="flex flex-col items-center gap-3">
 				<p>API Settings (For rate limit)</p>
 				<div class="flex flex-col gap-1">
-					<label class="flex gap-3 items-center"><Checkbox bind:checked={disableMostCommonMoves} /> Disable Most Common Moves</label>
-					<label class="flex gap-3 items-center"><Checkbox bind:checked={disableCloudEngine} /> Disable Cloud Engine</label>
+					<label class="flex gap-3 items-center"
+						><Checkbox bind:checked={disableMostCommonMoves} /> Disable Most Common Moves</label
+					>
+					<label class="flex gap-3 items-center"
+						><Checkbox bind:checked={disableCloudEngine} /> Disable Cloud Engine</label
+					>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<div class="flex flex-col gap-6 items-start grow">
-		<div class="flex w-200 flex-col items-center gap-3">
-			<div class="flex items-center w-full">
-				<div class="w-30"></div>
+	<div class="flex flex-col gap-6 items-start grow p-3">
+		<div class="flex max-w-200 w-full flex-col items-center gap-3">
+			<div class="flex justify-center items-center w-full">
+				<div class="lg:w-30"></div>
 				<div class="grow flex justify-center">
 					<LichessLogin />
 				</div>
-				<div class="w-30 flex justify-end">
+				<div class="w-30 flex lg:justify-end">
 					<ThemeToggle />
 				</div>
 			</div>
@@ -168,8 +171,17 @@
 		{/if}
 	</div>
 
-	<div class="flex flex-col gap-3 items-center">
-		<GameHistory {chess} {studyId} {forceEngine} {disableMostCommonMoves} bind:isGameOver bind:recordMove bind:choobHistory {maybeGetEngineEvaluation} />
+	<div class="flex flex-col gap-3 items-center p-3">
+		<GameHistory
+			{chess}
+			{studyId}
+			{forceEngine}
+			{disableMostCommonMoves}
+			bind:isGameOver
+			bind:recordMove
+			bind:choobHistory
+			{maybeGetEngineEvaluation}
+		/>
 	</div>
 </div>
 
@@ -201,7 +213,7 @@
 				refreshPlayerColorChoice();
 				playChoobveIfPossible?.();
 				isGameOver = false;
-			}}>Restore Board Checkpoint</Button
+			}}>Restore Checkpoint</Button
 		>
 	</div>
 {/snippet}
@@ -218,6 +230,6 @@
 	>
 {/snippet}
 
-{#snippet divider()}
-	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
+{#snippet divider(inVisibleOnMobile?: boolean)}
+	<div class={`${inVisibleOnMobile ? 'hidden lg:block' : ''} w-full border-b-1 border-(--foreground-gray)`}></div>
 {/snippet}

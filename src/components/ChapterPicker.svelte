@@ -104,7 +104,7 @@
 	<div>
 		<p>Select Study Chapter for Starting FEN</p>
 	</div>
-	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
+	<div class="hidden lg:block w-full border-b-1 border-(--foreground-gray)"></div>
 	<div class="p-1 h-full w-full overflow-y-scroll">
 		{#each chapters as chapter (chapter)}
 			{const name = chapter.name}
@@ -119,7 +119,7 @@
 			</div>
 		{/each}
 	</div>
-	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
+	<div class="w-60 lg:w-full border-b-1 border-(--foreground-gray) self-center"></div>
 	<div class="flex flex-col *:flex *:gap-3 *:items-center">
 		<label
 			><RadioInput

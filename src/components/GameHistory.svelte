@@ -164,8 +164,8 @@
 	let useEngineOnBlunder = $state(false);
 </script>
 
-<div class="grid grid-rows-[1fr,1fr,1fr] gap-y-3">
-	<div class="flex justify-center items-center flex-wrap gap-6">
+<div class="grid grid-rows-[1fr,1fr,1fr] gap-y-3 w-full">
+	<div class="flex justify-center items-center flex-col lg:flex-row lex-wrap gap-6">
 		<div class="flex flex-col items-center gap-2">
 			<div class="flex gap-3">
 				<p>Game Status:</p>
@@ -176,10 +176,12 @@
 			</Button>
 		</div>
 
-		<p class="text-center">End Game on:</p>
-		<div class="grid grid-cols-2 grid-rows-2 grid-flow-col gap-x-3 gap-y-1">
-			<div class="flex gap-3">
-				<label class="flex gap-2 items-center">Rare Position<Checkbox bind:checked={userEndOnRarity} disabled={disableMostCommonMoves}/></label>
+		<div class="flex items-center gap-3">
+
+			<p class="text-center">End Game on:</p>
+			<div class="grid grid-cols-1 grid-rows-4 lg:grid-cols-2 lg:grid-rows-2 grid-flow-col gap-x-3 gap-y-1">
+				<div class="flex gap-3">
+					<label class="flex gap-2 items-center">Rare Position<Checkbox bind:checked={userEndOnRarity} disabled={disableMostCommonMoves}/></label>
 				<label
 					class={`${endOnRarity ? 'bg-(--background-gray)' : 'bg-(--disabled-color)/25 text-(--disabled-color)/75'} rounded-sm pr-1 pb-1`}
 					><NumberInput
@@ -207,7 +209,7 @@
 						disabled={!endOnBlunder}
 					/>
 					<span class="text-sm">centipawns</span></label
-				>
+					>
 			</div>
 			<div class="flex gap-3">
 				<label class="flex gap-2 items-center"
@@ -215,33 +217,34 @@
 				>
 			</div>
 		</div>
+		</div>
 	</div>
 
-	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
-
+	<div class="w-60 lg:w-full border-b-1 border-(--foreground-gray) justify-self-center"></div>
+	
 	<div class="flex justify-center items-center gap-3">
 		<p>Show during game:</p>
 
-		<div class="flex flex-wrap gap-6">
-			<label class="flex gap-2 items-center">
-				Study Deviations<Checkbox bind:checked={showStudyDeviations} />
-			</label>
-
+		<div class="flex flex-col xl:flex-row flex-wrap gap-x-6">	
 			<label class="flex gap-2 items-center">
 				Win %<Checkbox bind:checked={recordWinPercent} />
 			</label>
-
+			
 			<label class="flex gap-2 items-center">
 				Evaluation<Checkbox bind:checked={showEvaluation} />
 			</label>
-
+			
 			<label class="flex gap-2 items-center">
 				Move Source<Checkbox bind:checked={showMoveSource} />
+			</label>
+
+			<label class="flex gap-2 items-center">
+				Study Deviations<Checkbox bind:checked={showStudyDeviations} />
 			</label>
 		</div>
 	</div>
 
-	<div class="h-max flex flex-col items-center">
+	<div class="h-max flex flex-col items-center overflow-x-scroll">
 		<table>
 			<thead>
 				<tr class="*:px-3">
