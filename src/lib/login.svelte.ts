@@ -5,7 +5,7 @@ import { SvelteDate } from 'svelte/reactivity';
 export const lichessHost = 'https://lichess.org';
 export const scopes = ['study:read'];
 export const clientId = 'choob.com';
-export let auth = $state<{ token?: AccessToken, username?: string }>({});
+export let auth = $state<{ token?: AccessToken; username?: string }>({});
 
 export class Login {
 	redirectUrl: string;
@@ -37,7 +37,7 @@ export class Login {
 		// check cache
 		const JSONcachedAuth = window.localStorage.getItem('lichess-auth-token');
 		if (JSONcachedAuth) {
-			const cachedAuth = JSON.parse(JSONcachedAuth) as typeof auth
+			const cachedAuth = JSON.parse(JSONcachedAuth) as typeof auth;
 			const cachedAuthToken = cachedAuth?.token;
 			// Assumes that putting the expiry into the date constructor works! https://jsdate.wtf/ reference
 			if (cachedAuthToken && cachedAuth.username && new SvelteDate() < new SvelteDate(cachedAuthToken.expiry)) {
@@ -57,15 +57,16 @@ export class Login {
 				if (!token) throw new Error('Token received but is undefined!');
 				auth.token = token;
 
-				
 				// set username
-				fetch("https://lichess.org/api/account", { headers: { Authorization: `Bearer ${auth?.token?.value}`}}).then(async response => {
-					const json = await response.json()
-					auth.username = json.username
-					
-					// cache
-					window.localStorage.setItem('lichess-auth-token', JSON.stringify(auth));
-				})
+				fetch('https://lichess.org/api/account', { headers: { Authorization: `Bearer ${auth?.token?.value}` } }).then(
+					async (response) => {
+						const json = await response.json();
+						auth.username = json.username;
+
+						// cache
+						window.localStorage.setItem('lichess-auth-token', JSON.stringify(auth));
+					}
+				);
 			}
 		} catch (err) {
 			this.error = err;

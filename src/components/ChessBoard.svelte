@@ -148,7 +148,7 @@
 				showDests: true,
 				events: {
 					after: async (from, to) => {
-						const previousFEN = chess.fen
+						const previousFEN = chess.fen;
 						chess.move({ from, to });
 
 						recordMove?.(chess, 'player', previousFEN).then(playChoobveIfPossible);

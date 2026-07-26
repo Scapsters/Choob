@@ -26,7 +26,7 @@
 	summary {
 		height: 2em;
 		margin-top: 0.5em;
-        padding-left: 0.5em;
+		padding-left: 0.5em;
 		background-color: var(--background-gray);
 	}
 

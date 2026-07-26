@@ -79,7 +79,8 @@
 		const history = chess.chess.history();
 		const evaluation = (maybeGetEngineEvaluation as MaybeGetEngineEvaluation)?.(chess.fen);
 		const winPercents =
-			commonMove && commonMove.winPercents || (!disableMostCommonMoves
+			(commonMove && commonMove.winPercents) ||
+			(!disableMostCommonMoves
 				? (
 						await getCommonMove({
 							apiToken: auth?.token?.value,
@@ -138,16 +139,16 @@
 			if (useEngineOnBlunder) {
 				forceEngine = true;
 			} else {
-				endGame("Blunder");
+				endGame('Blunder');
 			}
 			return;
 		}
 		if (endOnDeviation && lastMove.studyDeviation) {
-			endGame("Deviation");
+			endGame('Deviation');
 			return;
 		}
 		if (endOnRarity && isPositionRareEnough) {
-			endGame("Rarity");
+			endGame('Rarity');
 			return;
 		}
 	}
@@ -162,10 +163,10 @@
 				})
 			)?.winPercents;
 		}
-		reasonForEnd = reason
+		reasonForEnd = reason;
 		isGameOver = true;
-	}
-	maybeEndGame = endGame
+	};
+	maybeEndGame = endGame;
 
 	let recordWinPercent = $state(false);
 	let showStudyDeviations = $state(true);
@@ -182,28 +183,30 @@
 
 	let useEngineOnBlunder = $state(false);
 
-	let reasonForEnd = $state('')
+	let reasonForEnd = $state('');
 </script>
 
 <div class="grid grid-rows-[1fr,1fr,1fr] gap-y-3 w-full">
 	<div class="flex justify-around items-center flex-col lg:flex-row lex-wrap gap-6">
 		<div class="flex flex-col items-center gap-2">
-		<div class="flex flex-row xl:flex-col gap-x-3 gap-y-1">
-			<div class="flex flex-col 2xl:flex-row gap-x-3 items-center">
-				<p>Game Status:</p>
-				<p class="font-bold">{isGameOver ? 'Ended' : 'Active'}</p>
+			<div class="flex flex-row xl:flex-col gap-x-3 gap-y-1">
+				<div class="flex flex-col 2xl:flex-row gap-x-3 items-center">
+					<p>Game Status:</p>
+					<p class="font-bold">{isGameOver ? 'Ended' : 'Active'}</p>
+				</div>
+				{#if isGameOver && reasonForEnd}
+					<div class="flex flex-col 2xl:flex-row gap-x-3 items-center">
+						<p>Reason:</p>
+						<p class="font-bold">{reasonForEnd}</p>
+					</div>
+				{/if}
 			</div>
-			{#if isGameOver && reasonForEnd}
-			<div class="flex flex-col 2xl:flex-row gap-x-3 items-center">
-				<p>Reason:</p>
-				<p class="font-bold">{reasonForEnd}</p>
-			</div>
-			{/if}
-		</div>
-			<Button onclick={() => {
-				isGameOver = !isGameOver
-				reasonForEnd = 'Stopped'
-			}}>
+			<Button
+				onclick={() => {
+					isGameOver = !isGameOver;
+					reasonForEnd = 'Stopped';
+				}}
+			>
 				{isGameOver ? 'Start Game' : 'End Game'}
 			</Button>
 		</div>

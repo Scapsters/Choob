@@ -2,8 +2,8 @@
 	import type { HTMLInputAttributes } from 'svelte/elements';
 	import Checkbox from './Checkbox.svelte';
 
-    // svelte will give a warning when using group. Radio is also a controlled component, so we don't need
-    // actual group tracking.
+	// svelte will give a warning when using group. Radio is also a controlled component, so we don't need
+	// actual group tracking.
 	let {
 		selected = $bindable(),
 		...rest

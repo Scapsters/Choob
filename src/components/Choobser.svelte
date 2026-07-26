@@ -128,6 +128,7 @@
 
 		const previousFEN = chess.fen;
 
+		let moveError;
 		switch (forceEngine ? 'engine (C)' : (Chooser.chooseWeightedObject(weights).type as MoveType)) {
 			case 'study':
 				if (enabledStudyMove) {
@@ -137,10 +138,12 @@
 							let studyMove = studyMoves[Math.floor(Math.random() * studyMoves.length)].notation.notation;
 							chess.move(studyMove);
 							recordMove?.(chess, 'study', previousFEN, await common);
-							break;
+							return;
 						}
 					} catch (error) {
 						console.error(error);
+						moveError = error;
+						break;
 					}
 				}
 			case 'common':
@@ -150,10 +153,12 @@
 						if (awaitedCommon) {
 							chess.move(awaitedCommon.move);
 							recordMove?.(chess, 'common', previousFEN, awaitedCommon);
-							break;
+							return;
 						}
 					} catch (error) {
 						console.error(error);
+						moveError = error;
+						break;
 					}
 				}
 			case 'engine (C)':
@@ -163,10 +168,12 @@
 						if (awaitedEngine.evalSource === 'cloud') {
 							chess.move(awaitedEngine.move);
 							recordMove?.(chess, 'engine (C)', previousFEN, await common);
-							break;
+							return;
 						}
 					} catch (error) {
 						console.error(error);
+						moveError = error;
+						break;
 					}
 				}
 			case 'engine (L)':
@@ -174,10 +181,12 @@
 					const awaitedEngine = await engine;
 					chess.move(awaitedEngine.move);
 					recordMove?.(chess, 'engine (L)', previousFEN, await common);
+					return;
 				}
 		}
 
-		maybeEndGame?.("No Moves")
+		if (moveError) maybeEndGame?.('Error. Restart?');
+		else maybeEndGame?.('No Moves');
 	};
 </script>
 
@@ -273,7 +282,7 @@
 			<div class="gap-3 grid-cols-3 grid-rows-2 grid xl:flex">
 				{#each Object.entries(enabledSpeeds) as entry (entry[0])}
 					<label class="flex flex-col items-center">
-						<Checkbox bind:checked={enabledSpeeds[entry[0] as LichessSpeed]} disabled={!enabledCommonMove}/>
+						<Checkbox bind:checked={enabledSpeeds[entry[0] as LichessSpeed]} disabled={!enabledCommonMove} />
 						{entry[0]}
 					</label>
 				{/each}

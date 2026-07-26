@@ -13,10 +13,10 @@ const extractMoveFromUci = (uci: string) => {
 	let to = uci.slice(2, 4);
 
 	// TODO: promotion
-	return convertCastling({ from, to })
+	return convertCastling({ from, to });
 };
 
-export const convertCastling = ({ from, to }: { from: string, to: string }) => {
+export const convertCastling = ({ from, to }: { from: string; to: string }) => {
 	// stockfish shows castling differently than how chess.js likes it
 	if (from === 'e1' && to === 'h1') {
 		to = 'g1';
@@ -28,8 +28,8 @@ export const convertCastling = ({ from, to }: { from: string, to: string }) => {
 		to = 'c8';
 	}
 
-	return { from, to }
-}
+	return { from, to };
+};
 
 /**
  * Sends the given commands to stockfish one at a time, then waits until stockfish sends a matching message for each given desired response.

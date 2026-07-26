@@ -21,18 +21,18 @@
 	--foreground: oklch(15% 0.1 70);
 	--foreground-gray: oklch(50% 0.01 70);
 	--background-gray: oklch(92% 0.015 70);
-	--background: oklch(97% .01 70);
+	--background: oklch(97% 0.01 70);
 
 	--accent-color: oklch(60% 0.15 140);
 	--disabled-color: oklch(75% 0.01 70);
 	--line-thickness: round(0.15em, 1px);
 
 	color: var(--foreground);
-	background-color: var(--background)
+	background-color: var(--background);
 }
 
 :root.dark {
-	--foreground: oklch(90% .01 70);
+	--foreground: oklch(90% 0.01 70);
 	--foreground-gray: oklch(87% 0.015 70);
 	--background-gray: oklch(37% 0.01 70);
 	--background: oklch(25% 0.01 70);

@@ -41,7 +41,7 @@
 
 	let recordMove: RecordMove = $state(null);
 	let isGameOver = $state(false);
-	let maybeEndGame: ((reason: string) => Promise<void>) | null = $state(null)
+	let maybeEndGame: ((reason: string) => Promise<void>) | null = $state(null);
 	let forceEngine = $state(false);
 	let choobHistory = $state<ChoobHistory>([]);
 	function getPositionToSave() {
@@ -81,7 +81,7 @@
 		playerColor = (playerColorChoice === 'random' ? (Math.random() > 0.5 ? 'w' : 'b') : playerColorChoice) ?? 'w';
 	}
 
-	let isMobile = new MediaQuery('(max-width: 1279px)')
+	let isMobile = new MediaQuery('(max-width: 1279px)');
 </script>
 
 <div
