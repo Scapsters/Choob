@@ -176,8 +176,8 @@
 			</Button>
 		</div>
 
-		<p class="text-center">End Game on:</p>
-		<div class="grid grid-cols-2 grid-rows-2 grid-flow-col gap-x-3 gap-y-1">
+		<p class="text-center max-xl:w-full">End Game on:</p>
+		<div class="grid xl:grid-cols-2 xl:grid-rows-2 xl:grid-flow-col gap-x-3 gap-y-1">
 			<div class="flex gap-3">
 				<label class="flex gap-2 items-center">Rare Position<Checkbox bind:checked={userEndOnRarity} disabled={disableMostCommonMoves}/></label>
 				<label
@@ -219,10 +219,10 @@
 
 	<div class="w-full border-b-1 border-(--foreground-gray)"></div>
 
-	<div class="flex justify-center items-center gap-3">
-		<p>Show during game:</p>
+	<div class="flex flex-wrap justify-center items-center gap-3">
+		<p class="max-xl:w-full max-xl:text-center">Show during game:</p>
 
-		<div class="flex flex-wrap gap-6">
+		<div class="flex flex-wrap justify-center gap-6">
 			<label class="flex gap-2 items-center">
 				Study Deviations<Checkbox bind:checked={showStudyDeviations} />
 			</label>
@@ -241,7 +241,7 @@
 		</div>
 	</div>
 
-	<div class="h-max flex flex-col items-center">
+	<div class="h-max flex flex-col items-center max-xl:w-full max-xl:overflow-x-auto">
 		<table>
 			<thead>
 				<tr class="*:px-3">

@@ -4,7 +4,7 @@
 	let { value = $bindable(), ...rest }: Omit<HTMLInputAttributes, 'type'> = $props();
 </script>
 
-<input type="range" bind:value {...rest} />
+<input type="range" class="w-full min-w-0 max-w-32" bind:value {...rest} />
 
 <style lang="postcss">
 	input::-webkit-slider-thumb,

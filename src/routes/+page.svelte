@@ -79,9 +79,9 @@
 	}
 </script>
 
-<div class="grid grid-flow-col grid-rows-4 xl:grid-rows-2 gap-6 justify-center mx-auto p-6 max-w-400">
+<div class="flex flex-col xl:grid xl:grid-flow-col xl:grid-rows-2 gap-6 xl:justify-center mx-auto p-6 xl:max-w-300 max-w-100 w-full">
 	<div class="flex justify-center min-w-0 grow basis-80">
-		<div class="max-w-150 w-full">
+		<div class="xl:max-w-150 max-w-100 w-full">
 			<ChessBoard
 				{chess}
 				{playerColor}
@@ -142,9 +142,9 @@
 	</div>
 
 	<div class="flex flex-col gap-6 items-start grow">
-		<div class="flex w-200 flex-col items-center gap-3">
-			<div class="flex items-center w-full">
-				<div class="w-30"></div>
+		<div class="flex w-full max-w-200 flex-col items-center gap-3">
+			<div class="flex flex-wrap gap-y-2 items-center w-full">
+				<div class="w-30 max-xl:hidden"></div>
 				<div class="grow flex justify-center">
 					<LichessLogin />
 				</div>

@@ -45,7 +45,7 @@
 	});
 </script>
 
-<div class="flex gap-x-6 flex-wrap w-full justify-between">
+<div class="flex gap-x-6 gap-y-3 flex-wrap w-full justify-between">
 	<div class="flex gap-3 items-center">
 		<p>Study ID:</p>
 		<TextInput

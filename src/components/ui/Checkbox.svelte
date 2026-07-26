@@ -22,6 +22,7 @@
 		margin: 0;
 
 		font: inherit;
+		flex-shrink: 0;
 		width: round(1em, 2px);
 		height: round(1em, 2px);
 		background-color: var(--background);
