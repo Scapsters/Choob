@@ -22,7 +22,6 @@
 	import Button from '../components/ui/Button.svelte';
 	import Checkbox from '../components/ui/inputs/Checkbox.svelte';
 	import RadioInput from '../components/ui/inputs/RadioInput.svelte';
-	import { browser } from '$app/environment';
 	import Accordion from '../components/ui/Accordion.svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 
@@ -157,7 +156,7 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 				{#if !isMobile.current}
 					{@render loginAndTheme()}
 				{/if}
-				{@render divider()}
+				{@render divider(true)}
 				<StudyValidator bind:studyId bind:studyIsPublic bind:studyValidity />
 				{@render divider()}
 			</div>
@@ -240,8 +239,8 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 	>
 {/snippet}
 
-{#snippet divider(inVisibleOnMobile?: boolean)}
-	<div class={`${inVisibleOnMobile ? 'hidden xl:block' : ''} w-full border-b-1 border-(--foreground-gray)`}></div>
+{#snippet divider(invisibleOnMobile?: boolean)}
+	<div class={`${invisibleOnMobile ? 'hidden xl:block' : ''} w-full border-b-1 border-(--foreground-gray)`}></div>
 {/snippet}
 
 {#snippet loginAndTheme()}

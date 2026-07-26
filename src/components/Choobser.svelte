@@ -9,7 +9,7 @@
 
 <script lang="ts">
 	import { getCloudEvaluation, type ChoobEvaluation } from '$lib/chess/getCloudEvaluation.js';
-	import { getCommonMove } from '$lib/chess/getCommonMove.js';
+	import { getCommonMove, type LichessRating, type LichessSpeed } from '$lib/chess/getCommonMove.js';
 	import { getLocalEvaluation } from '../lib/chess/getLocalEvaluation.ts';
 	import Chooser from '$lib/external-packages/Chooser.js';
 
@@ -85,15 +85,42 @@
 	let enabledEngineMove = $state(true);
 	let enabledLocalEngine = $state(true);
 
+	let enabledSpeeds: Record<LichessSpeed, boolean> = $state({
+		ultraBullet: false,
+		bullet: false,
+		blitz: true,
+		rapid: true,
+		classical: true,
+		correspondence: true,
+	});
+	let studyMoveSpeeds: LichessSpeed[] = $derived(
+		(Object.entries(enabledSpeeds) as [LichessSpeed, boolean][]).filter((entry) => entry[1]).map((entry) => entry[0])
+	);
+	let enabledRatings: Record<LichessRating, boolean> = $state({
+		0: false,
+		1000: true,
+		1200: true,
+		1400: true,
+		1600: true,
+		1800: true,
+		2000: true,
+		2200: true,
+		2500: true,
+	});
+	let studyMoveRatings: LichessRating[] = $derived(
+		(Object.entries(enabledRatings) as [LichessRating, boolean][]).filter((entry) => entry[1]).map((entry) => entry[0])
+	);
+
 	playChoobve = async (engine?: Promise<ChoobEvaluation>) => {
 		// precompute certain move types for use in recording
 		// (even if we use a study move, we want to track the win percent/centipawns)
 		const getCommonMoveClosure = () =>
-		{console.log(chess.fen);
-			return getCommonMove({
+			getCommonMove({
 				apiToken: auth?.token?.value,
 				fen: chess.fen,
-			});}
+				ratings: studyMoveRatings,
+				speeds: studyMoveSpeeds,
+			});
 		const common = !disableMostCommonMoves && getCommonMoveClosure();
 		engine ??= getEvaluation(chess.fen);
 
@@ -150,8 +177,8 @@
 	};
 </script>
 
-<div class="flex flex-col items-center gap-3">
-	<p class="text-right">Choob's Settings</p>
+<div class="flex flex-col items-center">
+	<p class="text-right mb-3">Choob's Settings</p>
 
 	<div class="flex items-center gap-4">
 		<div
@@ -219,6 +246,31 @@
 					disabled={!enabledEngineMove || !enabledLocalEngine}
 					class="lg:w-50 w-35"
 				/>
+			</div>
+		</div>
+	</div>
+
+	<div class="flex flex-col items-center mt-6 gap-3">
+		<div class="flex flex-col 2xl:flex-row gap-1">
+			<div class="flex items-center w-full 2xl:w-auto justify-center"><p>Common Move ratings</p></div>
+			<div class="gap-3 grid-cols-5 grid-rows-2 grid xl:flex">
+				{#each Object.entries(enabledRatings) as entry (entry[0])}
+					<label class="flex flex-col items-center">
+						<Checkbox bind:checked={enabledRatings[entry[0] as LichessRating]} disabled={!enabledCommonMove} />
+						{entry[0]}
+					</label>
+				{/each}
+			</div>
+		</div>
+		<div class="flex flex-col 2xl:flex-row gap-1">
+			<div class="flex items-center w-full 2xl:w-auto justify-center"><p>Common Move speeds</p></div>
+			<div class="gap-3 grid-cols-3 grid-rows-2 grid xl:flex">
+				{#each Object.entries(enabledSpeeds) as entry (entry[0])}
+					<label class="flex flex-col items-center">
+						<Checkbox bind:checked={enabledSpeeds[entry[0] as LichessSpeed]} disabled={!enabledCommonMove}/>
+						{entry[0]}
+					</label>
+				{/each}
 			</div>
 		</div>
 	</div>

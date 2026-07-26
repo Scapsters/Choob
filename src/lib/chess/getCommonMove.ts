@@ -1,7 +1,7 @@
 import Chooser from '../external-packages/Chooser.js';
 
-type LichessRating = '0' | '1000' | '1200' | '1400' | '1600' | '1800' | '2000' | '2200' | '2500';
-type LichessSpeed = 'ultraBullet' | 'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence';
+export type LichessRating = '0' | '1000' | '1200' | '1400' | '1600' | '1800' | '2000' | '2200' | '2500';
+export type LichessSpeed = 'ultraBullet' | 'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence';
 
 export type ChoobCommonMove = {
 	move: string;
@@ -26,9 +26,9 @@ const LICHESS_EXPLORER_URL = 'https://explorer.lichess.org/lichess';
  */
 export async function getCommonMove({
 	apiToken,
-	ratings = ['0', '1000', '1200', '1400', '1600', '1800', '2000', '2200', '2500'],
+	ratings = ['1000', '1200', '1400', '1600', '1800', '2000', '2200', '2500'],
 	movesToConsider = 12,
-	speeds = ['ultraBullet', 'bullet', 'blitz', 'rapid', 'classical', 'correspondence'],
+	speeds = ['bullet', 'blitz', 'rapid', 'classical', 'correspondence'],
 	fen,
 }: {
 	apiToken?: string;
