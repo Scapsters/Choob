@@ -128,7 +128,6 @@
 			Object.values(move.winPercents || {}).reduce((pv, v) => pv + v, 0);
 		const isPositionRareEnough = sumWinPercentCounts(lastMove) / sumWinPercentCounts(firstMove) < rarityThreshold; // 0/0 goes to NaN goes to false (:
 
-		console.log(choobHistory, lastMove, secondToLastMove);
 		const wasLastMoveBadEnough =
 			typeof lastMove.centipawns === 'string' || // They blundered mate
 			typeof secondToLastMove?.centipawns === 'string' || // They lost mate
@@ -139,7 +138,6 @@
 		if (!endOnRarity && !endOnBlunder && !endOnDeviation) return;
 		if (endOnBlunder && wasLastMoveBadEnough) {
 			if (useEngineOnBlunder) {
-				console.log('wefwef');
 				forceEngine = true;
 			} else {
 				endGame('Blunder');

@@ -129,7 +129,6 @@
 		const previousFEN = chess.fen;
 
 		let moveError;
-		console.log(forceEngine);
 		switch (forceEngine ? 'engine (C)' : (Chooser.chooseWeightedObject(weights).type as MoveType)) {
 			case 'study':
 				if (enabledStudyMove) {
