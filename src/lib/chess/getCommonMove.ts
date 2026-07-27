@@ -39,8 +39,6 @@ export async function getCommonMove({
 }): Promise<ChoobCommonMove | null> {
 	if (!apiToken) return null;
 
-	console.log('EEEE');
-	console.trace();
 	let choobCommonMoves: ChoobCommonMove[] = [];
 
 	// check cache

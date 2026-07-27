@@ -129,6 +129,7 @@
 		const previousFEN = chess.fen;
 
 		let moveError;
+		console.log(forceEngine);
 		switch (forceEngine ? 'engine (C)' : (Chooser.chooseWeightedObject(weights).type as MoveType)) {
 			case 'study':
 				if (enabledStudyMove) {
@@ -188,6 +189,8 @@
 		if (moveError) maybeEndGame?.('Error. Restart?');
 		else maybeEndGame?.('No Moves');
 	};
+
+	$inspect(forceEngine);
 </script>
 
 <div class="flex flex-col items-center">
@@ -207,12 +210,17 @@
 			</div>
 			<div>
 				<p>Weight</p>
-				<NumberInput bind:value={weightStudyMove} min="0" max="100" disabled={studyValidity !== 'valid'} />
+				<NumberInput
+					bind:value={weightStudyMove}
+					min="0"
+					max="100"
+					disabled={studyValidity !== 'valid' || !enabledStudyMove}
+				/>
 				<RangeInput
 					bind:value={weightStudyMove}
 					min="0"
 					max="100"
-					disabled={studyValidity !== 'valid'}
+					disabled={studyValidity !== 'valid' || !enabledStudyMove}
 					class="lg:w-50 w-35"
 				/>
 			</div>
@@ -222,8 +230,14 @@
 			</div>
 			<div>
 				<p>Weight</p>
-				<NumberInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} />
-				<RangeInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token} class="lg:w-50 w-35" />
+				<NumberInput bind:value={weightCommonMove} min="0" max="100" disabled={!auth.token || !enabledCommonMove} />
+				<RangeInput
+					bind:value={weightCommonMove}
+					min="0"
+					max="100"
+					disabled={!auth.token || !enabledCommonMove}
+					class="lg:w-50 w-35"
+				/>
 			</div>
 			<div>
 				<p>Engine</p>

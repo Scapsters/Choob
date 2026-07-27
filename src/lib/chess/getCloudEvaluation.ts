@@ -5,7 +5,8 @@ type LichessCloudEvaluation = {
 	fen: string;
 	pvs: {
 		moves: string; // "d1e7 d8e7 ..."
-		cp: number; // 41 (centipawns)
+		cp?: number; // 41 (centipawns)
+		mate?: number; // -1 (mate in 1 for black)
 	}[];
 };
 
@@ -44,7 +45,7 @@ export async function getCloudEvaluation(fen: string, apiToken?: string): Promis
 	const body = (await response.json()) as LichessCloudEvaluation;
 
 	return {
-		centipawns: body.pvs[0].cp,
+		centipawns: (body.pvs[0].cp || '#' + body.pvs[0].mate) as number,
 		move: convertCastling({
 			from: body.pvs[0].moves.split(' ')[0].substring(0, 2),
 			to: body.pvs[0].moves.split(' ')[0].substring(2, 4),
