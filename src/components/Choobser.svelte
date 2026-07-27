@@ -214,7 +214,7 @@
 					min="0"
 					max="100"
 					disabled={studyValidity !== 'valid' || !enabledStudyMove}
-					class="w-35 lg:w-50"
+					class="w-30 lg:w-50"
 				/>
 			</div>
 			<div>
@@ -229,7 +229,7 @@
 					min="0"
 					max="100"
 					disabled={!auth.token || !enabledCommonMove}
-					class="w-35 lg:w-50"
+					class="w-30 lg:w-50"
 				/>
 			</div>
 			<div>
@@ -244,14 +244,14 @@
 					min="0"
 					max="100"
 					disabled={!enabledEngineMove}
-					class="w-35 lg:w-50"
+					class="w-30 lg:w-50"
 				/>
 			</div>
 			<div>
 				<p>Local Engine</p>
 				<Checkbox bind:checked={enabledLocalEngine} disabled={!enabledEngineMove} />
 			</div>
-			<div>
+			<div class="self-start">
 				<p>Depth</p>
 				<NumberInput
 					bind:value={localEvalDepth}
@@ -264,7 +264,7 @@
 					min="0"
 					max="25"
 					disabled={!enabledEngineMove || !enabledLocalEngine}
-					class="w-35 lg:w-50"
+					class="w-30 lg:w-50"
 				/>
 			</div>
 		</div>
@@ -283,9 +283,9 @@
 			{/each}
 		</div>
 		<div class="flex justify-center items-center w-full 2xl:w-auto"><p>Speeds</p></div>
-		<div class="xl:flex gap-3 grid grid-cols-3 grid-rows-2">
+		<div class="xl:flex gap-3 grid grid-cols-[min-content_1fr_1fr] grid-rows-2">
 			{#each Object.entries(enabledSpeeds) as entry (entry[0])}
-				<label class="flex flex-col items-center">
+				<label class="flex flex-col items-center w-15">
 					<Checkbox bind:checked={enabledSpeeds[entry[0] as LichessSpeed]} disabled={!enabledCommonMove} />
 					{entry[0]}
 				</label>
