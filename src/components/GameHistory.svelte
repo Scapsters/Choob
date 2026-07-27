@@ -321,43 +321,49 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each choobHistory as entry, i (entry)}
-					<tr class="*:text-center">
-						<td>{i + 1}.</td>
-						<td>{entry[0].san}</td>
-						{#if showStudyDeviations}
-							<td>{entry[0].studyDeviation ?? '-'}</td>
-						{/if}
-						{#if showEvaluation || isGameOver}
-							<td class={`${entry[0].evalSource === 'local' ? 'text-(--foreground)/60' : ''}`}>{entry[0].centipawns}</td
-							>
-						{/if}
-						{#if showMoveSource || isGameOver}
-							<td>{entry[0].moveType}</td>
-						{/if}
-						{#if recordWinPercent || isGameOver}
-							<td>{Math.round((entry[0].winPercents?.white ?? 0) * 100) || '-'}</td>
-						{/if}
+				{#if choobHistory.length > 0}
+					{#each choobHistory as entry, i (entry)}
+						<tr class="*:text-center">
+							<td>{i + 1}.</td>
+							<td>{entry[0].san}</td>
+							{#if showStudyDeviations}
+								<td>{entry[0].studyDeviation ?? '-'}</td>
+							{/if}
+							{#if showEvaluation || isGameOver}
+								<td class={`${entry[0].evalSource === 'local' ? 'text-(--foreground)/60' : ''}`}
+									>{entry[0].centipawns}</td
+								>
+							{/if}
+							{#if showMoveSource || isGameOver}
+								<td>{entry[0].moveType}</td>
+							{/if}
+							{#if recordWinPercent || isGameOver}
+								<td>{Math.round((entry[0].winPercents?.white ?? 0) * 100) || '-'}</td>
+							{/if}
 
-						<td>{entry[1]?.san ?? '-'}</td>
-						{#if showStudyDeviations}
-							<td>{entry[1]?.studyDeviation ?? '-'}</td>
-						{/if}
-						{#if showEvaluation || isGameOver}
-							<td class={`${entry[1]?.evalSource === 'local' ? 'text-(--foreground)/60' : ''}`}
-								>{entry[1]?.centipawns ?? '-'}</td
-							>
-						{/if}
-						{#if showMoveSource || isGameOver}
-							<td>{entry[1]?.moveType ?? '-'}</td>
-						{/if}
-						{#if recordWinPercent || isGameOver}
-							<td>{Math.round((entry[1]?.winPercents?.white ?? 0) * 100) || '-'}</td>
-						{/if}
-					</tr>
-				{/each}
+							<td>{entry[1]?.san ?? '-'}</td>
+							{#if showStudyDeviations}
+								<td>{entry[1]?.studyDeviation ?? '-'}</td>
+							{/if}
+							{#if showEvaluation || isGameOver}
+								<td class={`${entry[1]?.evalSource === 'local' ? 'text-(--foreground)/60' : ''}`}
+									>{entry[1]?.centipawns ?? '-'}</td
+								>
+							{/if}
+							{#if showMoveSource || isGameOver}
+								<td>{entry[1]?.moveType ?? '-'}</td>
+							{/if}
+							{#if recordWinPercent || isGameOver}
+								<td>{Math.round((entry[1]?.winPercents?.white ?? 0) * 100) || '-'}</td>
+							{/if}
+						</tr>
+					{/each}
+				{/if}
 			</tbody>
 		</table>
+		{#if choobHistory.length === 0}
+			<div class="text-center">-</div>
+		{/if}
 	</div>
 	<div class="flex justify-center">
 		<Button

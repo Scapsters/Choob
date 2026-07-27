@@ -86,7 +86,7 @@
 </script>
 
 <div
-	class="flex flex-col justify-center gap-x-6 gap-y-0 xl:gap-y-6 xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 grid-flow-col mx-auto p-1 xl:p-6 max-w-400"
+	class="flex flex-col justify-center gap-x-6 gap-y-0 xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 grid-flow-col mx-auto p-1 xl:p-6 max-w-400"
 >
 	<div class="flex justify-center min-w-0 basis-80">
 		<div class="w-full max-w-150">
@@ -94,7 +94,7 @@
 		</div>
 	</div>
 
-	<Accordion title="Game Controls" actuallyUseAccordion={isMobile.current}>
+	<Accordion title="Game Controls" name="settings" actuallyUseAccordion={isMobile.current}>
 		<div class="flex flex-col items-center gap-3 p-3">
 			<div class="flex h-min">
 				<div class="flex flex-col items-center gap-3 p-3">
@@ -155,7 +155,7 @@
 		</div>
 	</Accordion>
 
-	<Accordion title="Study Settings" actuallyUseAccordion={isMobile.current}>
+	<Accordion title="Study Settings" name="settings" actuallyUseAccordion={isMobile.current}>
 		<div class="flex flex-col items-start gap-3 p-3 grow">
 			<div class="flex flex-col items-center gap-3 w-full max-w-200">
 				{#if !isMobile.current}
@@ -178,7 +178,7 @@
 		</div>
 	</Accordion>
 
-	<Accordion title="History" actuallyUseAccordion={isMobile.current}>
+	<Accordion title="History" name="settings" actuallyUseAccordion={isMobile.current}>
 		<div class="flex flex-col items-center gap-3 p-3 2xl:w-210">
 			<GameHistory
 				{chess}

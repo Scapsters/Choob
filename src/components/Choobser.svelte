@@ -273,28 +273,24 @@
 
 	<p class="mt-6 text-right">Common Move Settings</p>
 
-	<div class="flex flex-col items-center gap-3 mt-3">
-		<div class="flex 2xl:flex-row flex-col gap-3">
-			<div class="flex justify-center items-center w-full 2xl:w-auto"><p>Ratings</p></div>
-			<div class="xl:flex gap-3 grid grid-cols-5 grid-rows-2">
-				{#each Object.entries(enabledRatings) as entry (entry[0])}
-					<label class="flex flex-col items-center">
-						<Checkbox bind:checked={enabledRatings[entry[0] as LichessRating]} disabled={!enabledCommonMove} />
-						{entry[0]}
-					</label>
-				{/each}
-			</div>
+	<div class="grid grid-cols-[1fr_5fr] grid-rows-2 grid-flow-row items-center gap-3 mt-3">
+		<div class="flex justify-center items-center w-full 2xl:w-auto"><p>Ratings</p></div>
+		<div class="xl:flex gap-3 grid grid-cols-5 grid-rows-2">
+			{#each Object.entries(enabledRatings) as entry (entry[0])}
+				<label class="flex flex-col items-center">
+					<Checkbox bind:checked={enabledRatings[entry[0] as LichessRating]} disabled={!enabledCommonMove} />
+					{entry[0]}
+				</label>
+			{/each}
 		</div>
-		<div class="flex 2xl:flex-row flex-col gap-3">
-			<div class="flex justify-center items-center w-full 2xl:w-auto"><p>Speeds</p></div>
-			<div class="xl:flex gap-3 grid grid-cols-3 grid-rows-2">
-				{#each Object.entries(enabledSpeeds) as entry (entry[0])}
-					<label class="flex flex-col items-center">
-						<Checkbox bind:checked={enabledSpeeds[entry[0] as LichessSpeed]} disabled={!enabledCommonMove} />
-						{entry[0]}
-					</label>
-				{/each}
-			</div>
+		<div class="flex justify-center items-center w-full 2xl:w-auto"><p>Speeds</p></div>
+		<div class="xl:flex gap-3 grid grid-cols-3 grid-rows-2">
+			{#each Object.entries(enabledSpeeds) as entry (entry[0])}
+				<label class="flex flex-col items-center">
+					<Checkbox bind:checked={enabledSpeeds[entry[0] as LichessSpeed]} disabled={!enabledCommonMove} />
+					{entry[0]}
+				</label>
+			{/each}
 		</div>
 	</div>
 </div>
