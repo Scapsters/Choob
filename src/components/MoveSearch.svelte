@@ -70,8 +70,8 @@
 </script>
 
 <div>
-	<div class="flex gap-3 items-center justify-around lg:justify-end">
-		<div class="flex flex-col 2xl:flex-row gap-x-3 gap-y-1 items-center">
+	<div class="flex justify-around lg:justify-end items-center gap-3">
+		<div class="flex 2xl:flex-row flex-col items-center gap-x-3 gap-y-1">
 			<label for="moveSearch">Search for move</label>
 			<TextInput id="moveSearch" class="w-20" bind:value={moveToSearch} />
 		</div>
@@ -85,7 +85,7 @@
 		>
 	</div>
 	{#if foundChaptersWithMove}
-		<div class="w-full flex flex-col gap-1 text-left overflow-y-scroll items-start">
+		<div class="flex flex-col items-start gap-1 w-full overflow-y-scroll text-left">
 			{#each foundChaptersWithMove as chapter (chapter)}
 				{@const name = (chapter.tags as StudyGameTags)?.['ChapterName']}
 				<Button

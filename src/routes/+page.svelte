@@ -86,14 +86,10 @@
 </script>
 
 <div
-	class="
-grid-flow-col gap-x-6 gap-y-0 xl:gap-y-6 justify-center mx-auto max-w-400
-flex flex-col p-1
-xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
-"
+	class="flex flex-col justify-center gap-x-6 gap-y-0 xl:gap-y-6 xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 grid-flow-col mx-auto p-1 xl:p-6 max-w-400"
 >
 	<div class="flex justify-center min-w-0 basis-80">
-		<div class="max-w-150 w-full">
+		<div class="w-full max-w-150">
 			<ChessBoard {chess} {playerColor} {isChoobEnabled} {choobHistory} {playChoobveIfPossible} {recordMove} />
 		</div>
 	</div>
@@ -104,9 +100,9 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 				<div class="flex flex-col items-center gap-3 p-3">
 					{@render divider()}
 					<div class="flex gap-3 w-full">
-						<div class="grow lg:w-full"></div>
+						<div class="lg:w-full grow"></div>
 						{@render colorSettings()}
-						<div class="grow w-full flex justify-end items-center">
+						<div class="flex justify-end items-center w-full grow">
 							<Button
 								disabled={chess.fen === DEFAULT_FEN}
 								onclick={() => {
@@ -117,7 +113,7 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 							>
 						</div>
 					</div>
-					<div class="flex gap-3 flex-wrap justify-center">{@render gameControls()}</div>
+					<div class="flex flex-wrap justify-center gap-3">{@render gameControls()}</div>
 					{@render divider()}
 				</div>
 			</div>
@@ -142,14 +138,14 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 					<p>API Settings (For rate limits)</p>
 					<div class="flex flex-col gap-1">
 						<div class="flex gap-1">
-							<label class="flex gap-3 items-center">
+							<label class="flex items-center gap-3">
 								<Checkbox bind:checked={disableMostCommonMoves} /> Disable Some Common Moves</label
 							>
 							<InfoTooltip
 								title="Disables querying for common move information when recording moves that don't need it. Common moves by Choob still work, and the win % will still be queried on game end."
 							/>
 						</div>
-						<label class="flex gap-3 items-center"
+						<label class="flex items-center gap-3"
 							><Checkbox bind:checked={disableCloudEngine} /> Disable Cloud Engine</label
 						>
 					</div>
@@ -159,8 +155,8 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 	</Accordion>
 
 	<Accordion title="Study Settings" actuallyUseAccordion={isMobile.current}>
-		<div class="flex flex-col gap-3 items-start grow p-3">
-			<div class="flex max-w-200 w-full flex-col items-center gap-3">
+		<div class="flex flex-col items-start gap-3 p-3 grow">
+			<div class="flex flex-col items-center gap-3 w-full max-w-200">
 				{#if !isMobile.current}
 					{@render loginAndTheme()}
 				{/if}
@@ -169,11 +165,11 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 				{@render divider()}
 			</div>
 			{#if studyId}
-				<div class="flex w-full justify-between flex-wrap xl:flex-nowrap gap-x-12 gap-y-6">
+				<div class="flex flex-wrap xl:flex-nowrap justify-between gap-x-12 gap-y-6 w-full">
 					<div class="h-full grow">
 						<ChapterPicker {setBoard} {studyId} {studyValidity} {playChoobveIfPossible} />
 					</div>
-					<div class="h-full grow justify-self-end">
+					<div class="justify-self-end h-full grow">
 						<MoveSearch {setBoard} {studyId} {chess} {playChoobveIfPossible} />
 					</div>
 				</div>
@@ -182,7 +178,7 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 	</Accordion>
 
 	<Accordion title="History" actuallyUseAccordion={isMobile.current}>
-		<div class="flex flex-col gap-3 items-center p-3 2xl:w-210">
+		<div class="flex flex-col items-center gap-3 p-3 2xl:w-210">
 			<GameHistory
 				{chess}
 				{studyId}
@@ -204,7 +200,7 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 </div>
 
 {#snippet gameControls()}
-	<label class="flex gap-3 items-center"
+	<label class="flex items-center gap-3"
 		>Allow Choob to move<Checkbox
 			class="toggle"
 			bind:checked={
@@ -253,12 +249,12 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 {/snippet}
 
 {#snippet loginAndTheme()}
-	<div class="flex flex-wrap justify-center items-center w-full gap-3">
+	<div class="flex flex-wrap justify-center items-center gap-3 w-full">
 		<div class="xl:w-30"></div>
-		<div class="grow flex justify-center">
+		<div class="flex justify-center grow">
 			<LichessLogin />
 		</div>
-		<div class="w-30 flex xl:justify-end">
+		<div class="flex xl:justify-end w-30">
 			<ThemeToggle />
 		</div>
 	</div>

@@ -189,16 +189,16 @@
 	let reasonForEnd = $state('');
 </script>
 
-<div class="grid grid-rows-[1fr,1fr,1fr] gap-y-3 w-full">
-	<div class="flex justify-around items-center flex-col lg:flex-row lex-wrap gap-6">
+<div class="gap-y-3 grid grid-rows-[1fr,1fr,1fr] w-full">
+	<div class="flex lg:flex-row flex-col justify-around items-center gap-6 lex-wrap">
 		<div class="flex flex-col items-center gap-2">
 			<div class="flex flex-row xl:flex-col gap-x-3 gap-y-1">
-				<div class="flex flex-col 2xl:flex-row gap-x-3 items-center">
+				<div class="flex 2xl:flex-row flex-col items-center gap-x-3">
 					<p>Game Status:</p>
 					<p class="font-bold">{isGameOver ? 'Ended' : 'Active'}</p>
 				</div>
 				{#if isGameOver && reasonForEnd}
-					<div class="flex flex-col 2xl:flex-row gap-x-3 items-center">
+					<div class="flex 2xl:flex-row flex-col items-center gap-x-3">
 						<p>Reason:</p>
 						<p class="font-bold">{reasonForEnd}</p>
 					</div>
@@ -216,9 +216,9 @@
 
 		<div class="flex flex-col items-center gap-3">
 			<p class="text-center">End Game on:</p>
-			<div class="grid grid-cols-1 grid-rows-4 lg:grid-cols-2 lg:grid-rows-2 grid-flow-col gap-x-3 gap-y-1">
+			<div class="gap-x-3 gap-y-1 grid grid-cols-1 lg:grid-cols-2 grid-rows-4 lg:grid-rows-2 grid-flow-col">
 				<div class="flex gap-3">
-					<label class="flex gap-2 items-center">
+					<label class="flex items-center gap-2">
 						Rare Position
 						<Checkbox bind:checked={userEndOnRarity} disabled={disableMostCommonMoves} />
 						{#if disableMostCommonMoves}
@@ -238,10 +238,10 @@
 					>
 				</div>
 				<div class="flex gap-3">
-					<label class="flex gap-2 items-center">Study Deviation<Checkbox bind:checked={endOnDeviation} /></label>
+					<label class="flex items-center gap-2">Study Deviation<Checkbox bind:checked={endOnDeviation} /></label>
 				</div>
 				<div class="flex gap-3">
-					<label class="flex gap-2 items-center">Blunder<Checkbox bind:checked={endOnBlunder} /></label>
+					<label class="flex items-center gap-2">Blunder<Checkbox bind:checked={endOnBlunder} /></label>
 					<label
 						class={`${endOnBlunder ? 'bg-(--background-gray)' : 'bg-(--disabled-color)/25 text-(--disabled-color)/75'} rounded-sm px-1 pb-1`}
 						>±<NumberInput
@@ -255,7 +255,7 @@
 					>
 				</div>
 				<div class="flex gap-3">
-					<label class="flex gap-2 items-center"
+					<label class="flex items-center gap-2"
 						>Allow Engine Punishment<Checkbox bind:checked={useEngineOnBlunder} disabled={!endOnBlunder} /></label
 					>
 				</div>
@@ -268,26 +268,26 @@
 	<div class="flex justify-center items-center gap-3">
 		<p>Show during game:</p>
 
-		<div class="flex flex-col xl:flex-row flex-wrap gap-x-6">
-			<label class="flex gap-2 items-center">
+		<div class="flex xl:flex-row flex-col flex-wrap gap-x-6">
+			<label class="flex items-center gap-2">
 				Win %<Checkbox bind:checked={recordWinPercent} />
 			</label>
 
-			<label class="flex gap-2 items-center">
+			<label class="flex items-center gap-2">
 				Evaluation<Checkbox bind:checked={showEvaluation} />
 			</label>
 
-			<label class="flex gap-2 items-center">
+			<label class="flex items-center gap-2">
 				Move Source<Checkbox bind:checked={showMoveSource} />
 			</label>
 
-			<label class="flex gap-2 items-center">
+			<label class="flex items-center gap-2">
 				Study Deviations<Checkbox bind:checked={showStudyDeviations} />
 			</label>
 		</div>
 	</div>
 
-	<div class="h-max flex flex-col items-center overflow-x-scroll">
+	<div class="flex flex-col items-center h-max overflow-x-scroll">
 		<table>
 			<thead>
 				<tr class="*:px-3">

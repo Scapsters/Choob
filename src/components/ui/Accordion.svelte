@@ -11,7 +11,7 @@
 	{/if}
 {:else}
 	<details {...rest}>
-		<summary class="flex w-full items-center">
+		<summary class="flex items-center w-full">
 			<p>{title}</p>
 		</summary>
 		<ul>

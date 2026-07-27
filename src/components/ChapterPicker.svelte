@@ -105,10 +105,10 @@
 		<p>Chapter for Starting FEN</p>
 	</div>
 	<div class="hidden xl:block w-full border-b-1 border-(--foreground-gray)"></div>
-	<div class="p-1 h-full w-full overflow-y-scroll">
+	<div class="p-1 w-full h-full overflow-y-scroll">
 		{#each chapters as chapter (chapter)}
 			{const name = chapter.name}
-			<div class="flex gap-3 items-center">
+			<div class="flex items-center gap-3">
 				<RadioInput
 					id={name}
 					name="chapterSelect"
@@ -120,7 +120,7 @@
 		{/each}
 	</div>
 	<div class="w-full border-b-1 border-(--foreground-gray) self-center"></div>
-	<div class="flex flex-col *:flex *:gap-3 *:items-center">
+	<div class="flex *:flex flex-col *:items-center *:gap-3">
 		<label
 			><RadioInput
 				bind:selected={() => whereToPlayChapterFrom, setWhereToPlayChapterFrom}
@@ -135,7 +135,7 @@
 				name="fenSide"
 			/>Use End</label
 		>
-		<div class="*:flex *:gap-3 *:items-center">
+		<div class="*:flex *:items-center *:gap-3">
 			<label>
 				<RadioInput
 					bind:selected={() => whereToPlayChapterFrom, setWhereToPlayChapterFrom}

@@ -189,20 +189,14 @@
 		if (moveError) maybeEndGame?.('Error. Restart?');
 		else maybeEndGame?.('No Moves');
 	};
-
-	$inspect(forceEngine);
 </script>
 
 <div class="flex flex-col items-center">
-	<p class="text-right mb-3">Choob's Settings</p>
+	<p class="mb-3 text-right">Choob's Settings</p>
 
 	<div class="flex items-center gap-4">
 		<div
-			class="
-			grid grid-cols-[fit-content(100%)_1fr] gap-x-4 gap-y-2
-			*:flex *:gap-2 *:items-center
-			*:*:first:flex-grow *:*:text-right
-		"
+			class="*:flex *:*:first:flex-grow *:items-center gap-x-4 gap-y-2 *:gap-2 grid grid-cols-[fit-content(100%)_1fr] *:*:text-right"
 		>
 			<div>
 				<p>Study</p>
@@ -221,7 +215,7 @@
 					min="0"
 					max="100"
 					disabled={studyValidity !== 'valid' || !enabledStudyMove}
-					class="lg:w-50 w-35"
+					class="w-35 lg:w-50"
 				/>
 			</div>
 			<div>
@@ -236,7 +230,7 @@
 					min="0"
 					max="100"
 					disabled={!auth.token || !enabledCommonMove}
-					class="lg:w-50 w-35"
+					class="w-35 lg:w-50"
 				/>
 			</div>
 			<div>
@@ -251,7 +245,7 @@
 					min="0"
 					max="100"
 					disabled={!enabledEngineMove}
-					class="lg:w-50 w-35"
+					class="w-35 lg:w-50"
 				/>
 			</div>
 			<div>
@@ -271,18 +265,18 @@
 					min="0"
 					max="25"
 					disabled={!enabledEngineMove || !enabledLocalEngine}
-					class="lg:w-50 w-35"
+					class="w-35 lg:w-50"
 				/>
 			</div>
 		</div>
 	</div>
 
-	<p class="text-right mt-6">Common Move Settings</p>
+	<p class="mt-6 text-right">Common Move Settings</p>
 
-	<div class="flex flex-col items-center mt-3 gap-3">
-		<div class="flex flex-col 2xl:flex-row gap-3">
-			<div class="flex items-center w-full 2xl:w-auto justify-center"><p>Ratings</p></div>
-			<div class="gap-3 grid-cols-5 grid-rows-2 grid xl:flex">
+	<div class="flex flex-col items-center gap-3 mt-3">
+		<div class="flex 2xl:flex-row flex-col gap-3">
+			<div class="flex justify-center items-center w-full 2xl:w-auto"><p>Ratings</p></div>
+			<div class="xl:flex gap-3 grid grid-cols-5 grid-rows-2">
 				{#each Object.entries(enabledRatings) as entry (entry[0])}
 					<label class="flex flex-col items-center">
 						<Checkbox bind:checked={enabledRatings[entry[0] as LichessRating]} disabled={!enabledCommonMove} />
@@ -291,9 +285,9 @@
 				{/each}
 			</div>
 		</div>
-		<div class="flex flex-col 2xl:flex-row gap-3">
-			<div class="flex items-center w-full 2xl:w-auto justify-center"><p>Speeds</p></div>
-			<div class="gap-3 grid-cols-3 grid-rows-2 grid xl:flex">
+		<div class="flex 2xl:flex-row flex-col gap-3">
+			<div class="flex justify-center items-center w-full 2xl:w-auto"><p>Speeds</p></div>
+			<div class="xl:flex gap-3 grid grid-cols-3 grid-rows-2">
 				{#each Object.entries(enabledSpeeds) as entry (entry[0])}
 					<label class="flex flex-col items-center">
 						<Checkbox bind:checked={enabledSpeeds[entry[0] as LichessSpeed]} disabled={!enabledCommonMove} />

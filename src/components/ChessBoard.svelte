@@ -224,8 +224,8 @@
 	}
 </script>
 
-<div class="w-full h-full rounded-lg">
-	<div class="w-full aspect-square rounded-lg board" bind:this={boardEl}></div>
+<div class="rounded-lg w-full h-full">
+	<div class="rounded-lg w-full aspect-square board" bind:this={boardEl}></div>
 </div>
 
 <style>
