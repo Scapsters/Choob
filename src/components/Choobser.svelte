@@ -53,8 +53,8 @@
 
 	const getEvaluation = async (fen: string): Promise<ChoobEvaluation> => {
 		const localEval = getLocalEvaluation(fen, localEvalDepth);
-		const cloudEval = await getCloudEvaluation(fen, auth?.token?.value);
-		return cloudEval ?? localEval;
+		const cloudEval = !disableCloudEngine && await getCloudEvaluation(fen, auth?.token?.value);
+		return cloudEval || localEval;
 	};
 	maybeGetEngineEvaluation = getEvaluation;
 
