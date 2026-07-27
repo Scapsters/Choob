@@ -29,6 +29,7 @@
 	import { getStudyMove } from '$lib/chess/getStudyMove';
 	import Checkbox from './ui/inputs/Checkbox.svelte';
 	import NumberInput from './ui/inputs/NumberInput.svelte';
+	import InfoTooltip from './ui/InfoTooltip.svelte';
 
 	let {
 		maybeGetEngineEvaluation,
@@ -217,9 +218,13 @@
 			<p class="text-center">End Game on:</p>
 			<div class="grid grid-cols-1 grid-rows-4 lg:grid-cols-2 lg:grid-rows-2 grid-flow-col gap-x-3 gap-y-1">
 				<div class="flex gap-3">
-					<label class="flex gap-2 items-center"
-						>Rare Position<Checkbox bind:checked={userEndOnRarity} disabled={disableMostCommonMoves} /></label
-					>
+					<label class="flex gap-2 items-center">
+						Rare Position
+						<Checkbox bind:checked={userEndOnRarity} disabled={disableMostCommonMoves} />
+						{#if disableMostCommonMoves}
+							<InfoTooltip title="Disabled because of the 'Disable Some Common Moves' option in API Settings" />
+						{/if}
+					</label>
 					<label
 						class={`${endOnRarity ? 'bg-(--background-gray)' : 'bg-(--disabled-color)/25 text-(--disabled-color)/75'} rounded-sm pr-1 pb-1`}
 						><NumberInput
