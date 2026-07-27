@@ -108,6 +108,7 @@
 								onclick={() => {
 									setBoard();
 									playChoobveIfPossible();
+									refreshPlayerColorChoice();
 									isGameOver = false;
 								}}>Reset Board</Button
 							>
@@ -214,6 +215,7 @@
 	>
 	<div class="flex flex-wrap gap-3">
 		<Button
+			disabled={chess.fen === DEFAULT_FEN}
 			onclick={() => {
 				savedPosition = getPositionToSave();
 			}}>Set Board Checkpoint</Button
