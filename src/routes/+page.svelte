@@ -139,16 +139,16 @@ xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 xl:p-6
 					/>
 				</div>
 				<div class="flex flex-col items-center gap-3">
-					<div class="flex gap-1">
-						<p>API Settings (For rate limits)</p>
-						<InfoTooltip
-							title="Disables querying for common move information when recording moves that don't need it. Common moves by Choob still work, and the win % will still be queried on game end."
-						/>
-					</div>
+					<p>API Settings (For rate limits)</p>
 					<div class="flex flex-col gap-1">
-						<label class="flex gap-3 items-center"
-							><Checkbox bind:checked={disableMostCommonMoves} /> Disable Some Common Moves</label
-						>
+						<div class="flex gap-1">
+							<label class="flex gap-3 items-center">
+								<Checkbox bind:checked={disableMostCommonMoves} /> Disable Some Common Moves</label
+							>
+							<InfoTooltip
+								title="Disables querying for common move information when recording moves that don't need it. Common moves by Choob still work, and the win % will still be queried on game end."
+							/>
+						</div>
 						<label class="flex gap-3 items-center"
 							><Checkbox bind:checked={disableCloudEngine} /> Disable Cloud Engine</label
 						>
