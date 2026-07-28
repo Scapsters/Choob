@@ -9,7 +9,7 @@
 		@apply h-min! rounded-xs! leading-[2]!;
 	}
 	button {
-		@apply h-min! rounded-xs! leading-[2]!;
+		@apply h-min rounded-xs leading-[2];
 	}
 }
 
