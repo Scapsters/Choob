@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import type { HTMLButtonAttributes } from 'svelte/elements';
+	import { twMerge } from 'tailwind-merge';
 
 	let {
 		children,
@@ -12,12 +13,7 @@
 
 <button
 	{...rest}
-	class="
-	px-2
-    bg-(--background) border-(length:--line-thickness) border-(--foreground-gray)
-    [&:enabled]:hover:cursor-pointer [&:enabled]:hover:bg-(--background-gray)/50 [&:enabled]:active:bg-(--background-gray)
-    [&:disabled]:border-(--disabled-color) [&:disabled]:bg-(--disabled-color)/25 [&:disabled]:text-(--disabled-color)/75
-    "
+	class={twMerge("px-2 bg-(--background) border-(length:--line-thickness) border-(--foreground-gray) [&:enabled]:hover:cursor-pointer [&:enabled]:hover:bg-(--background-gray)/50 [&:enabled]:active:bg-(--background-gray) [&:disabled]:border-(--disabled-color) [&:disabled]:bg-(--disabled-color)/25 [&:disabled]:text-(--disabled-color)/75", rest.class as string)}
 >
 	{@render children?.()}
 </button>
