@@ -224,7 +224,7 @@
 						{/if}
 					</label>
 					<label
-						class={`${endOnRarity ? 'bg-(--background-gray)' : 'bg-(--disabled-color)/25 text-(--disabled-color)/75'} rounded-sm pr-1 pb-1`}
+						class={`${endOnRarity ? 'bg-(--background-gray)' : 'bg-(--disabled-color)/25 text-(--disabled-color)/75'} rounded-sm pr-1 pt-0.5`}
 						><NumberInput
 							bind:value={rarityThreshold}
 							min="0"
@@ -241,7 +241,7 @@
 				<div class="flex gap-3">
 					<label class="flex items-center gap-2">Blunder<Checkbox bind:checked={endOnBlunder} /></label>
 					<label
-						class={`${endOnBlunder ? 'bg-(--background-gray)' : 'bg-(--disabled-color)/25 text-(--disabled-color)/75'} rounded-sm px-1 pb-1`}
+						class={`${endOnBlunder ? 'bg-(--background-gray)' : 'bg-(--disabled-color)/25 text-(--disabled-color)/75'} rounded-sm px-1 pt-0.5 pb-0.5`}
 						>±<NumberInput
 							bind:value={blunderThreshold}
 							min="0"
