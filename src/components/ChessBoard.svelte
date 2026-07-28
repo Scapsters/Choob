@@ -138,6 +138,7 @@
 				lastMove: true,
 				check: true,
 			},
+			coordinates: false,
 			animation: {
 				enabled: true,
 				duration: 500,
