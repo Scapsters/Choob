@@ -181,7 +181,7 @@
 						<ChapterPicker {setBoard} {studyId} {studyValidity} {playChoobveIfPossible} />
 					</div>
 					<div class="justify-self-end h-full grow">
-						<MoveSearch {setBoard} {studyId} {chess} {playChoobveIfPossible} />
+						<MoveSearch {setBoard} {studyId} {chess} {playChoobveIfPossible} {recordMove}/>
 					</div>
 				</div>
 			{/if}

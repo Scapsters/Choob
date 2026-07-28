@@ -105,7 +105,7 @@ function mapTreePassParents<R extends TreeNode<R>, T extends TreeNode<T>>(
 /**
  * Returns a fen with the half-move and whole-move counter set to 1
  */
-function makeFENMoveAgnostic(fen: string) {
+export function makeFENMoveAgnostic(fen: string) {
 	return [...fen.split(' ').slice(0, 4), 0, 1].join(' ');
 }
 

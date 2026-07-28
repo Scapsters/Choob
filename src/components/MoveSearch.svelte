@@ -1,18 +1,32 @@
 <script lang="ts">
-	import { getStudyGames, prepareStudy, type MoveNodeWithFEN, type StudyGameTags } from '$lib/chess/getStudyMove';
+	import {
+		getStudyGames,
+		makeFENMoveAgnostic,
+		prepareStudy,
+		type MoveNodeWithFEN,
+		type StudyGameTags,
+	} from '$lib/chess/getStudyMove';
 	import { auth } from '$lib/login.svelte';
 	import type { ParseTree } from '@mliebelt/pgn-parser';
 	import Button from './ui/Button.svelte';
 	import type { SvelteChess } from './ChessBoard.svelte';
 	import TextInput from './ui/inputs/TextInput.svelte';
+	import Checkbox from './ui/inputs/Checkbox.svelte';
+	import type { RecordMove } from './GameHistory.svelte';
 
 	let {
 		studyId,
 		setBoard,
 		chess,
 		playChoobveIfPossible,
-	}: { studyId: string; setBoard: (fen?: string) => void; chess: SvelteChess; playChoobveIfPossible: () => void } =
-		$props();
+		recordMove,
+	}: {
+		studyId: string;
+		setBoard: (fen?: string) => void;
+		chess: SvelteChess;
+		playChoobveIfPossible: () => void;
+		recordMove: RecordMove;
+	} = $props();
 
 	let moveToSearch = $state('');
 	type FoundChapterWithMove = ParseTree & { matchingMove: MoveNodeWithFEN; moveBefore?: MoveNodeWithFEN };
@@ -67,9 +81,25 @@
 		}
 		if (moveToSearch) searchForMoveInStudy(moveToSearch);
 	});
+
+	let showCurrentMoves = $state(false);
+
+	let chaptersWithFenAssociationMaps = $derived(
+		(async () => {
+			const chapters = await getStudyGames(studyId, false, auth?.token?.value);
+			if (!chapters) return;
+
+			const chaptersWithFenAssociationMaps = chapters.map((chapter) => ({
+				...chapter,
+				fenAssociationMap: prepareStudy([chapter])['FENAssociationMap'],
+			}));
+
+			return chaptersWithFenAssociationMaps;
+		})()
+	);
 </script>
 
-<div>
+<div class="flex flex-col items-center xl:items-end gap-3">
 	<div class="flex justify-around lg:justify-end items-center gap-3">
 		<div class="flex 2xl:flex-row flex-col items-center gap-x-3 gap-y-1">
 			<label for="moveSearch">Search for move</label>
@@ -85,7 +115,7 @@
 		>
 	</div>
 	{#if foundChaptersWithMove}
-		<div class="flex flex-col items-start gap-1 w-full overflow-y-scroll text-left">
+		<div class="flex flex-col w-fit items-start gap-1 overflow-y-scroll text-left">
 			{#each foundChaptersWithMove as chapter (chapter)}
 				{@const name = (chapter.tags as StudyGameTags)?.['ChapterName']}
 				<Button
@@ -97,5 +127,39 @@
 				>
 			{/each}
 		</div>
+	{/if}
+	<label class="flex items-center gap-3">
+		Show current study moves
+		<Checkbox bind:checked={showCurrentMoves}></Checkbox>
+	</label>
+	{#if showCurrentMoves}
+		{#await chaptersWithFenAssociationMaps then awaitedChaptersWithFenAssociationMaps}
+			<div class="flex flex-col gap-1 items-end">
+				{#each awaitedChaptersWithFenAssociationMaps as chapter (chapter)}
+					{@const studyMoves = Array.from(
+						new Set(
+							chapter.fenAssociationMap.get(makeFENMoveAgnostic(chess.fen))?.map((move) => move.notation.notation)
+						)
+					)}
+					{#if studyMoves.length > 0}
+						<div class="flex gap-3">
+							<p>{(chapter.tags as StudyGameTags)?.['ChapterName']}</p>
+							{#each studyMoves as studyMove (studyMove)}
+								<Button
+									class="h-[1.5em] leading-1 px-1"
+									onclick={() => {
+										const previousFEN = chess.fen;
+										chess.move(studyMove);
+										recordMove?.(chess, 'study', previousFEN);
+									}}
+								>
+									{studyMove}
+								</Button>
+							{/each}
+						</div>
+					{/if}
+				{/each}
+			</div>
+		{/await}
 	{/if}
 </div>
