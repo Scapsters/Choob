@@ -6,6 +6,16 @@
 	export const prerender = false;
 </script>
 
+<svelte:head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@1,100..900&display=swap" rel="stylesheet">
+</svelte:head>
+
 <script lang="ts">
 	import 'svelte5-chessground/style.css';
 	import ChessBoard, { SvelteChess } from '../components/ChessBoard.svelte';
