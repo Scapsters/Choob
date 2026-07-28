@@ -285,7 +285,7 @@
 		<div class="flex justify-center items-center w-full 2xl:w-auto"><p>Speeds</p></div>
 		<div class="xl:flex gap-3 grid grid-cols-[min-content_1fr_1fr] grid-rows-2">
 			{#each Object.entries(enabledSpeeds) as entry (entry[0])}
-				<label class="flex flex-col items-center w-15">
+				<label class="flex flex-col items-center">
 					<Checkbox bind:checked={enabledSpeeds[entry[0] as LichessSpeed]} disabled={!enabledCommonMove} />
 					{entry[0]}
 				</label>
