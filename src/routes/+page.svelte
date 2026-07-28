@@ -9,11 +9,7 @@
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-	<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap" rel="stylesheet">
-
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@1,100..900&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Lexend&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 </svelte:head>
 
 <script lang="ts">
@@ -35,6 +31,7 @@
 	import Accordion from '../components/ui/Accordion.svelte';
 	import { MediaQuery } from 'svelte/reactivity';
 	import InfoTooltip from '../components/ui/InfoTooltip.svelte';
+	import AuthorBar from '../components/AuthorBar.svelte';
 
 	let chess = $state(new SvelteChess());
 
@@ -95,6 +92,7 @@
 	let isMobile = new MediaQuery('(max-width: 1279px)');
 </script>
 
+<AuthorBar />
 <div
 	class="flex flex-col justify-center gap-x-6 gap-y-0 xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 grid-flow-col mx-auto p-1 xl:p-6 max-w-400 overflow-x-clip"
 >
