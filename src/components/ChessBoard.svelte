@@ -175,10 +175,8 @@
 	let undoneMoves: { move: Move; choobHistoryEntry: ChoobHistoryEntry }[] = $state([]);
 	$effect(() => {
 		// uphold choob history invariances in this completely inappropriate location. Haha
-		function handleArrowKeys(e: Event) {
-			const event = e as KeyboardEvent;
-			if (event.key === 'ArrowLeft') {
-				if (choobHistory.length === 0) return;
+		function goBack() {
+			if (choobHistory.length === 0) return;
 				const history = chess.historyVerbose();
 				const lastChoobHistoryMove = choobHistory[choobHistory.length - 1];
 				const lastChoobHistoryHalfMove = lastChoobHistoryMove.findLast((move) => move) ?? null;
@@ -196,9 +194,10 @@
 					choobHistory.pop();
 				}
 				chess.undo();
-			}
-			if (event.key === 'ArrowRight') {
-				const undoneMove = undoneMoves.pop();
+		}
+
+		function goForward() {
+			const undoneMove = undoneMoves.pop();
 				if (!undoneMove) return;
 
 				chess.move(undoneMove.move ?? null);
@@ -215,17 +214,32 @@
 				} else {
 					choobHistory.push([undoneMove.choobHistoryEntry, null]);
 				}
-			}
 		}
+
+		function handleArrowKeys(e: Event) {
+			const event = e as KeyboardEvent;
+			if (event.key === 'ArrowLeft') goBack()
+			if (event.key === 'ArrowRight') goForward()
+		}
+		function handleScroll(e: Event) {
+			const event = e as WheelEvent;
+			if (event.deltaY > 0) goBack()
+			else goForward()
+		}
+
 		document.addEventListener('keydown', handleArrowKeys);
-		return () => document.removeEventListener('keydown', handleArrowKeys);
+		document.addEventListener('wheel', handleScroll);
+		return () => {
+			document.removeEventListener('keydown', handleArrowKeys);
+			document.removeEventListener('wheel', handleScroll);
+		}
 	});
 	function areMovesEqual(move1: { to: Key; from: Key }, move2: { to: Key; from: Key }) {
 		return move1.from === move2.from && move1.to === move2.to;
 	}
 </script>
 
-<div class="rounded-lg w-full h-full">
+<div class="rounded-lg w-full h-full overscroll-none overflow-hidden">
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div class="rounded-lg w-full aspect-square board" bind:this={boardEl} onmousedown={() => boardEl.focus()} role="main"></div>
 </div>
