@@ -110,7 +110,18 @@ export function makeFENMoveAgnostic(fen: string) {
 }
 
 /**
+ * Returns every legal move from the given FEN alongside the move-agnostic FEN it leads to.
+ */
+export function getLegalMovesWithResultingFENs(fen: string): { san: string; resultingFEN: string }[] {
+	return new Chess(fen).moves({ verbose: true }).map((move) => ({
+		san: move.san,
+		resultingFEN: makeFENMoveAgnostic(move.after),
+	}));
+}
+
+/**
  * Creates a Map of every study move and all of its FEN's possible next moves across all given trees.
+ * Also collects the set of every (move-agnostic) position occurring in the trees.
  */
 function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 	const createBoard = (startingFEN: string | undefined, moves: MoveNode[]) => {
@@ -142,12 +153,14 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 	);
 
 	const FENAssociationMap = new Map<string, MoveNode[]>();
+	const FENSet = new Set<string>();
 	moveTreesWithFEN.forEach((root, i) =>
 		traverseTreePassParents(root, (node, parentMoves) => {
 			const fen = makeFENMoveAgnostic(
 				(parentMoves.length === 0 ? studyGameTrees[i].tags?.FEN : parentMoves[parentMoves.length - 1].fen) ??
 					DEFAULT_FEN
 			);
+			FENSet.add(fen);
 
 			const existingNextMoveSet = FENAssociationMap.get(fen);
 			if (!existingNextMoveSet) FENAssociationMap.set(fen, []);
@@ -155,10 +168,11 @@ function createFENAssociationMap(studyGameTrees: StudyGameTree[]) {
 			// very specific, don't add nodes that correspond to empty chapters to the initial fen's association map
 			if (node.notation) {
 				FENAssociationMap.get(fen)!.push(node);
+				FENSet.add(node.fen);
 			}
 		})
 	);
-	return { FENAssociationMap, moveTreesWithFEN };
+	return { FENAssociationMap, moveTreesWithFEN, FENSet };
 }
 
 let studyGames = new Map<string, StudyGame[]>();
@@ -251,22 +265,24 @@ export function prepareStudy(games: StudyGame[]): {
 	studyGameTrees: StudyGameTree[];
 	FENAssociationMap: Map<string, MoveNode[]>;
 	moveTreesWithFEN: MoveNodeWithFEN[];
+	FENSet: Set<string>;
 } {
 	// check cache
 	let preparedStudy = preparedStudies.get(getStudyHash(games));
 	if (preparedStudy) return preparedStudy;
 
 	const studyGameTrees = games.map((game) => convertStudyGameToTree(game));
-	const { FENAssociationMap, moveTreesWithFEN } = createFENAssociationMap(studyGameTrees);
+	const { FENAssociationMap, moveTreesWithFEN, FENSet } = createFENAssociationMap(studyGameTrees);
 
 	// cache
 	preparedStudies.set(getStudyHash(games), {
 		studyGameTrees,
 		FENAssociationMap,
 		moveTreesWithFEN,
+		FENSet,
 	});
 
-	return { studyGameTrees, FENAssociationMap, moveTreesWithFEN };
+	return { studyGameTrees, FENAssociationMap, moveTreesWithFEN, FENSet };
 }
 
 /**

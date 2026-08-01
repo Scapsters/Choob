@@ -1,5 +1,6 @@
 <script lang="ts">
 	import {
+		getLegalMovesWithResultingFENs,
 		getStudyGames,
 		makeFENMoveAgnostic,
 		prepareStudy,
@@ -92,11 +93,14 @@
 			const chaptersWithFenAssociationMaps = chapters.map((chapter) => ({
 				...chapter,
 				fenAssociationMap: prepareStudy([chapter])['FENAssociationMap'],
+				fenSet: prepareStudy([chapter])['FENSet'],
 			}));
 
 			return chaptersWithFenAssociationMaps;
 		})()
 	);
+
+	let legalMovesWithResultingFENs = $derived(showCurrentMoves ? getLegalMovesWithResultingFENs(chess.fen) : []);
 </script>
 
 <div class="flex flex-col items-center xl:items-end gap-3">
@@ -141,7 +145,10 @@
 							chapter.fenAssociationMap.get(makeFENMoveAgnostic(chess.fen))?.map((move) => move.notation.notation)
 						)
 					)}
-					{#if studyMoves.length > 0}
+					{@const transposingMoves = legalMovesWithResultingFENs
+						.filter((move) => !studyMoves.includes(move.san) && chapter.fenSet.has(move.resultingFEN))
+						.map((move) => move.san)}
+					{#if studyMoves.length > 0 || transposingMoves.length > 0}
 						<div class="flex gap-3">
 							<p>{(chapter.tags as StudyGameTags)?.['ChapterName']}</p>
 							{#each studyMoves as studyMove (studyMove)}
@@ -154,6 +161,18 @@
 									}}
 								>
 									{studyMove}
+								</Button>
+							{/each}
+							{#each transposingMoves as transposingMove (transposingMove)}
+								<Button
+									class="h-[1.5em] leading-1 px-1 italic border-dashed"
+									onclick={() => {
+										const previousFEN = chess.fen;
+										chess.move(transposingMove);
+										recordMove?.(chess, 'study', previousFEN);
+									}}
+								>
+									{transposingMove}
 								</Button>
 							{/each}
 						</div>
