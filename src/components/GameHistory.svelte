@@ -64,7 +64,8 @@
 		if (turn === 'w') choobHistory.push([entry, null]);
 		else {
 			const currentMove = choobHistory[choobHistory.length - 1];
-			currentMove[1] = entry;
+			if (currentMove) currentMove[1] = entry;
+			else choobHistory.push([entry, null]);
 		}
 	};
 
@@ -155,6 +156,11 @@
 	}
 
 	const endGame = async (reason: string) => {
+		if (choobHistory.length === 0) {
+			reasonForEnd = reason;
+			isGameOver = true;
+			return;
+		}
 		const lastMove = choobHistory[choobHistory.length - 1].findLast((entry) => !!entry) as ChoobHistoryEntry;
 		if (!lastMove.winPercents) {
 			lastMove.winPercents = (
