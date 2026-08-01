@@ -93,6 +93,11 @@
 </script>
 
 <AuthorBar />
+{#if isMobile.current}
+	<div class="my-2 mt-3 flex justify-center">
+		<LichessLogin />
+	</div>
+{/if}
 <div
 	class="flex flex-col justify-center gap-x-6 gap-y-0 xl:grid xl:grid-cols-[1fr,1fr] xl:grid-rows-2 grid-flow-col mx-auto p-1 xl:p-6 max-w-400 overflow-x-clip"
 >
@@ -203,8 +208,9 @@
 	</Accordion>
 
 	{#if isMobile.current}
-		<div class="h-6"></div>
-		{@render loginAndTheme()}
+	<div class="flex justify-end p-4">
+		<ThemeToggle />
+	</div>	
 	{/if}
 </div>
 
