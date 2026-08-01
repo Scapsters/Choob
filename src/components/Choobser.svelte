@@ -143,7 +143,6 @@
 					} catch (error) {
 						console.error(error);
 						moveError = error;
-						break;
 					}
 				}
 			case 'common':
