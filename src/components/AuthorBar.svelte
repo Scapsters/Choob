@@ -1,5 +1,5 @@
 <details>
-	<summary class="author-icon-container"><div class="author-icon"></div></summary>
+	<summary class="author-icon-container"><div class="author-bar-button-container"><div class="author-icon"></div></div></summary>
 	<ul class="author-bar">
 		<p>I'm Scott Happy, hiiiii</p>
 		<p>
@@ -20,6 +20,14 @@
 </details>
 
 <style>
+	.author-bar-button-container {
+		position: relative;
+		background-color: transparent;
+		z-index: 10000;
+		width: 40px;
+		height: 40px;
+	}
+
 	.author-icon-container::marker {
 		content: '';
 	}
@@ -84,6 +92,9 @@
 	/* move icon on open */
 	details[open] .author-icon {
 		left: calc(150px - 0.5em);
+	}
+	details[open] .author-bar-button-container {
+		left: calc(140px - 0.5em);
 	}
 
 	/* spin bar on open */
