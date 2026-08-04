@@ -1,5 +1,16 @@
 <details>
-	<summary class="author-icon-container"><div class="author-bar-button-container"><div class="author-icon"></div></div></summary>
+	<summary class="author-icon-container">
+		<div class="author-bar-button-container">
+			<div class="author-icon">
+				<svg class="author-mask-svg" aria-hidden="true">
+					<mask id="author-icon-mask" maskContentUnits="userSpaceOnUse">
+						<rect class="author-mask-keep"></rect>
+						<rect class="author-mask-bar"></rect>
+					</mask>
+				</svg>
+			</div>
+		</div>
+	</summary>
 	<ul class="author-bar">
 		<p>I'm Scott Happy, hiiiii</p>
 		<p>
@@ -40,6 +51,8 @@
 		width: 1em;
 		height: 1em;
 		transform: skewY(-20deg);
+		/* the notch is a real hole (mask), so the icon works over any backdrop */
+		mask: url(#author-icon-mask);
 
 		transition:
 			background-color 150ms linear,
@@ -60,33 +73,38 @@
 		background-color: oklch(0.8 0.12 170);
 	}
 
-	.author-icon::before {
-		content: '';
+	.author-mask-svg {
 		position: absolute;
+		width: 0;
+		height: 0;
+	}
+	.author-mask-keep {
+		x: -0.5em;
+		y: -0.5em;
+		width: 2em;
+		height: 2em;
+		fill: white;
+	}
+	.author-mask-bar {
+		x: 0;
 		width: 1em;
-		top: 0.35em;
+		y: 0.35em;
+		height: 0.25em;
+		fill: black;
 		transform: skewY(40deg);
+		transform-box: fill-box;
+		transform-origin: 50% 50%;
 
 		transition:
 			height 150ms linear,
-			top 150ms linear,
-			transform 350ms ease-in-out,
-			background-color 200ms cubic-bezier(0.35, 0.05, 0.795, 0.035);
-	}
-	.author-icon::before {
-		background-color: var(--background);
-	}
-	details[open] .author-icon::before {
-		background-color: color-mix(in lab, rgba(0, 0, 0, 1) 70%, var(--background) 30%);
+			y 150ms linear,
+			transform 350ms ease-in-out;
 	}
 
 	/* grow bar on hover */
-	.author-icon::before {
-		height: 0.25em;
-	}
-	.author-icon:hover::before {
+	.author-icon:hover .author-mask-bar {
 		height: 0.5em;
-		top: 0.25em;
+		y: 0.25em;
 	}
 
 	/* move icon on open */
@@ -98,10 +116,7 @@
 	}
 
 	/* spin bar on open */
-	.author-icon::before {
-		transform: rotate(180);
-	}
-	details[open] .author-icon::before {
+	details[open] .author-mask-bar {
 		transform: rotate(-180deg);
 	}
 
