@@ -56,7 +56,8 @@
 
 		transition:
 			background-color 150ms linear,
-			left 200ms cubic-bezier(0.35, 0.05, 0.795, 0.035);
+			left 200ms cubic-bezier(0.35, 0.05, 0.795, 0.035),
+			transform 350ms ease-in-out;
 	}
 	.author-icon {
 		background-color: oklch(0.7 0.12 170);
@@ -107,17 +108,20 @@
 		y: 0.25em;
 	}
 
-	/* move icon on open */
+	/* move and spin icon on open */
 	details[open] .author-icon {
 		left: calc(150px - 0.5em);
+		transform: skewY(-20deg) rotate(-180deg);
 	}
 	details[open] .author-bar-button-container {
 		left: calc(140px - 0.5em);
 	}
 
-	/* spin bar on open */
+	/* unskew bar on open (the spin lives on .author-icon: Firefox ignores
+	   transform-box on non-rendered <mask> content, so rotating the rect
+	   would pivot around the SVG origin instead of its own center) */
 	details[open] .author-mask-bar {
-		transform: rotate(-180deg);
+		transform: skewY(0deg);
 	}
 
 	.author-bar {
